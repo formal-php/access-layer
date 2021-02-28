@@ -11,6 +11,7 @@ use Formal\AccessLayer\{
     Query\Commit,
     Query\Rollback,
     Query\Parameter,
+    Exception\QueryFailed,
 };
 use Innmind\Url\Url;
 use PHPUnit\Framework\TestCase;
@@ -48,6 +49,55 @@ class PDOTest extends TestCase
         // by using any() we only do a partial iteration over the results
         $this->assertTrue($result1->any(static fn() => true));
         $this->assertTrue($result2->any(static fn() => true));
+    }
+
+    public function testThrowWhenInvalidQuery()
+    {
+        try {
+            $query = new SQL('INSERT');
+            $this->connection()($query);
+            $this->fail('it should throw an exception');
+        } catch (QueryFailed $e) {
+            $this->assertSame($query, $e->query());
+            $this->assertIsNotString($e->code());
+            $this->assertIsNotString($e->message());
+        }
+    }
+
+    public function testThrowWhenNotEnoughParameters()
+    {
+        try {
+            $query = new SQL('INSERT INTO `test` VALUES (:uuid, :username);');
+            $this->connection()($query);
+            $this->fail('it should throw an exception');
+        } catch (QueryFailed $e) {
+            $this->assertSame($query, $e->query());
+            $this->assertIsNotString($e->code());
+            $this->assertIsNotString($e->message());
+        }
+    }
+
+    public function testThrowWhenValueDoesntFitTheSchema()
+    {
+        $this
+            ->forAll(
+                Set\Uuid::any(),
+                $this->username(),
+            )
+            ->take(1)
+            ->disableShrinking()
+            ->then(function($uuid, $username) {
+                try {
+                    $query = new SQL('INSERT INTO `test` VALUES (:uuid, :username);');
+                    $query = $query
+                        ->with(Parameter::named('uuid', $uuid.$uuid)) // too long
+                        ->with(Parameter::named('username', $username));
+                    $this->connection()($query);
+                    $this->fail('it should throw an exception');
+                } catch (QueryFailed $e) {
+                    $this->assertSame($query, $e->query());
+                }
+            });
     }
 
     public function testInsert()
@@ -213,16 +263,24 @@ class PDOTest extends TestCase
 
     public function testFailWhenCommittingUnstartedTransaction()
     {
-        $this->expectException(\Exception::class);
-
-        $this->connection()(new Commit);
+        try {
+            $query = new Commit;
+            $this->connection()($query);
+            $this->fail('it should throw an exception');
+        } catch (QueryFailed $e) {
+            $this->assertSame($query, $e->query());
+        }
     }
 
     public function testFailWhenRollbackingUnstartedTransaction()
     {
-        $this->expectException(\Exception::class);
-
-        $this->connection()(new Rollback);
+        try {
+            $query = new Rollback;
+            $this->connection()($query);
+            $this->fail('it should throw an exception');
+        } catch (QueryFailed $e) {
+            $this->assertSame($query, $e->query());
+        }
     }
 
     private function connection(): PDO

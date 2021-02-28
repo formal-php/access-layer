@@ -8,6 +8,7 @@ use Formal\AccessLayer\{
     Query,
     Query\Parameter,
     Row,
+    Exception\QueryFailed,
 };
 use Innmind\Url\{
     Url,
@@ -47,19 +48,28 @@ final class PDO implements Connection
     public function __invoke(Query $query): Sequence
     {
         if ($query instanceof Query\StartTransaction) {
-            $this->pdo->beginTransaction();
+            $this->attempt(
+                $query,
+                fn(): bool => $this->pdo->beginTransaction(),
+            );
 
             return Sequence::of(Row::class);
         }
 
         if ($query instanceof Query\Commit) {
-            $this->pdo->commit();
+            $this->attempt(
+                $query,
+                fn(): bool => $this->pdo->commit(),
+            );
 
             return Sequence::of(Row::class);
         }
 
         if ($query instanceof Query\Rollback) {
-            $this->pdo->rollBack();
+            $this->attempt(
+                $query,
+                fn(): bool => $this->pdo->rollBack(),
+            );
 
             return Sequence::of(Row::class);
         }
@@ -82,9 +92,7 @@ final class PDO implements Connection
             },
         );
 
-        if (!$statement->execute()) {
-            throw new \RuntimeException($query->toString());
-        }
+        $this->attempt($query, static fn(): bool => $statement->execute());
 
         /** @var Sequence<Row> */
         return Sequence::defer(
@@ -96,6 +104,34 @@ final class PDO implements Connection
 
                 unset($statement);
             })($statement),
+        );
+    }
+
+    /**
+     * @param callable(): bool $attempt
+     *
+     * @throws QueryFailed
+     */
+    private function attempt(Query $query, callable $attempt): void
+    {
+        try {
+            if ($attempt()) {
+                return;
+            }
+            $previous = null;
+        } catch (\PDOException $e) {
+            $previous = $e;
+        }
+
+        /** @var array{0: string, 1: ?string, 2: ?string} */
+        $errorInfo = $this->pdo->errorInfo();
+
+        throw new QueryFailed(
+            $query,
+            $errorInfo[0],
+            $errorInfo[1],
+            $errorInfo[2],
+            $previous,
         );
     }
 }
