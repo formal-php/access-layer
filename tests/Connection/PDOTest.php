@@ -285,7 +285,9 @@ class PDOTest extends TestCase
 
     private function connection(): PDO
     {
-        return new PDO(Url::of('mysql://root:root@127.0.0.1:3306/example'));
+        $port = \getenv('DB_PORT') ?: '3306';
+
+        return new PDO(Url::of("mysql://root:root@127.0.0.1:$port/example"));
     }
 
     private function username(): Set
