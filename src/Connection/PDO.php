@@ -46,6 +46,24 @@ final class PDO implements Connection
 
     public function __invoke(Query $query): Sequence
     {
+        if ($query instanceof Query\StartTransaction) {
+            $this->pdo->beginTransaction();
+
+            return Sequence::of(Row::class);
+        }
+
+        if ($query instanceof Query\Commit) {
+            $this->pdo->commit();
+
+            return Sequence::of(Row::class);
+        }
+
+        if ($query instanceof Query\Rollback) {
+            $this->pdo->rollBack();
+
+            return Sequence::of(Row::class);
+        }
+
         $statement = $this->pdo->prepare($query->toString());
 
         $query->parameters()->reduce(
