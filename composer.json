@@ -15,7 +15,8 @@
         "issues": "http://github.com/formal-php/access-layer/issues"
     },
     "require": {
-        "php": "~7.4|~8.0"
+        "php": "~7.4|~8.0",
+        "innmind/immutable": "^3.10"
     },
     "autoload": {
         "psr-4": {
