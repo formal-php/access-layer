@@ -19,6 +19,14 @@ final class SQL implements Query
         $this->parameters = Sequence::of(Parameter::class);
     }
 
+    public function with(Parameter $parameter): self
+    {
+        $self = clone $this;
+        $self->parameters = ($this->parameters)($parameter);
+
+        return $self;
+    }
+
     public function parameters(): Sequence
     {
         return $this->parameters;

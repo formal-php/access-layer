@@ -6,6 +6,7 @@ namespace Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Connection,
     Query,
+    Query\Parameter,
     Row,
 };
 use Innmind\Url\{
@@ -46,6 +47,22 @@ final class PDO implements Connection
     public function __invoke(Query $query): Sequence
     {
         $statement = $this->pdo->prepare($query->toString());
+
+        $query->parameters()->reduce(
+            0,
+            static function(int $index, Parameter $parameter) use ($statement): int {
+                if ($parameter->boundByName()) {
+                    $statement->bindValue($parameter->name(), $parameter->value());
+
+                    return $index;
+                }
+
+                ++$index;
+                $statement->bindValue($index, $parameter->value());
+
+                return $index;
+            },
+        );
 
         if (!$statement->execute()) {
             throw new \RuntimeException($query->toString());

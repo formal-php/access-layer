@@ -7,16 +7,18 @@ use Formal\AccessLayer\{
     Connection\PDO,
     Connection,
     Query\SQL,
+    Query\Parameter,
 };
 use Innmind\Url\Url;
 use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
+};
 
 class PDOTest extends TestCase
 {
-    public function setUp(): void
-    {
-        $this->connection()(new SQL('CREATE TABLE IF NOT EXISTS `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, PRIMARY KEY (id));'));
-    }
+    use BlackBox;
 
     public function setUp(): void
     {
@@ -47,25 +49,95 @@ class PDOTest extends TestCase
 
     public function testInsert()
     {
-        $connection = $this->connection();
-        $select = new SQL('SELECT * FROM test');
-        $rows = $connection($select);
+        $this
+            ->forAll(Set\Uuid::any())
+            ->take(1)
+            ->disableShrinking()
+            ->then(function($uuid) {
+                $connection = $this->connection();
+                $select = new SQL('SELECT * FROM test');
+                $rows = $connection($select);
 
-        $this->assertCount(0, $rows);
+                $this->assertCount(0, $rows);
 
-        $sequence = $connection(new SQL("INSERT INTO `test` VALUES ('bb1ec590-2103-4220-9570-4e9eca632fc2', 'foo');"));
+                $sequence = $connection(new SQL("INSERT INTO `test` VALUES ('$uuid', 'foo');"));
 
-        $this->assertCount(0, $sequence);
+                $this->assertCount(0, $sequence);
 
-        $rows = $connection($select);
+                $rows = $connection($select);
 
-        $this->assertCount(1, $rows);
-        $this->assertSame('bb1ec590-2103-4220-9570-4e9eca632fc2', $rows->first()->column('id'));
-        $this->assertSame('foo', $rows->first()->column('username'));
+                $this->assertCount(1, $rows);
+                $this->assertSame($uuid, $rows->first()->column('id'));
+                $this->assertSame('foo', $rows->first()->column('username'));
+            });
+    }
+
+    public function testBindParameterByName()
+    {
+        $this
+            ->forAll(
+                Set\Uuid::any(),
+                $this->username(),
+            )
+            ->take(1)
+            ->disableShrinking()
+            ->then(function($uuid, $username) {
+                $connection = $this->connection();
+                $insert = new SQL('INSERT INTO `test` VALUES (:uuid, :username);');
+                $insert = $insert
+                    ->with(Parameter::named('uuid', $uuid))
+                    ->with(Parameter::named('username', $username));
+                $connection($insert);
+
+                $rows = $connection(new SQL('SELECT * FROM `test`'));
+
+                $this->assertCount(1, $rows);
+                $this->assertSame($uuid, $rows->first()->column('id'));
+                $this->assertSame($username, $rows->first()->column('username'));
+            });
+    }
+
+    public function testBindParameterByIndex()
+    {
+        $this
+            ->forAll(
+                Set\Uuid::any(),
+                $this->username(),
+            )
+            ->take(1)
+            ->disableShrinking()
+            ->then(function($uuid, $username) {
+                $connection = $this->connection();
+                $insert = new SQL('INSERT INTO `test` VALUES (?, ?);');
+                $insert = $insert
+                    ->with(Parameter::of($uuid))
+                    ->with(Parameter::of($username));
+                $connection($insert);
+
+                $rows = $connection(new SQL('SELECT * FROM `test`'));
+
+                $this->assertCount(1, $rows);
+                $this->assertSame($uuid, $rows->first()->column('id'));
+                $this->assertSame($username, $rows->first()->column('username'));
+            });
     }
 
     private function connection(): PDO
     {
         return new PDO(Url::of('mysql://root:root@127.0.0.1:3306/example'));
+    }
+
+    private function username(): Set
+    {
+        return Set\Decorate::immutable(
+            static fn(array $chars): string => \implode('', $chars),
+            Set\Sequence::of(
+                Set\Decorate::immutable(
+                    static fn(int $ord): string => \chr($ord),
+                    Set\Integers::between(32, 126),
+                ),
+                Set\Integers::between(0, 255),
+            ),
+        );
     }
 }
