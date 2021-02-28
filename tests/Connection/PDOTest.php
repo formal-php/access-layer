@@ -18,9 +18,11 @@ class PDOTest extends TestCase
         $this->connection()(new SQL('CREATE TABLE IF NOT EXISTS `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, PRIMARY KEY (id));'));
     }
 
-    public function tearDown(): void
+    public function setUp(): void
     {
-        $this->connection()(new SQL('DROP TABLE `test`'));
+        $connection = $this->connection();
+        $connection(new SQL('DROP TABLE IF EXISTS `test`'));
+        $connection(new SQL('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, PRIMARY KEY (id));'));
     }
 
     public function testInterface()
