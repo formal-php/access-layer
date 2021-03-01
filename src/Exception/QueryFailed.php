@@ -9,13 +9,13 @@ final class QueryFailed extends RuntimeException
 {
     private Query $query;
     private string $sqlstate;
-    private ?string $driverSpecificCode;
+    private ?int $driverSpecificCode;
     private ?string $driverSpecificMessage;
 
     public function __construct(
         Query $query,
         string $sqlstate,
-        ?string $code,
+        ?int $code,
         ?string $message,
         ?\Throwable $previous
     ) {
@@ -42,7 +42,7 @@ final class QueryFailed extends RuntimeException
         return $this->sqlstate;
     }
 
-    public function code(): ?string
+    public function code(): ?int
     {
         return $this->driverSpecificCode;
     }

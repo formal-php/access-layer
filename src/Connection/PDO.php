@@ -140,13 +140,14 @@ final class PDO implements Connection
             if ($attempt()) {
                 return;
             }
+            /** @var array{0: string, 1: ?int, 2: ?string} */
+            $errorInfo = $this->pdo->errorInfo();
             $previous = null;
         } catch (\PDOException $e) {
+            /** @var array{0: string, 1: ?int, 2: ?string} */
+            $errorInfo = $e->errorInfo ?? $this->pdo->errorInfo();
             $previous = $e;
         }
-
-        /** @var array{0: string, 1: ?string, 2: ?string} */
-        $errorInfo = $this->pdo->errorInfo();
 
         throw new QueryFailed(
             $query,

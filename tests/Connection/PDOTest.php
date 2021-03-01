@@ -60,8 +60,8 @@ class PDOTest extends TestCase
             $this->fail('it should throw an exception');
         } catch (QueryFailed $e) {
             $this->assertSame($query, $e->query());
-            $this->assertIsNotString($e->code());
-            $this->assertIsNotString($e->message());
+            $this->assertIsInt($e->code());
+            $this->assertIsString($e->message());
         }
     }
 
@@ -73,8 +73,8 @@ class PDOTest extends TestCase
             $this->fail('it should throw an exception');
         } catch (QueryFailed $e) {
             $this->assertSame($query, $e->query());
-            $this->assertIsNotString($e->code());
-            $this->assertIsNotString($e->message());
+            $this->assertIsInt($e->code());
+            $this->assertIsString($e->message());
         }
     }
 
