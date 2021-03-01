@@ -44,10 +44,7 @@ final class Row
         return $this->columns->contains($name);
     }
 
-    /**
-     * @return mixed
-     */
-    public function column(string $name)
+    public function column(string $name): mixed
     {
         return $this->columns->get($name);
     }

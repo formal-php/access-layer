@@ -6,30 +6,20 @@ namespace Formal\AccessLayer\Query;
 final class Parameter
 {
     private ?string $name = null;
-    /** @var mixed */
-    private $value;
+    private mixed $value;
 
-    /**
-     * @param mixed $value
-     */
-    private function __construct(?string $name, $value)
+    private function __construct(?string $name, mixed $value)
     {
         $this->name = $name;
         $this->value = $value;
     }
 
-    /**
-     * @param mixed $value
-     */
-    public static function of($value): self
+    public static function of(mixed $value): self
     {
         return new self(null, $value);
     }
 
-    /**
-     * @param mixed $value
-     */
-    public static function named(string $name, $value): self
+    public static function named(string $name, mixed $value): self
     {
         return new self($name, $value);
     }
@@ -46,10 +36,7 @@ final class Parameter
         return $this->name;
     }
 
-    /**
-     * @return mixed
-     */
-    public function value()
+    public function value(): mixed
     {
         return $this->value;
     }
