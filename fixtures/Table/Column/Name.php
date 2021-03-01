@@ -15,7 +15,10 @@ final class Name
     {
         return Set\Decorate::immutable(
             static fn(string $name): Model => new Model($name),
-            Set\Strings::madeOf(Set\Chars::alphanumerical())->between(1, 64),
+            Set\Strings::madeOf(
+                Set\Chars::alphanumerical(),
+                Set\Elements::of('é', 'è', 'ê', 'ë', '_'),
+            )->between(1, 64),
         );
     }
 }

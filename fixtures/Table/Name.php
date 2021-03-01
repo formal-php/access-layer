@@ -19,7 +19,10 @@ final class Name
                 Set\Chars::lowercaseLetter(),
                 Set\Chars::uppercaseLetter(),
             ),
-            Set\Strings::madeOf(Set\Chars::alphanumerical())->between(0, 63),
+            Set\Strings::madeOf(
+                Set\Chars::alphanumerical(),
+                Set\Elements::of('é', 'è', 'ê', 'ë', '_'),
+            )->between(0, 63),
         );
     }
 }
