@@ -337,15 +337,6 @@ class PDOTest extends TestCase
 
     private function username(): Set
     {
-        return Set\Decorate::immutable(
-            static fn(array $chars): string => \implode('', $chars),
-            Set\Sequence::of(
-                Set\Decorate::immutable(
-                    static fn(int $ord): string => \chr($ord),
-                    Set\Integers::between(32, 126),
-                ),
-                Set\Integers::between(0, 255),
-            ),
-        );
+        return Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255);
     }
 }
