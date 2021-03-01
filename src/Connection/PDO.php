@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Connection,
     Query,
     Query\Parameter,
+    Query\Parameter\Type,
     Row,
     Exception\QueryFailed,
 };
@@ -89,9 +90,10 @@ final class PDO implements Connection
                 if ($parameter->boundByName()) {
                     $this->attempt(
                         $query,
-                        static fn(): bool => $statement->bindValue(
+                        fn(): bool => $statement->bindValue(
                             $parameter->name(),
                             $parameter->value(),
+                            $this->castType($parameter->type()),
                         ),
                     );
 
@@ -101,9 +103,10 @@ final class PDO implements Connection
                 ++$index;
                 $this->attempt(
                     $query,
-                    static fn(): bool => $statement->bindValue(
+                    fn(): bool => $statement->bindValue(
                         $index,
                         $parameter->value(),
+                        $this->castType($parameter->type()),
                     ),
                 );
 
@@ -152,5 +155,16 @@ final class PDO implements Connection
             $errorInfo[2],
             $previous,
         );
+    }
+
+    private function castType(Type $type): int
+    {
+        return match($type) {
+            Type::bool() => \PDO::PARAM_BOOL,
+            Type::null() => \PDO::PARAM_NULL,
+            Type::int() => \PDO::PARAM_INT,
+            Type::string() => \PDO::PARAM_STR,
+            Type::unspecified() => \PDO::PARAM_STR, // this is the default of PDOStatement::bindValue()
+        };
     }
 }

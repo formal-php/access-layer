@@ -11,6 +11,7 @@ use Formal\AccessLayer\{
     Query\Commit,
     Query\Rollback,
     Query\Parameter,
+    Query\Parameter\Type,
     Exception\QueryFailed,
 };
 use Innmind\Url\Url;
@@ -28,7 +29,7 @@ class PDOTest extends TestCase
     {
         $connection = $this->connection();
         $connection(new SQL('DROP TABLE IF EXISTS `test`'));
-        $connection(new SQL('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, PRIMARY KEY (id));'));
+        $connection(new SQL('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, `registerNumber` bigint NOT NULL, PRIMARY KEY (id));'));
     }
 
     public function testInterface()
@@ -67,7 +68,7 @@ class PDOTest extends TestCase
     public function testThrowWhenNotEnoughParameters()
     {
         try {
-            $query = new SQL('INSERT INTO `test` VALUES (:uuid, :username);');
+            $query = new SQL('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
             $this->connection()($query);
             $this->fail('it should throw an exception');
         } catch (QueryFailed $e) {
@@ -83,15 +84,17 @@ class PDOTest extends TestCase
             ->forAll(
                 Set\Uuid::any(),
                 $this->username(),
+                Set\Integers::any(),
             )
             ->take(1)
             ->disableShrinking()
-            ->then(function($uuid, $username) {
+            ->then(function($uuid, $username, $number) {
                 try {
-                    $query = new SQL('INSERT INTO `test` VALUES (:uuid, :username);');
+                    $query = new SQL('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
                     $query = $query
                         ->with(Parameter::named('uuid', $uuid.$uuid)) // too long
-                        ->with(Parameter::named('username', $username));
+                        ->with(Parameter::named('username', $username))
+                        ->with(Parameter::named('registerNumber', $number));
                     $this->connection()($query);
                     $this->fail('it should throw an exception');
                 } catch (QueryFailed $e) {
@@ -113,7 +116,7 @@ class PDOTest extends TestCase
 
                 $this->assertCount(0, $rows);
 
-                $sequence = $connection(new SQL("INSERT INTO `test` VALUES ('$uuid', 'foo');"));
+                $sequence = $connection(new SQL("INSERT INTO `test` VALUES ('$uuid', 'foo', 42);"));
 
                 $this->assertCount(0, $sequence);
 
@@ -122,6 +125,7 @@ class PDOTest extends TestCase
                 $this->assertCount(1, $rows);
                 $this->assertSame($uuid, $rows->first()->column('id'));
                 $this->assertSame('foo', $rows->first()->column('username'));
+                $this->assertSame('42', $rows->first()->column('registerNumber'));
             });
     }
 
@@ -131,15 +135,17 @@ class PDOTest extends TestCase
             ->forAll(
                 Set\Uuid::any(),
                 $this->username(),
+                Set\Integers::any(),
             )
             ->take(1)
             ->disableShrinking()
-            ->then(function($uuid, $username) {
+            ->then(function($uuid, $username, $number) {
                 $connection = $this->connection();
-                $insert = new SQL('INSERT INTO `test` VALUES (:uuid, :username);');
+                $insert = new SQL('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
                 $insert = $insert
                     ->with(Parameter::named('uuid', $uuid))
-                    ->with(Parameter::named('username', $username));
+                    ->with(Parameter::named('username', $username))
+                    ->with(Parameter::named('registerNumber', $number));
                 $connection($insert);
 
                 $rows = $connection(new SQL('SELECT * FROM `test`'));
@@ -147,6 +153,7 @@ class PDOTest extends TestCase
                 $this->assertCount(1, $rows);
                 $this->assertSame($uuid, $rows->first()->column('id'));
                 $this->assertSame($username, $rows->first()->column('username'));
+                $this->assertSame((string) $number, $rows->first()->column('registerNumber'));
             });
     }
 
@@ -156,15 +163,17 @@ class PDOTest extends TestCase
             ->forAll(
                 Set\Uuid::any(),
                 $this->username(),
+                Set\Integers::any(),
             )
             ->take(1)
             ->disableShrinking()
-            ->then(function($uuid, $username) {
+            ->then(function($uuid, $username, $number) {
                 $connection = $this->connection();
-                $insert = new SQL('INSERT INTO `test` VALUES (?, ?);');
+                $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
                 $insert = $insert
                     ->with(Parameter::of($uuid))
-                    ->with(Parameter::of($username));
+                    ->with(Parameter::of($username))
+                    ->with(Parameter::of($number));
                 $connection($insert);
 
                 $rows = $connection(new SQL('SELECT * FROM `test`'));
@@ -172,6 +181,7 @@ class PDOTest extends TestCase
                 $this->assertCount(1, $rows);
                 $this->assertSame($uuid, $rows->first()->column('id'));
                 $this->assertSame($username, $rows->first()->column('username'));
+                $this->assertSame((string) $number, $rows->first()->column('registerNumber'));
             });
     }
 
@@ -181,18 +191,20 @@ class PDOTest extends TestCase
             ->forAll(
                 Set\Uuid::any(),
                 $this->username(),
+                Set\Integers::any(),
             )
             ->take(1)
             ->disableShrinking()
-            ->then(function($uuid, $username) {
+            ->then(function($uuid, $username, $number) {
                 $connection = $this->connection();
 
                 $connection(new StartTransaction);
 
-                $insert = new SQL('INSERT INTO `test` VALUES (?, ?);');
+                $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
                 $insert = $insert
                     ->with(Parameter::of($uuid))
-                    ->with(Parameter::of($username));
+                    ->with(Parameter::of($username))
+                    ->with(Parameter::of($number));
                 $connection($insert);
 
                 $rows = $connection(new SQL('SELECT * FROM `test`'));
@@ -200,6 +212,7 @@ class PDOTest extends TestCase
                 $this->assertCount(1, $rows);
                 $this->assertSame($uuid, $rows->first()->column('id'));
                 $this->assertSame($username, $rows->first()->column('username'));
+                $this->assertSame((string) $number, $rows->first()->column('registerNumber'));
             });
     }
 
@@ -209,18 +222,20 @@ class PDOTest extends TestCase
             ->forAll(
                 Set\Uuid::any(),
                 $this->username(),
+                Set\Integers::any(),
             )
             ->take(1)
             ->disableShrinking()
-            ->then(function($uuid, $username) {
+            ->then(function($uuid, $username, $number) {
                 $connection = $this->connection();
 
                 $connection(new StartTransaction);
 
-                $insert = new SQL('INSERT INTO `test` VALUES (?, ?);');
+                $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
                 $insert = $insert
                     ->with(Parameter::of($uuid))
-                    ->with(Parameter::of($username));
+                    ->with(Parameter::of($username))
+                    ->with(Parameter::of($number));
                 $connection($insert);
 
                 $connection(new Commit);
@@ -230,6 +245,7 @@ class PDOTest extends TestCase
                 $this->assertCount(1, $rows);
                 $this->assertSame($uuid, $rows->first()->column('id'));
                 $this->assertSame($username, $rows->first()->column('username'));
+                $this->assertSame((string) $number, $rows->first()->column('registerNumber'));
             });
     }
 
@@ -239,18 +255,20 @@ class PDOTest extends TestCase
             ->forAll(
                 Set\Uuid::any(),
                 $this->username(),
+                Set\Integers::any(),
             )
             ->take(1)
             ->disableShrinking()
-            ->then(function($uuid, $username) {
+            ->then(function($uuid, $username, $number) {
                 $connection = $this->connection();
 
                 $connection(new StartTransaction);
 
-                $insert = new SQL('INSERT INTO `test` VALUES (?, ?);');
+                $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
                 $insert = $insert
                     ->with(Parameter::of($uuid))
-                    ->with(Parameter::of($username));
+                    ->with(Parameter::of($username))
+                    ->with(Parameter::of($number));
                 $connection($insert);
 
                 $connection(new Rollback);
@@ -281,6 +299,33 @@ class PDOTest extends TestCase
         } catch (QueryFailed $e) {
             $this->assertSame($query, $e->query());
         }
+    }
+
+    public function testParameterTypesCanBeSpecified()
+    {
+        $this
+            ->forAll(
+                Set\Uuid::any(),
+                $this->username(),
+                Set\Integers::any(),
+            )
+            ->disableShrinking()
+            ->then(function($uuid, $username, $number) {
+                $connection = $this->connection();
+
+                $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
+                $insert = $insert
+                    ->with(Parameter::of($uuid, Type::string()))
+                    ->with(Parameter::of($username, Type::string()))
+                    ->with(Parameter::of($number, Type::int()));
+                $connection($insert);
+
+                $rows = $connection(new SQL("SELECT * FROM `test` WHERE id = '$uuid'"));
+
+                $this->assertCount(1, $rows);
+                $this->assertSame($username, $rows->first()->column('username'));
+                $this->assertSame((string) $number, $rows->first()->column('registerNumber'));
+            });
     }
 
     private function connection(): PDO
