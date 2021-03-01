@@ -6,9 +6,6 @@ namespace Tests\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Connection\PDO,
     Connection,
-    Query\SQL,
-    Query\DropTable,
-    Table,
 };
 use Innmind\Url\Url;
 use PHPUnit\Framework\TestCase;
@@ -21,9 +18,7 @@ class PDOTest extends TestCase
 
     public function setUp(): void
     {
-        $connection = $this->connection();
-        $connection(DropTable::ifExists(new Table\Name('test')));
-        $connection(new SQL('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, `registerNumber` bigint NOT NULL, PRIMARY KEY (id));'));
+        PConnection::seed($this->connection());
     }
 
     public function testInterface()

@@ -3,6 +3,12 @@ declare(strict_types = 1);
 
 namespace Properties\Formal\AccessLayer;
 
+use Formal\AccessLayer\{
+    Connection as Concrete,
+    Query\SQL,
+    Query\DropTable,
+    Table\Name,
+};
 use Innmind\BlackBox\{
     Set,
     Property,
@@ -43,5 +49,11 @@ final class Connection
             Connection\CanDropUnknownDatabaseIfNotExists::any(),
             Connection\DroppingUnknownDatabaseMustThrow::any(),
         ];
+    }
+
+    public static function seed(Concrete $connection): void
+    {
+        $connection(DropTable::ifExists(new Name('test')));
+        $connection(new SQL('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, `registerNumber` bigint NOT NULL, PRIMARY KEY (id));'));
     }
 }
