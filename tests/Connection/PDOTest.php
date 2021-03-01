@@ -338,10 +338,7 @@ class PDOTest extends TestCase
         $this
             ->forAll(
                 Name::any(),
-                Set\Sequence::of(
-                    Column::any(),
-                    Set\Integers::between(1, 20),
-                ),
+                Column::list(),
             )
             ->then(function($name, $columns) {
                 $connection = $this->connection();
@@ -361,10 +358,7 @@ class PDOTest extends TestCase
         $this
             ->forAll(
                 Name::any(),
-                Set\Sequence::of(
-                    Column::any(),
-                    Set\Integers::between(1, 20),
-                ),
+                Column::list(),
             )
             ->then(function($name, $columns) {
                 $connection = $this->connection();
@@ -386,10 +380,7 @@ class PDOTest extends TestCase
         $this
             ->forAll(
                 Name::any(),
-                Set\Sequence::of(
-                    Column::any(),
-                    Set\Integers::between(1, 20),
-                ),
+                Column::list(),
             )
             ->then(function($name, $columns) {
                 $connection = $this->connection();

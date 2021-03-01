@@ -21,4 +21,30 @@ final class Column
             ),
         );
     }
+
+    /**
+     * @return Set<Model>
+     */
+    public static function list(): Set
+    {
+        return Set\Decorate::immutable(
+            static function($columns) {
+                $names = [];
+                $filtered = [];
+
+                foreach ($columns as $column) {
+                    if (!\in_array($column->name()->toString(), $names, true)) {
+                        $names[] = $column->name()->toString();
+                        $filtered[] = $column;
+                    }
+                }
+
+                return $filtered;
+            },
+            Set\Sequence::of(
+                self::any(),
+                Set\Integers::between(1, 20),
+            ),
+        );
+    }
 }
