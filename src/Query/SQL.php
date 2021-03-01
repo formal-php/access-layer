@@ -32,7 +32,7 @@ final class SQL implements Query
         return $this->parameters;
     }
 
-    public function toString(): string
+    public function sql(): string
     {
         return $this->sql;
     }

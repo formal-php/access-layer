@@ -25,7 +25,7 @@ final class QueryFailed extends RuntimeException
         $this->driverSpecificMessage = $message;
         parent::__construct(\sprintf(
             "Query '%s' failed with: [%s] [%s] %s",
-            $query->toString(),
+            $query->sql(),
             $sqlstate,
             (string) $code,
             (string) $message,

@@ -81,7 +81,7 @@ final class PDO implements Connection
      */
     private function execute(Query $query): Sequence
     {
-        $statement = $this->pdo->prepare($query->toString());
+        $statement = $this->pdo->prepare($query->sql());
 
         $query->parameters()->reduce(
             0,

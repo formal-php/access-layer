@@ -12,5 +12,5 @@ interface Query
      * @return Sequence<Parameter>
      */
     public function parameters(): Sequence;
-    public function toString(): string;
+    public function sql(): string;
 }

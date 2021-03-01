@@ -14,7 +14,7 @@ final class Commit implements Query
         return Sequence::of(Parameter::class);
     }
 
-    public function toString(): string
+    public function sql(): string
     {
         return 'COMMIT';
     }

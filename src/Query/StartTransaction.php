@@ -14,7 +14,7 @@ final class StartTransaction implements Query
         return Sequence::of(Parameter::class);
     }
 
-    public function toString(): string
+    public function sql(): string
     {
         return 'START TRANSACTION';
     }
