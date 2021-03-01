@@ -21,7 +21,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Formal\\AccessLayer\\": "src/"
+            "Formal\\AccessLayer\\": "src/",
+            "Fixtures\\Formal\\AccessLayer\\": "fixtures/"
         }
     },
     "autoload-dev": {

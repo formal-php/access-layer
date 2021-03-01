@@ -10,6 +10,7 @@ use Formal\AccessLayer\{
     Query\StartTransaction,
     Query\Commit,
     Query\Rollback,
+    Query\CreateTable,
     Query\Parameter,
     Query\Parameter\Type,
     Exception\QueryFailed,
@@ -20,6 +21,8 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
+use Fixtures\Formal\AccessLayer\Table\Name;
+use Fixtures\Formal\AccessLayer\Table\Column;
 
 class PDOTest extends TestCase
 {
@@ -325,6 +328,78 @@ class PDOTest extends TestCase
                 $this->assertCount(1, $rows);
                 $this->assertSame($username, $rows->first()->column('username'));
                 $this->assertSame((string) $number, $rows->first()->column('registerNumber'));
+            });
+    }
+
+    public function testCreateTable()
+    {
+        $this
+            ->forAll(
+                Name::any(),
+                Set\Sequence::of(
+                    Column::any(),
+                    Set\Integers::between(1, 20),
+                ),
+            )
+            ->then(function($name, $columns) {
+                $connection = $this->connection();
+
+                try {
+                    $rows = $connection(new CreateTable($name, ...$columns));
+
+                    $this->assertCount(0, $rows);
+                } finally {
+                    $connection(new SQL("DROP TABLE IF EXISTS {$name->sql()}"));
+                }
+            });
+    }
+
+    public function testFailToCreateSameTableTwice()
+    {
+        $this
+            ->forAll(
+                Name::any(),
+                Set\Sequence::of(
+                    Column::any(),
+                    Set\Integers::between(1, 20),
+                ),
+            )
+            ->then(function($name, $columns) {
+                $connection = $this->connection();
+
+                try {
+                    $connection(new CreateTable($name, ...$columns));
+                    $connection($expected = new CreateTable($name, ...$columns));
+                    $this->fail('it should throw');
+                } catch (QueryFailed $e) {
+                    $this->assertSame($expected, $e->query());
+                } finally {
+                    $connection(new SQL("DROP TABLE IF EXISTS {$name->sql()}"));
+                }
+            });
+    }
+
+    public function testCreateTableIfNotExists()
+    {
+        $this
+            ->forAll(
+                Name::any(),
+                Set\Sequence::of(
+                    Column::any(),
+                    Set\Integers::between(1, 20),
+                ),
+            )
+            ->then(function($name, $columns) {
+                $connection = $this->connection();
+
+                try {
+                    $connection(new CreateTable($name, ...$columns));
+                    $rows = $connection(CreateTable::ifNotExists($name, ...$columns));
+
+                    $this->assertCount(0, $rows);
+                } finally {
+                    $connection(new SQL("DROP TABLE IF EXISTS {$name->sql()}"));
+                }
             });
     }
 
