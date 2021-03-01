@@ -11,8 +11,10 @@ use Formal\AccessLayer\{
     Query\Commit,
     Query\Rollback,
     Query\CreateTable,
+    Query\DropTable,
     Query\Parameter,
     Query\Parameter\Type,
+    Table,
     Exception\QueryFailed,
 };
 use Innmind\Url\Url;
@@ -31,7 +33,7 @@ class PDOTest extends TestCase
     public function setUp(): void
     {
         $connection = $this->connection();
-        $connection(new SQL('DROP TABLE IF EXISTS `test`'));
+        $connection(DropTable::ifExists(new Table\Name('test')));
         $connection(new SQL('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, `registerNumber` bigint NOT NULL, PRIMARY KEY (id));'));
     }
 
@@ -349,7 +351,7 @@ class PDOTest extends TestCase
 
                     $this->assertCount(0, $rows);
                 } finally {
-                    $connection(new SQL("DROP TABLE IF EXISTS {$name->sql()}"));
+                    $connection(DropTable::ifExists($name));
                 }
             });
     }
@@ -374,7 +376,7 @@ class PDOTest extends TestCase
                 } catch (QueryFailed $e) {
                     $this->assertSame($expected, $e->query());
                 } finally {
-                    $connection(new SQL("DROP TABLE IF EXISTS {$name->sql()}"));
+                    $connection(DropTable::ifExists($name));
                 }
             });
     }
@@ -398,7 +400,33 @@ class PDOTest extends TestCase
 
                     $this->assertCount(0, $rows);
                 } finally {
-                    $connection(new SQL("DROP TABLE IF EXISTS {$name->sql()}"));
+                    $connection(DropTable::ifExists($name));
+                }
+            });
+    }
+
+    public function testCanDropUnknownDatabase()
+    {
+        $this
+            ->forAll(Name::any())
+            ->then(function($name) {
+                $rows = $this->connection()(DropTable::ifExists($name));
+
+                $this->assertCount(0, $rows);
+            });
+    }
+
+    public function testThrowWhenDroppingUnknownDatabase()
+    {
+        $this
+            ->forAll(Name::any())
+            ->then(function($name) {
+                try {
+                    $query = new DropTable($name);
+                    $this->connection()($query);
+                    $this->fail('it should throw');
+                } catch (QueryFailed $e) {
+                    $this->assertSame($query, $e->query());
                 }
             });
     }
