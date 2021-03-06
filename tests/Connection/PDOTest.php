@@ -51,6 +51,7 @@ class PDOTest extends TestCase
     {
         $this
             ->forAll(PConnection::properties())
+            ->disableShrinking()
             ->then(function($properties) {
                 $properties->ensureHeldBy($this->connection());
             });
