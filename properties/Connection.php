@@ -52,6 +52,7 @@ final class Connection
             Connection\SelectEverything::any(),
             Connection\SelectColumns::any(),
             Connection\Update::any(),
+            Connection\Delete::any(),
         ];
     }
 
