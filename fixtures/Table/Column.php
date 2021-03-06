@@ -33,8 +33,11 @@ final class Column
                 $filtered = [];
 
                 foreach ($columns as $column) {
-                    if (!\in_array($column->name()->toString(), $names, true)) {
-                        $names[] = $column->name()->toString();
+                    // in mysql column names are case insensitive
+                    $name = \strtolower($column->name()->toString());
+
+                    if (!\in_array($name, $names, true)) {
+                        $names[] = $name;
                         $filtered[] = $column;
                     }
                 }
