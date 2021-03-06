@@ -11,28 +11,41 @@ use Formal\AccessLayer\{
     Table\Column,
     Row,
 };
+use Innmind\Specification\Specification;
 use Innmind\Immutable\Sequence;
 
 final class Update implements Query
 {
     private Name $table;
     private Row $row;
+    private Where $where;
 
     public function __construct(Name $table, Row $row)
     {
         $this->table = $table;
         $this->row = $row;
+        $this->where = Where::everything();
+    }
+
+    public function where(Specification $specification): self
+    {
+        $self = clone $this;
+        $self->where = Where::of($specification);
+
+        return $self;
     }
 
     public function parameters(): Sequence
     {
         /** @var Sequence<Parameter> */
-        return $this->row->reduce(
+        $parameters = $this->row->reduce(
             Sequence::of(Parameter::class),
             static function(Sequence $parameters, Column\Name $_, mixed $value, Type $type): Sequence {
                 return ($parameters)(Parameter::of($value, $type));
             },
         );
+
+        return $parameters->append($this->where->parameters());
     }
 
     public function sql(): string
@@ -49,9 +62,10 @@ final class Update implements Query
         );
 
         return \sprintf(
-            'UPDATE %s SET %s',
+            'UPDATE %s SET %s %s',
             $this->table->sql(),
             \implode(', ', $columns),
+            $this->where->sql(),
         );
     }
 }

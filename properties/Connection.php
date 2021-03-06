@@ -51,8 +51,11 @@ final class Connection
             Connection\DroppingUnknownDatabaseMustThrow::any(),
             Connection\SelectEverything::any(),
             Connection\SelectColumns::any(),
+            Connection\SelectWhere::any(),
             Connection\Update::any(),
+            Connection\UpdateSpecificRow::any(),
             Connection\Delete::any(),
+            Connection\DeleteSpecificRow::any(),
         ];
     }
 

@@ -10,6 +10,7 @@ use Formal\AccessLayer\{
     Table\Name,
     Table\Column,
 };
+use Innmind\Specification\Specification;
 use Innmind\Immutable\Sequence;
 use function Innmind\Immutable\join;
 
@@ -18,11 +19,13 @@ final class Select implements Query
     private Name $table;
     /** @var Sequence<Column\Name> */
     private Sequence $columns;
+    private Where $where;
 
     public function __construct(Name $table)
     {
         $this->table = $table;
         $this->columns = Sequence::of(Column\Name::class);
+        $this->where = Where::everything();
     }
 
     public function columns(Column\Name $first, Column\Name ...$rest): self
@@ -33,17 +36,26 @@ final class Select implements Query
         return $self;
     }
 
+    public function where(Specification $specification): self
+    {
+        $self = clone $this;
+        $self->where = Where::of($specification);
+
+        return $self;
+    }
+
     public function parameters(): Sequence
     {
-        return Sequence::of(Parameter::class);
+        return $this->where->parameters();
     }
 
     public function sql(): string
     {
         return \sprintf(
-            'SELECT %s FROM %s',
+            'SELECT %s FROM %s %s',
             $this->columns->empty() ? '*' : $this->buildColumns(),
             $this->table->sql(),
+            $this->where->sql(),
         );
     }
 
