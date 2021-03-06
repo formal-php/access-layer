@@ -48,6 +48,8 @@ final class Connection
             Connection\CreateTableIfNotExists::any(),
             Connection\CanDropUnknownDatabaseIfNotExists::any(),
             Connection\DroppingUnknownDatabaseMustThrow::any(),
+            Connection\SelectEverything::any(),
+            Connection\SelectColumns::any(),
         ];
     }
 
