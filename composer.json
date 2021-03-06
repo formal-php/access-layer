@@ -18,7 +18,8 @@
         "php": "~8.0",
         "innmind/immutable": "^3.10",
         "innmind/url": "^3.6",
-        "innmind/specification": "^2.4"
+        "innmind/specification": "^2.4",
+        "psr/log": "^1.1"
     },
     "autoload": {
         "psr-4": {
