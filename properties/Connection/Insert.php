@@ -3,7 +3,12 @@ declare(strict_types = 1);
 
 namespace Properties\Formal\AccessLayer\Connection;
 
-use Formal\AccessLayer\Query\SQL;
+use Formal\AccessLayer\{
+    Query\SQL,
+    Query,
+    Table,
+    Row,
+};
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -44,7 +49,14 @@ final class Insert implements Property
 
         Assert::assertCount(0, $rows);
 
-        $sequence = $connection(new SQL("INSERT INTO `test` VALUES ('{$this->uuid}', 'foo', 42);"));
+        $sequence = $connection(new Query\Insert(
+            new Table\Name('test'),
+            Row::of([
+                'id' => $this->uuid,
+                'username' => 'foo',
+                'registerNumber' => 42,
+            ]),
+        ));
 
         Assert::assertCount(0, $sequence);
 

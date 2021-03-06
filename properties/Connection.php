@@ -35,6 +35,7 @@ final class Connection
             Connection\AQueryWithoutTheCorrectNumberOfParametersMustThrow::any(),
             Connection\MustThrowWhenValueDoesntFitTheSchema::any(),
             Connection\Insert::any(),
+            Connection\MultipleInsertsAtOnce::any(),
             Connection\ParametersCanBeBoundByName::any(),
             Connection\ParametersCanBeBoundByIndex::any(),
             Connection\ContentInsertedAfterStartOfTransactionIsAccessible::any(),
