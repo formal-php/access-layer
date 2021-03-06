@@ -5,6 +5,7 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
+    Query\Parameter,
     Row,
     Table\Name,
     Table\Column,
@@ -34,7 +35,7 @@ final class Select implements Query
 
     public function parameters(): Sequence
     {
-        return Sequence::of(Row::class);
+        return Sequence::of(Parameter::class);
     }
 
     public function sql(): string
