@@ -25,4 +25,16 @@ final class Name
             )->between(0, 63),
         );
     }
+
+    /**
+     * @return Set<array{0: Model, 1: Model}>
+     */
+    public static function pair(): Set
+    {
+        return Set\Composite::immutable(
+            static fn($a, $b) => [$a, $b],
+            self::any(),
+            self::any(),
+        )->filter(static fn($pair) => $pair[0]->toString() !== $pair[1]->toString());
+    }
 }

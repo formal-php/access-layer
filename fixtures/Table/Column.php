@@ -11,13 +11,13 @@ final class Column
     /**
      * @return Set<Model>
      */
-    public static function any(): Set
+    public static function any(Set $type = null, int $max = null): Set
     {
         return new Set\Randomize( // randomize to prevent same name used twice
             Set\Composite::immutable(
                 static fn($name, $type): Model => new Model($name, $type),
-                Column\Name::any(),
-                Column\Type::any(),
+                Column\Name::any($max),
+                $type ?? Column\Type::any(),
             ),
         );
     }

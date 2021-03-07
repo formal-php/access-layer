@@ -34,6 +34,25 @@ final class Type
     /**
      * @return Set<Model>
      */
+    public static function constraint(): Set
+    {
+        return new Set\Either(
+            self::bigint(),
+            self::binary(),
+            self::bit(),
+            self::char(),
+            self::decimal(),
+            self::int(),
+            self::mediumint(),
+            self::smallint(),
+            self::tinyint(),
+            self::varchar(),
+        );
+    }
+
+    /**
+     * @return Set<Model>
+     */
     private static function bigint(): Set
     {
         return Set\Decorate::immutable(

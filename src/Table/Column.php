@@ -24,6 +24,11 @@ final class Column
         return $this->name;
     }
 
+    public function type(): Type
+    {
+        return $this->type;
+    }
+
     public function sql(): string
     {
         return "{$this->name->sql()} {$this->type->sql()}";

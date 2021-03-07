@@ -45,6 +45,8 @@ final class Connection
             Connection\RollbackingAnUnstartedTransactionMustThrow::any(),
             Connection\ParameterTypesCanBeSpecified::any(),
             Connection\CreateTable::any(),
+            Connection\CreateTableWithPrimaryKey::any(),
+            Connection\CreateTableWithForeignKey::any(),
             Connection\CreatingSameTableTwiceMustThrow::any(),
             Connection\CreateTableIfNotExists::any(),
             Connection\CanDropUnknownDatabaseIfNotExists::any(),

@@ -11,14 +11,14 @@ final class Name
     /**
      * @return Set<Model>
      */
-    public static function any(): Set
+    public static function any(int $max = null): Set
     {
         return Set\Decorate::immutable(
             static fn(string $name): Model => new Model($name),
             Set\Strings::madeOf(
                 Set\Chars::alphanumerical(),
                 Set\Elements::of('é', 'è', 'ê', 'ë', '_'),
-            )->between(1, 64),
+            )->between(1, $max ?? 64),
         );
     }
 }
