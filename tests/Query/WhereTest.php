@@ -20,7 +20,10 @@ use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
-use Fixtures\Formal\AccessLayer\Table\Column;
+use Fixtures\Formal\AccessLayer\Table\{
+    Column,
+    Name,
+};
 
 class WhereTest extends TestCase
 {
@@ -750,6 +753,39 @@ class WhereTest extends TestCase
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->value());
                 $this->assertSame($type, $where->parameters()->first()->type());
+            });
+    }
+
+    public function testTableNameCanBeUsedInProperty()
+    {
+        $this
+            ->forAll(
+                Name::any(),
+                Column::any(),
+                Set\Strings::any()
+            )
+            ->then(function($table, $column, $value) {
+                $specification = $this->createMock(Comparator::class);
+                $specification
+                    ->expects($this->any())
+                    ->method('property')
+                    ->willReturn($table->toString().'.'.$column->name()->toString());
+                $specification
+                    ->expects($this->any())
+                    ->method('sign')
+                    ->willReturn(Sign::equality());
+                $specification
+                    ->expects($this->any())
+                    ->method('value')
+                    ->willReturn($value);
+                $where = Where::of($specification);
+
+                $this->assertSame(
+                    "WHERE {$table->sql()}.{$column->name()->sql()} = ?",
+                    $where->sql(),
+                );
+                $this->assertCount(1, $where->parameters());
+                $this->assertSame($value, $where->parameters()->first()->value());
             });
     }
 

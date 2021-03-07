@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
+    Table\Name,
     Table\Column,
     Row\Value,
 };
@@ -15,7 +16,10 @@ use Innmind\Specification\{
     Sign,
     Operator,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
 
 final class Where
 {
@@ -74,7 +78,7 @@ final class Where
 
     private function buildComparator(Comparator $specification): string
     {
-        $column = (new Column\Name($specification->property()))->sql();
+        $column = $this->buildColumn($specification);
         $sign = match($specification->sign()) {
             Sign::equality() => '=',
             Sign::inequality() => '<>',
@@ -223,5 +227,20 @@ final class Where
         }
 
         return null;
+    }
+
+    private function buildColumn(Comparator $specification): string
+    {
+        $property = Str::of($specification->property());
+
+        if ($property->contains('.')) {
+            $parts = $property->split('.');
+            $table = new Name($parts->get(0)->toString());
+            $column = new Column\Name($parts->get(1)->toString());
+
+            return "{$table->sql()}.{$column->sql()}";
+        }
+
+        return (new Column\Name($specification->property()))->sql();
     }
 }
