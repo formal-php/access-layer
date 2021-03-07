@@ -3,24 +3,22 @@ name: CI
 on: [push, pull_request]
 
 jobs:
-  roave_bc_check:
-    name: Roave BC Check
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - name: fetch tags
-        run: git fetch --depth=1 origin +refs/tags/*:refs/tags/*
-      - name: Roave BC Check
-        uses: docker://nyholm/roave-bc-check-ga
-        continue-on-error: true
   phpunit:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
-        php-version: ['7.4', '8.0']
+        os: [ubuntu-latest]
+        php-version: ['8.0']
         dependencies: ['lowest', 'highest']
     name: 'PHPUnit'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
+        ports:
+            - 3306
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -49,14 +47,24 @@ jobs:
         run: vendor/bin/phpunit
         env:
           BLACKBOX_DETAILED_PROPERTIES: 1
+          BLACKBOX_DISABLE_SHRINKING: 1
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
-        php-version: ['7.4', '8.0']
+        os: [ubuntu-latest]
+        php-version: ['8.0']
         dependencies: ['lowest', 'highest']
     name: 'Coverage'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
+        ports:
+            - 3306
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -85,6 +93,7 @@ jobs:
         run: vendor/bin/phpunit --coverage-clover=coverage.clover
         env:
           BLACKBOX_SET_SIZE: 1
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -92,7 +101,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['7.4', '8.0']
+        php-version: ['8.0']
         dependencies: ['lowest', 'highest']
     name: 'Psalm'
     steps:
@@ -124,7 +133,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['7.4']
+        php-version: ['8.0']
     name: 'CS'
     steps:
       - name: Checkout
