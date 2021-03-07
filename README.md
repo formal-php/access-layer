@@ -4,7 +4,9 @@
 [![codecov](https://codecov.io/gh/formal-php/access-layer/branch/develop/graph/badge.svg)](https://codecov.io/gh/formal-php/access-layer)
 [![Type Coverage](https://shepherd.dev/github/formal-php/access-layer/coverage.svg)](https://shepherd.dev/github/formal-php/access-layer)
 
-Description
+This a simple abstraction layer on top of builtin `\PDO` class to offer a minimalist api.
+
+The goal is separate expression of queries and their execution by using immutable structures and eliminating states wherever possible.
 
 ## Installation
 
@@ -12,6 +14,23 @@ Description
 composer require formal/access-layer
 ```
 
-## Usage
+## Example
 
-Todo
+```php
+use Formal\AccessLayer\{
+    Connection\Lazy,
+    Query\SQL,
+    Row,
+};
+use Innmind\Url\Url;
+use Innmind\Immutable\Sequence;
+
+$connection = new Lazy(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'));
+
+$rows = $connection(new SQL('SELECT * FROM `some_table`'));
+$rows; // instanceof Sequence<Row>
+```
+
+## Documentation
+
+Complete documentation can be found at <http://formal-php.github.io/access-layer/>.
