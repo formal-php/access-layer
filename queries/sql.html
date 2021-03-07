@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>formal/access-layer</title>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/main.css"/>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/styles/atom-one-dark.css"/>
+    <script src="https://formal-php.github.io/access-layer/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://formal-php.github.io/access-layer/"><code>access-layer</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li>
+                                    <a href="https://formal-php.github.io/access-layer/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details>
+                        <summary>
+                                                            Connections
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/pdo.html">
+                                        PDO
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/lazy.html">
+                                        Lazy
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/logger.html">
+                                        Logger
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/own.html">
+                                        Create your own
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <details open>
+                        <summary>
+                                                            Queries
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item current">
+                                    <a href="https://formal-php.github.io/access-layer/queries/sql.html">
+                                        SQL
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/create_table.html">
+                                        Create table
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/drop_table.html">
+                                        Drop table
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/insert.html">
+                                        Insert
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/select.html">
+                                        Select
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/update.html">
+                                        Update
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/delete.html">
+                                        Delete
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/transactions.html">
+                                        Transactions
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="sql"><a href="#sql" class="anchor">#</a><code>SQL</code></h1>
+<p>This is the most basic way to execute a query through a connection.</p>
+<pre><code class="language-php">use Formal\AccessLayer\{
+    Query\SQL,
+    Row,
+};
+
+$query = new SQL('SHOW TABLES');
+$tables = $connection($query);
+$tables->foreach(function(Row $row): void {
+    echo $row->column('Tables_in_database_name');
+});</code></pre>
+<h2 id="parameters"><a href="#parameters" class="anchor">#</a>Parameters</h2>
+<p>For some queries you will need to specify parameters to provide values, you can bind them either by specifying their name or by an index</p>
+<p><strong>Important</strong>: do not copy the values directly in the sql query as you'll be vulnerable to sql injection.</p>
+<h3 id="bound-by-name"><a href="#bound-by-name" class="anchor">#</a>Bound by name</h3>
+<p>This useful when you use the same parameter multiple times in your query.</p>
+<pre><code class="language-php">use Formal\AccessLayer\Query\Parameter;
+
+$insert = new SQL('INSERT INTO `users` (`username`, `name`) VALUES (:username, :username)');
+$insert = $insert->with(Parameter::named('username', 'some username value'));
+$connection($insert);</code></pre>
+<h3 id="bound-by-index"><a href="#bound-by-index" class="anchor">#</a>Bound by index</h3>
+<p>This is the most simple approach as you only have to worry that you add the parameters in the order specified in the sql query.</p>
+<pre><code class="language-php">use Formal\AccessLayer\Query\Parameter;
+
+$insert = new SQL('INSERT INTO `users` (`username`, `name`) VALUES (?, ?)');
+$insert = $insert
+    ->with(Parameter::of('some username value'))
+    ->with(Parameter::of('some name'));
+$connection($insert);</code></pre>
+<p><strong>Note</strong>: traditionally the index value rely on the user (you) to be specified (see <a href="https://www.php.net/manual/en/pdostatement.bindvalue.php"><code>PDOStatement::bindValue</code></a>), but this increase the probability for you to make an error. This problem is resolved here as the order in which the parameters are provided is always respected, this allows the connection to correctly provide the index to <code>\PDO</code>.</p></main>
+    <footer>
+        <a href="https://github.com/formal-php/access-layer/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>formal/access-layer</title>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/main.css"/>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/styles/atom-one-dark.css"/>
+    <script src="https://formal-php.github.io/access-layer/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://formal-php.github.io/access-layer/"><code>access-layer</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li>
+                                    <a href="https://formal-php.github.io/access-layer/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details>
+                        <summary>
+                                                            Connections
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/pdo.html">
+                                        PDO
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/lazy.html">
+                                        Lazy
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/logger.html">
+                                        Logger
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/own.html">
+                                        Create your own
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <details open>
+                        <summary>
+                                                            Queries
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/sql.html">
+                                        SQL
+                                    </a>
+                                </li>
+                                                            <li class="sub-item current">
+                                    <a href="https://formal-php.github.io/access-layer/queries/create_table.html">
+                                        Create table
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/drop_table.html">
+                                        Drop table
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/insert.html">
+                                        Insert
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/select.html">
+                                        Select
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/update.html">
+                                        Update
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/delete.html">
+                                        Delete
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/transactions.html">
+                                        Transactions
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="createtable"><a href="#createtable" class="anchor">#</a><code>CreateTable</code></h1>
+<pre><code class="language-php">use Formal\AccessLayer\{
+    Query\CreateTable,
+    Table\Name,
+    Table\Column,
+};
+
+$create = new CreateTable(
+    new Name('users'),
+    new Column(
+        new Column\Name('username'),
+        Column\Type::varchar(),
+    ),
+    new Column(
+        new Column\Name('name'),
+        Column\Type::varchar(),
+    ),
+);
+$connection($create);</code></pre>
+<p>This query will fail if the table doesn't exist, you can prevent this like so:</p>
+<pre><code class="language-php">use Formal\AccessLayer\{
+    Query\CreateTable,
+    Table\Name,
+    Table\Column,
+};
+
+$create = CreateTable::ifNotExists(
+    new Name('users'),
+    new Column(
+        new Column\Name('username'),
+        Column\Type::varchar(),
+    ),
+    new Column(
+        new Column\Name('name'),
+        Column\Type::varchar(),
+    ),
+);
+$connection($create);</code></pre>
+<h2 id="constraints"><a href="#constraints" class="anchor">#</a>Constraints</h2>
+<h3 id="primary-key"><a href="#primary-key" class="anchor">#</a>Primary key</h3>
+<p>You can specify the primary key of the table like so:</p>
+<pre><code class="language-php">$create = new CreateTable(
+    new Name('users'),
+    new Column(
+        new Column\Name('id'),
+        Column\Type::int(),
+    ),
+);
+$create = $create->primaryKey(new Column\Name('id'));
+$connection($create);</code></pre>
+<h3 id="foreign-key"><a href="#foreign-key" class="anchor">#</a>Foreign key</h3>
+<pre><code class="language-php">$create = new CreateTable(
+    new Name('address'),
+    new Column(
+        new Column\Name('user'),
+        Column\Type::int(),
+    ),
+    new Column(
+        new Column\Name('address'),
+        Column\Type::text(),
+    ),
+);
+$create = $create->foreignKey(
+    new Column\Name('user'),
+    new Name('users'),
+    new Column\Name('id'),
+);
+$connection($create);</code></pre>
+<p><strong>Note</strong>: this will name the foreign key <code>FK_user_id</code> so it's easier to reference it afterwards.</p></main>
+    <footer>
+        <a href="https://github.com/formal-php/access-layer/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>

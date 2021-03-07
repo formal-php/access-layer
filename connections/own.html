@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>formal/access-layer</title>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/main.css"/>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/styles/atom-one-dark.css"/>
+    <script src="https://formal-php.github.io/access-layer/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://formal-php.github.io/access-layer/"><code>access-layer</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li>
+                                    <a href="https://formal-php.github.io/access-layer/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details open>
+                        <summary>
+                                                            Connections
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/pdo.html">
+                                        PDO
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/lazy.html">
+                                        Lazy
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/logger.html">
+                                        Logger
+                                    </a>
+                                </li>
+                                                            <li class="sub-item current">
+                                    <a href="https://formal-php.github.io/access-layer/connections/own.html">
+                                        Create your own
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <details>
+                        <summary>
+                                                            Queries
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/sql.html">
+                                        SQL
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/create_table.html">
+                                        Create table
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/drop_table.html">
+                                        Drop table
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/insert.html">
+                                        Insert
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/select.html">
+                                        Select
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/update.html">
+                                        Update
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/delete.html">
+                                        Delete
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/transactions.html">
+                                        Transactions
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="create-your-own"><a href="#create-your-own" class="anchor">#</a>Create your own</h1>
+<p>You can easily create your own connection to extend the behaviour of this library.</p>
+<p>For example you could implement a connection that will send any failure to sentry like so:</p>
+<pre><code class="language-php">use Formal\AccessLayer\{
+    Connection,
+    Query,
+};
+use Innmind\Immutable\Sequence;
+use Sentry\ClientInterface;
+
+final class Sentry implements Connection
+{
+    private Connection $connection;
+    private ClientInterface $sentry;
+
+    public function __construct(Connection $connection, ClientInterface $sentry)
+    {
+        $this->connection = $connection;
+        $this->sentry = $sentry;
+    }
+
+    public function __invoke(Query $query): Sequence
+    {
+        try {
+            return ($this->connection)($query);
+        } catch (\Throwable $e) {
+            $this->sentry->captureException($e);
+
+            throw $e;
+        }
+    }
+}</code></pre>
+<h2 id="testing-your-connection"><a href="#testing-your-connection" class="anchor">#</a>Testing your connection</h2>
+<p>An important part of extending the behaviour of the connection with your own logic is to not change the current behaviour that other code may rely upon. This library helps you make sure you don't break these behaviours by providing you properties.</p>
+<p>Below is an example of a PHPUnit test case that you can extend to add your specific test cases:</p>
+<pre><code class="language-php">use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\BlackBox;
+use Properties\Formal\AccessLayer\Connection;
+
+class SentryTest extends TestCase
+{
+    use BlackBox;
+
+    public function setUp(): void
+    {
+        Connection::seed($this->connection());
+    }
+
+    // you can add here test cases like in any other PHPUnit class
+
+    /**
+     * @dataProvider properties
+     */
+    public function testHoldProperty($property)
+    {
+        $this
+            ->forAll($property)
+            ->then(function($property) {
+                $connection = $this->connection();
+
+                if (!$property->applicableTo($connection)) {
+                    $this->markTestSkipped();
+                }
+
+                $property->ensureHeldBy($connection);
+            });
+    }
+
+    public function testHoldProperties()
+    {
+        $this
+            ->forAll(Connection::properties())
+            ->disableShrinking()
+            ->then(function($properties) {
+                $properties->ensureHeldBy($this->connection());
+            });
+    }
+
+    public function properties(): iterable
+    {
+        foreach (Connection::list() as $property) {
+            yield [$property];
+        }
+    }
+
+    private function connection(): PDO
+    {
+        return new Sentry(/* add the arguments of your implementation here */);
+    }
+}</code></pre>
+<p>This will ensure that your implementation hold all the properties that must be held by all the connection implementations so you can swap the implementations without side effects.</p></main>
+    <footer>
+        <a href="https://github.com/formal-php/access-layer/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>

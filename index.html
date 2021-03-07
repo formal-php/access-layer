@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>formal/access-layer</title>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/main.css"/>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/styles/default.css"/>
+    <link rel="stylesheet" href="https://formal-php.github.io/access-layer/static/styles/atom-one-dark.css"/>
+    <script src="https://formal-php.github.io/access-layer/static/highlight.pack.js"></script>
+    <script>hljs.initHighlightingOnLoad();</script>
+</head>
+<body>
+    <header>
+        <a href="https://formal-php.github.io/access-layer/"><code>access-layer</code></a>
+    </header>
+    <aside>
+        <ul>
+                    <li class="current">
+                                    <a href="https://formal-php.github.io/access-layer/index.html">
+                        Getting started
+                    </a>
+                            </li>
+                    <li>
+                                    <details>
+                        <summary>
+                                                            Connections
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/pdo.html">
+                                        PDO
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/lazy.html">
+                                        Lazy
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/logger.html">
+                                        Logger
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/connections/own.html">
+                                        Create your own
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                    <li>
+                                    <details>
+                        <summary>
+                                                            Queries
+                                                    </summary>
+                        <ul>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/sql.html">
+                                        SQL
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/create_table.html">
+                                        Create table
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/drop_table.html">
+                                        Drop table
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/insert.html">
+                                        Insert
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/select.html">
+                                        Select
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/update.html">
+                                        Update
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/delete.html">
+                                        Delete
+                                    </a>
+                                </li>
+                                                            <li class="sub-item ">
+                                    <a href="https://formal-php.github.io/access-layer/queries/transactions.html">
+                                        Transactions
+                                    </a>
+                                </li>
+                                                    </ul>
+                    </details>
+                            </li>
+                </ul>
+    </aside>
+    <main><h1 id="getting-started"><a href="#getting-started" class="anchor">#</a>Getting started</h1>
+<p>This library is designed to eliminate state wherever possible when dealing with a database connection.</p>
+<p>The result is an api can consist of only one method on the connection (<code>__invoke</code>) and one kind of argument (<code>Query</code>). Both can easily extended through composition.</p>
+<h2 id="installation"><a href="#installation" class="anchor">#</a>Installation</h2>
+<pre><code class="language-sh">composer require formal/access-layer</code></pre>
+<h2 id="basic-usage"><a href="#basic-usage" class="anchor">#</a>Basic usage</h2>
+<pre><code class="language-php">use Formal\AccessLayer\{
+    Connection\Lazy,
+    Query\SQL,
+    Row,
+};
+use Innmind\Url\Url;
+use Innmind\Immutable\Sequence;
+
+$connection = new Lazy(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'));
+
+$rows = $connection(new SQL('SELECT * FROM `some_table`'));
+$rows; // instanceof Sequence<Row></code></pre></main>
+    <footer>
+        <a href="https://github.com/formal-php/access-layer/" target="_blank">GitHub</a>
+    </footer>
+</body>
+</html>
