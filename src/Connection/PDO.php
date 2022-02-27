@@ -161,11 +161,11 @@ final class PDO implements Connection
     private function castType(Type $type): int
     {
         return match ($type) {
-            Type::bool() => \PDO::PARAM_BOOL,
-            Type::null() => \PDO::PARAM_NULL,
-            Type::int() => \PDO::PARAM_INT,
-            Type::string() => \PDO::PARAM_STR,
-            Type::unspecified() => \PDO::PARAM_STR, // this is the default of PDOStatement::bindValue()
+            Type::bool => \PDO::PARAM_BOOL,
+            Type::null => \PDO::PARAM_NULL,
+            Type::int => \PDO::PARAM_INT,
+            Type::string => \PDO::PARAM_STR,
+            Type::unspecified => \PDO::PARAM_STR, // this is the default of PDOStatement::bindValue()
         };
     }
 }

@@ -867,11 +867,11 @@ class WhereTest extends TestCase
     private function type(): Set
     {
         return Set\Elements::of(
-            Type::bool(),
-            Type::null(),
-            Type::int(),
-            Type::string(),
-            Type::unspecified(),
+            Type::bool,
+            Type::null,
+            Type::int,
+            Type::string,
+            Type::unspecified,
         );
     }
 }

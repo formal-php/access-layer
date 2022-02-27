@@ -18,7 +18,7 @@ final class Value
     {
         $this->column = $column;
         $this->value = $value;
-        $this->type = $type ?? Type::unspecified();
+        $this->type = $type ?? Type::unspecified;
     }
 
     public function column(): Name

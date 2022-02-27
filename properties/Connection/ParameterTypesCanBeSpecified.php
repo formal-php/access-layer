@@ -51,9 +51,9 @@ final class ParameterTypesCanBeSpecified implements Property
     {
         $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
         $insert = $insert
-            ->with(Parameter::of($this->uuid, Type::string()))
-            ->with(Parameter::of($this->username, Type::string()))
-            ->with(Parameter::of($this->number, Type::int()));
+            ->with(Parameter::of($this->uuid, Type::string))
+            ->with(Parameter::of($this->username, Type::string))
+            ->with(Parameter::of($this->number, Type::int));
         $connection($insert);
 
         $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));

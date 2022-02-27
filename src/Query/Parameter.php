@@ -15,7 +15,7 @@ final class Parameter
     {
         $this->name = $name;
         $this->value = $value;
-        $this->type = $type ?? Type::unspecified();
+        $this->type = $type ?? Type::unspecified;
     }
 
     public static function of(mixed $value, Type $type = null): self
