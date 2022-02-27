@@ -91,7 +91,10 @@ final class SelectWhere implements Property
         $rows = $connection($select);
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame($this->uuid, $rows->first()->column('id'));
+        Assert::assertSame($this->uuid, $rows->first()->match(
+            static fn($row) => $row->column('id'),
+            static fn() => null,
+        ));
 
         return $connection;
     }

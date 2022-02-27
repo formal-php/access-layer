@@ -19,6 +19,7 @@ use Innmind\Specification\{
 use Innmind\Immutable\{
     Sequence,
     Str,
+    Maybe,
 };
 
 final class Where
@@ -45,12 +46,15 @@ final class Where
      */
     public function parameters(): Sequence
     {
+        /** @var Sequence<Parameter> */
+        $parameters = Sequence::of();
+
         if (\is_null($this->specification)) {
-            return Sequence::of(Parameter::class);
+            return $parameters;
         }
 
         return $this->findParamaters(
-            Sequence::of(Parameter::class),
+            $parameters,
             $this->specification,
         );
     }
@@ -233,14 +237,21 @@ final class Where
     {
         $property = Str::of($specification->property());
 
-        if ($property->contains('.')) {
-            $parts = $property->split('.');
-            $table = new Name($parts->get(0)->toString());
-            $column = new Column\Name($parts->get(1)->toString());
+        $parts = $property->split('.');
+        $table = $parts
+            ->first()
+            ->map(static fn($name) => $name->toString())
+            ->map(static fn($name) => new Name($name));
+        $column = $parts
+            ->get(1)
+            ->map(static fn($name) => $name->toString())
+            ->map(static fn($name) => new Column\Name($name));
 
-            return "{$table->sql()}.{$column->sql()}";
-        }
-
-        return (new Column\Name($specification->property()))->sql();
+        return Maybe::all($table, $column)
+            ->map(static fn(Name $table, Column\Name $column) => "{$table->sql()}.{$column->sql()}")
+            ->match(
+                static fn($withTable) => $withTable,
+                static fn() => (new Column\Name($specification->property()))->sql(),
+            );
     }
 }

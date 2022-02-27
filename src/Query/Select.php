@@ -11,8 +11,10 @@ use Formal\AccessLayer\{
     Table\Column,
 };
 use Innmind\Specification\Specification;
-use Innmind\Immutable\Sequence;
-use function Innmind\Immutable\join;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
 
 final class Select implements Query
 {
@@ -24,14 +26,18 @@ final class Select implements Query
     public function __construct(Name $table)
     {
         $this->table = $table;
-        $this->columns = Sequence::of(Column\Name::class);
+        /** @var Sequence<Column\Name> */
+        $this->columns = Sequence::of();
         $this->where = Where::everything();
     }
 
+    /**
+     * @no-named-arguments
+     */
     public function columns(Column\Name $first, Column\Name ...$rest): self
     {
         $self = clone $this;
-        $self->columns = Sequence::of(Column\Name::class, $first, ...$rest);
+        $self->columns = Sequence::of($first, ...$rest);
 
         return $self;
     }
@@ -61,11 +67,10 @@ final class Select implements Query
 
     private function buildColumns(): string
     {
-        $columns = $this->columns->mapTo(
-            'string',
+        $columns = $this->columns->map(
             static fn($column) => $column->sql(),
         );
 
-        return join(', ', $columns)->toString();
+        return Str::of(', ')->join($columns)->toString();
     }
 }

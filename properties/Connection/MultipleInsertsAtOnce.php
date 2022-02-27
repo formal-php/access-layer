@@ -90,28 +90,46 @@ final class MultipleInsertsAtOnce implements Property
 
         Assert::assertCount(2, $rows);
         Assert::assertContains(
-            $rows->first()->column('id'),
+            $rows->first()->match(
+                static fn($row) => $row->column('id'),
+                static fn() => null,
+            ),
             [$this->uuid1, $this->uuid2],
         );
         Assert::assertContains(
-            $rows->first()->column('username'),
+            $rows->first()->match(
+                static fn($row) => $row->column('username'),
+                static fn() => null,
+            ),
             [$this->username1, $this->username2],
         );
         Assert::assertContains(
-            $rows->first()->column('registerNumber'),
-            [(string) $this->number1, (string) $this->number2],
+            $rows->first()->match(
+                static fn($row) => $row->column('registerNumber'),
+                static fn() => null,
+            ),
+            [$this->number1, $this->number2],
         );
         Assert::assertContains(
-            $rows->last()->column('id'),
+            $rows->last()->match(
+                static fn($row) => $row->column('id'),
+                static fn() => null,
+            ),
             [$this->uuid1, $this->uuid2],
         );
         Assert::assertContains(
-            $rows->last()->column('username'),
+            $rows->last()->match(
+                static fn($row) => $row->column('username'),
+                static fn() => null,
+            ),
             [$this->username1, $this->username2],
         );
         Assert::assertContains(
-            $rows->last()->column('registerNumber'),
-            [(string) $this->number1, (string) $this->number2],
+            $rows->last()->match(
+                static fn($row) => $row->column('registerNumber'),
+                static fn() => null,
+            ),
+            [$this->number1, $this->number2],
         );
 
         return $connection;

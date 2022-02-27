@@ -30,7 +30,8 @@ final class DropTable implements Query
 
     public function parameters(): Sequence
     {
-        return Sequence::of(Row::class);
+        /** @var Sequence<Query\Parameter> */
+        return Sequence::of();
     }
 
     public function sql(): string

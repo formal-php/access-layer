@@ -63,9 +63,18 @@ final class Insert implements Property
         $rows = $connection($select);
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame($this->uuid, $rows->first()->column('id'));
-        Assert::assertSame('foo', $rows->first()->column('username'));
-        Assert::assertSame('42', $rows->first()->column('registerNumber'));
+        Assert::assertSame($this->uuid, $rows->first()->match(
+            static fn($row) => $row->column('id'),
+            static fn() => null,
+        ));
+        Assert::assertSame('foo', $rows->first()->match(
+            static fn($row) => $row->column('username'),
+            static fn() => null,
+        ));
+        Assert::assertSame(42, $rows->first()->match(
+            static fn($row) => $row->column('registerNumber'),
+            static fn() => null,
+        ));
 
         return $connection;
     }

@@ -39,7 +39,7 @@ final class Update implements Query
     {
         /** @var Sequence<Parameter> */
         $parameters = $this->row->reduce(
-            Sequence::of(Parameter::class),
+            Sequence::of(),
             static function(Sequence $parameters, Column\Name $_, mixed $value, Type $type): Sequence {
                 return ($parameters)(Parameter::of($value, $type));
             },

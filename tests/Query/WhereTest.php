@@ -63,7 +63,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -92,7 +95,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -121,7 +127,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -150,7 +159,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -179,7 +191,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -208,7 +223,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -293,7 +311,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame("%$value", $where->parameters()->first()->value());
+                $this->assertSame("%$value", $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -322,7 +343,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame("$value%", $where->parameters()->first()->value());
+                $this->assertSame("$value%", $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -351,7 +375,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame("%$value%", $where->parameters()->first()->value());
+                $this->assertSame("%$value%", $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -385,9 +412,18 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(3, $where->parameters());
-                $this->assertSame($value1, $where->parameters()->get(0)->value());
-                $this->assertSame($value2, $where->parameters()->get(1)->value());
-                $this->assertSame($value3, $where->parameters()->get(2)->value());
+                $this->assertSame($value1, $where->parameters()->get(0)->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+                $this->assertSame($value2, $where->parameters()->get(1)->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+                $this->assertSame($value3, $where->parameters()->get(2)->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
         $this
             ->forAll(
@@ -451,7 +487,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
         $this
             ->forAll(Column::any(), Set\Strings::any())
@@ -481,7 +520,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -541,8 +583,14 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(2, $where->parameters());
-                $this->assertSame($value1, $where->parameters()->first()->value());
-                $this->assertSame($value2, $where->parameters()->last()->value());
+                $this->assertSame($value1, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+                $this->assertSame($value2, $where->parameters()->last()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
         $this
             ->forAll(
@@ -598,8 +646,14 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(2, $where->parameters());
-                $this->assertSame($value1, $where->parameters()->first()->value());
-                $this->assertSame($value2, $where->parameters()->last()->value());
+                $this->assertSame($value1, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+                $this->assertSame($value2, $where->parameters()->last()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -659,8 +713,14 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(2, $where->parameters());
-                $this->assertSame($value1, $where->parameters()->first()->value());
-                $this->assertSame($value2, $where->parameters()->last()->value());
+                $this->assertSame($value1, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+                $this->assertSame($value2, $where->parameters()->last()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
         $this
             ->forAll(
@@ -716,8 +776,14 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(2, $where->parameters());
-                $this->assertSame($value1, $where->parameters()->first()->value());
-                $this->assertSame($value2, $where->parameters()->last()->value());
+                $this->assertSame($value1, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+                $this->assertSame($value2, $where->parameters()->last()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -751,8 +817,14 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
-                $this->assertSame($type, $where->parameters()->first()->type());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+                $this->assertSame($type, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->type(),
+                    static fn() => null,
+                ));
             });
     }
 
@@ -785,7 +857,10 @@ class WhereTest extends TestCase
                     $where->sql(),
                 );
                 $this->assertCount(1, $where->parameters());
-                $this->assertSame($value, $where->parameters()->first()->value());
+                $this->assertSame($value, $where->parameters()->first()->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
             });
     }
 

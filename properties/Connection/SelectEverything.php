@@ -60,9 +60,18 @@ final class SelectEverything implements Property
         $rows = $connection(new Select(new Name('test')));
 
         Assert::assertGreaterThanOrEqual(1, $rows->size());
-        Assert::assertTrue($rows->first()->contains('id'));
-        Assert::assertTrue($rows->first()->contains('username'));
-        Assert::assertTrue($rows->first()->contains('registerNumber'));
+        Assert::assertTrue($rows->first()->match(
+            static fn($row) => $row->contains('id'),
+            static fn() => null,
+        ));
+        Assert::assertTrue($rows->first()->match(
+            static fn($row) => $row->contains('username'),
+            static fn() => null,
+        ));
+        Assert::assertTrue($rows->first()->match(
+            static fn($row) => $row->contains('registerNumber'),
+            static fn() => null,
+        ));
 
         return $connection;
     }

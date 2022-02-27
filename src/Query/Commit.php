@@ -11,7 +11,7 @@ final class Commit implements Query
     public function parameters(): Sequence
     {
         /** @var Sequence<Parameter> */
-        return Sequence::of(Parameter::class);
+        return Sequence::of();
     }
 
     public function sql(): string

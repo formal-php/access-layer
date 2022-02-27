@@ -16,7 +16,7 @@ final class SQL implements Query
     {
         $this->sql = $sql;
         /** @var Sequence<Parameter> */
-        $this->parameters = Sequence::of(Parameter::class);
+        $this->parameters = Sequence::of();
     }
 
     public function with(Parameter $parameter): self

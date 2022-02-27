@@ -59,9 +59,18 @@ final class ParameterTypesCanBeSpecified implements Property
         $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame($this->uuid, $rows->first()->column('id'));
-        Assert::assertSame($this->username, $rows->first()->column('username'));
-        Assert::assertSame((string) $this->number, $rows->first()->column('registerNumber'));
+        Assert::assertSame($this->uuid, $rows->first()->match(
+            static fn($row) => $row->column('id'),
+            static fn() => null,
+        ));
+        Assert::assertSame($this->username, $rows->first()->match(
+            static fn($row) => $row->column('username'),
+            static fn() => null,
+        ));
+        Assert::assertSame($this->number, $rows->first()->match(
+            static fn($row) => $row->column('registerNumber'),
+            static fn() => null,
+        ));
 
         return $connection;
     }

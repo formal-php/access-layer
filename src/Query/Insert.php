@@ -11,8 +11,10 @@ use Formal\AccessLayer\{
     Table\Column,
     Row,
 };
-use Innmind\Immutable\Sequence;
-use function Innmind\Immutable\join;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
 
 final class Insert implements Query
 {
@@ -20,17 +22,20 @@ final class Insert implements Query
     /** @var Sequence<Row> */
     private Sequence $rows;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(Name $table, Row $first, Row ...$rest)
     {
         $this->table = $table;
-        $this->rows = Sequence::of(Row::class, $first, ...$rest);
+        $this->rows = Sequence::of($first, ...$rest);
     }
 
     public function parameters(): Sequence
     {
         /** @var Sequence<Parameter> */
         return $this->rows->reduce(
-            Sequence::of(Parameter::class),
+            Sequence::of(),
             static function(Sequence $parameters, Row $row): Sequence {
                 return $row->reduce(
                     $parameters,
@@ -44,12 +49,11 @@ final class Insert implements Query
 
     public function sql(): string
     {
-        $inserts = $this->rows->mapTo(
-            'string',
+        $inserts = $this->rows->map(
             fn($row) => $this->buildInsert($row),
         );
 
-        return join('; ', $inserts)->toString();
+        return Str::of('; ')->join($inserts)->toString();
     }
 
     private function buildInsert(Row $row): string

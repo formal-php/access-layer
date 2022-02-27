@@ -63,9 +63,18 @@ final class SelectColumns implements Property
         $rows = $connection($select);
 
         Assert::assertGreaterThanOrEqual(1, $rows->size());
-        Assert::assertTrue($rows->first()->contains('id'));
-        Assert::assertFalse($rows->first()->contains('username'));
-        Assert::assertFalse($rows->first()->contains('registerNumber'));
+        Assert::assertTrue($rows->first()->match(
+            static fn($row) => $row->contains('id'),
+            static fn() => null,
+        ));
+        Assert::assertFalse($rows->first()->match(
+            static fn($row) => $row->contains('username'),
+            static fn() => null,
+        ));
+        Assert::assertFalse($rows->first()->match(
+            static fn($row) => $row->contains('registerNumber'),
+            static fn() => null,
+        ));
 
         return $connection;
     }

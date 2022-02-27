@@ -74,7 +74,8 @@ final class PDO implements Connection
     {
         $this->attempt($query, $action);
 
-        return Sequence::of(Row::class);
+        /** @var Sequence<Row> */
+        return Sequence::of();
     }
 
     /**
@@ -84,7 +85,7 @@ final class PDO implements Connection
     {
         $statement = $this->pdo->prepare($query->sql());
 
-        $query->parameters()->reduce(
+        $_ = $query->parameters()->reduce(
             0,
             function(int $index, Parameter $parameter) use ($query, $statement): int {
                 if ($parameter->boundByName()) {
@@ -118,7 +119,6 @@ final class PDO implements Connection
 
         /** @var Sequence<Row> */
         return Sequence::defer(
-            Row::class,
             (static function(\PDOStatement $statement): \Generator {
                 while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
                     yield Row::of($row);

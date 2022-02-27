@@ -15,9 +15,12 @@ final class Row
     /** @var Sequence<Value> */
     private Sequence $values;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(Value ...$values)
     {
-        $this->values = Sequence::of(Value::class, ...$values);
+        $this->values = Sequence::of(...$values);
     }
 
     /**
@@ -45,7 +48,14 @@ final class Row
 
     public function column(string $name): mixed
     {
-        return $this->values->find($this->match($name))->value();
+        return $this
+            ->values
+            ->find($this->match($name))
+            ->map(static fn($value): mixed => $value->value())
+            ->match(
+                static fn($value): mixed => $value,
+                static fn() => throw new \LogicException("Unknown column $name"),
+            );
     }
 
     /**
