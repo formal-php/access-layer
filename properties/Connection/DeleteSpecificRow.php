@@ -84,7 +84,7 @@ final class DeleteSpecificRow implements Property
 
             public function sign(): Sign
             {
-                return Sign::equality();
+                return Sign::equality;
             }
 
             public function value()

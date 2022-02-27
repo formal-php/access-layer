@@ -84,24 +84,24 @@ final class Where
     {
         $column = $this->buildColumn($specification);
         $sign = match ($specification->sign()) {
-            Sign::equality() => '=',
-            Sign::inequality() => '<>',
-            Sign::lessThan() => '<',
-            Sign::moreThan() => '>',
-            Sign::lessThanOrEqual() => '<=',
-            Sign::moreThanOrEqual() => '>=',
-            Sign::isNull() => 'IS NULL',
-            Sign::isNotNull() => 'IS NOT NULL',
-            Sign::startsWith() => 'LIKE',
-            Sign::endsWith() => 'LIKE',
-            Sign::contains() => 'LIKE',
-            Sign::in() => 'IN',
+            Sign::equality => '=',
+            Sign::inequality => '<>',
+            Sign::lessThan => '<',
+            Sign::moreThan => '>',
+            Sign::lessThanOrEqual => '<=',
+            Sign::moreThanOrEqual => '>=',
+            Sign::isNull => 'IS NULL',
+            Sign::isNotNull => 'IS NOT NULL',
+            Sign::startsWith => 'LIKE',
+            Sign::endsWith => 'LIKE',
+            Sign::contains => 'LIKE',
+            Sign::in => 'IN',
         };
 
         return match ($specification->sign()) {
-            Sign::isNull() => \sprintf('%s %s', $column, $sign),
-            Sign::isNotNull() => \sprintf('%s %s', $column, $sign),
-            Sign::in() => $this->buildInSql($specification),
+            Sign::isNull => \sprintf('%s %s', $column, $sign),
+            Sign::isNotNull => \sprintf('%s %s', $column, $sign),
+            Sign::in => $this->buildInSql($specification),
             default => \sprintf(
                 '%s %s ?',
                 $column,
@@ -115,7 +115,7 @@ final class Where
         return \sprintf(
             '(%s %s %s)',
             $this->buildSql($specification->left()),
-            $specification->operator()->equals(Operator::and()) ? 'AND' : 'OR',
+            $specification->operator() === Operator::and ? 'AND' : 'OR',
             $this->buildSql($specification->right()),
         );
     }
@@ -182,8 +182,8 @@ final class Where
         Comparator $specification,
     ): Sequence {
         if (
-            $specification->sign()->equals(Sign::isNull()) ||
-            $specification->sign()->equals(Sign::isNotNull())
+            $specification->sign() === Sign::isNull ||
+            $specification->sign() === Sign::isNotNull
         ) {
             return $parameters;
         }
@@ -192,7 +192,7 @@ final class Where
         $value = $this->value($specification);
         $type = $this->type($specification);
 
-        if ($specification->sign()->equals(Sign::in())) {
+        if ($specification->sign() === Sign::in) {
             /**
              * @var mixed $in
              */
@@ -217,9 +217,9 @@ final class Where
         }
 
         return match ($specification->sign()) {
-            Sign::startsWith() => "%$value",
-            Sign::endsWith() => "$value%",
-            Sign::contains() => "%$value%",
+            Sign::startsWith => "%$value",
+            Sign::endsWith => "$value%",
+            Sign::contains => "%$value%",
             default => $value,
         };
     }

@@ -51,7 +51,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -83,7 +83,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -115,7 +115,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::lessThan());
+                    ->willReturn(Sign::lessThan);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -147,7 +147,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::lessThanOrEqual());
+                    ->willReturn(Sign::lessThanOrEqual);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -179,7 +179,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::moreThan());
+                    ->willReturn(Sign::moreThan);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -211,7 +211,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::moreThanOrEqual());
+                    ->willReturn(Sign::moreThanOrEqual);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -243,7 +243,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::isNull());
+                    ->willReturn(Sign::isNull);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -271,7 +271,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::isNotNull());
+                    ->willReturn(Sign::isNotNull);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -299,7 +299,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::startsWith());
+                    ->willReturn(Sign::startsWith);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -331,7 +331,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::endsWith());
+                    ->willReturn(Sign::endsWith);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -363,7 +363,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::contains());
+                    ->willReturn(Sign::contains);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -400,7 +400,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::in());
+                    ->willReturn(Sign::in);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -442,7 +442,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::in());
+                    ->willReturn(Sign::in);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -470,7 +470,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -503,7 +503,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -545,7 +545,7 @@ class WhereTest extends TestCase
                 $left
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $left
                     ->expects($this->any())
                     ->method('value')
@@ -558,7 +558,7 @@ class WhereTest extends TestCase
                 $right
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $right
                     ->expects($this->any())
                     ->method('value')
@@ -575,7 +575,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('operator')
-                    ->willReturn(Operator::and());
+                    ->willReturn(Operator::and);
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -608,7 +608,7 @@ class WhereTest extends TestCase
                 $left
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $left
                     ->expects($this->any())
                     ->method('value')
@@ -621,7 +621,7 @@ class WhereTest extends TestCase
                 $right
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $right
                     ->expects($this->any())
                     ->method('value')
@@ -638,7 +638,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('operator')
-                    ->willReturn(Operator::and());
+                    ->willReturn(Operator::and);
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -675,7 +675,7 @@ class WhereTest extends TestCase
                 $left
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $left
                     ->expects($this->any())
                     ->method('value')
@@ -688,7 +688,7 @@ class WhereTest extends TestCase
                 $right
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $right
                     ->expects($this->any())
                     ->method('value')
@@ -705,7 +705,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('operator')
-                    ->willReturn(Operator::or());
+                    ->willReturn(Operator::or);
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -738,7 +738,7 @@ class WhereTest extends TestCase
                 $left
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::inequality());
+                    ->willReturn(Sign::inequality);
                 $left
                     ->expects($this->any())
                     ->method('value')
@@ -751,7 +751,7 @@ class WhereTest extends TestCase
                 $right
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $right
                     ->expects($this->any())
                     ->method('value')
@@ -768,7 +768,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('operator')
-                    ->willReturn(Operator::or());
+                    ->willReturn(Operator::or);
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -805,7 +805,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specification
                     ->expects($this->any())
                     ->method('value')
@@ -845,7 +845,7 @@ class WhereTest extends TestCase
                 $specification
                     ->expects($this->any())
                     ->method('sign')
-                    ->willReturn(Sign::equality());
+                    ->willReturn(Sign::equality);
                 $specification
                     ->expects($this->any())
                     ->method('value')
