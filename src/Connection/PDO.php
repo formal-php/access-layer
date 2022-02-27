@@ -88,24 +88,14 @@ final class PDO implements Connection
         $_ = $query->parameters()->reduce(
             0,
             function(int $index, Parameter $parameter) use ($query, $statement): int {
-                if ($parameter->boundByName()) {
-                    $this->attempt(
-                        $query,
-                        fn(): bool => $statement->bindValue(
-                            $parameter->name(),
-                            $parameter->value(),
-                            $this->castType($parameter->type()),
-                        ),
-                    );
-
-                    return $index;
-                }
-
                 ++$index;
                 $this->attempt(
                     $query,
                     fn(): bool => $statement->bindValue(
-                        $index,
+                        $parameter->name()->match(
+                            static fn($name) => $name,
+                            static fn() => $index,
+                        ),
                         $parameter->value(),
                         $this->castType($parameter->type()),
                     ),

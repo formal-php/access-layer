@@ -31,19 +31,13 @@ final class Logger implements Connection
                     'sql' => $query->sql(),
                     'parameters' => $query->parameters()->reduce(
                         [],
-                        static function(array $parameters, Parameter $parameter): array {
-                            if ($parameter->boundByName()) {
-                                /** @psalm-suppress MixedAssignment */
-                                $parameters[$parameter->name()] = $parameter->value();
-
-                                return $parameters;
-                            }
-
-                            /** @psalm-suppress MixedAssignment */
-                            $parameters[] = $parameter->value();
-
-                            return $parameters;
-                        },
+                        static fn(array $parameters, $parameter) => \array_merge(
+                            $parameters,
+                            $parameter->name()->match(
+                                static fn($name) => [$name => $parameter->value()],
+                                static fn() => [$parameter->value()],
+                            ),
+                        ),
                     ),
                 ],
             );

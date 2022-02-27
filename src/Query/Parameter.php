@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\Query\Parameter\Type;
+use Innmind\Immutable\Maybe;
 
 /**
  * @psalm-immutable
@@ -43,20 +44,12 @@ final class Parameter
         return new self($name, $value, $type);
     }
 
-    public function boundByName(): bool
-    {
-        return \is_string($this->name);
-    }
-
     /**
-     * @psalm-suppress InvalidNullableReturnType
-     *
-     * @return non-empty-string
+     * @return Maybe<non-empty-string>
      */
-    public function name(): string
+    public function name(): Maybe
     {
-        /** @psalm-suppress NullableReturnStatement */
-        return $this->name;
+        return Maybe::of($this->name);
     }
 
     public function value(): mixed
