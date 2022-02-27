@@ -75,6 +75,7 @@ final class CreateTable implements Query
 
     public function sql(): string
     {
+        /** @var non-empty-string */
         return \sprintf(
             'CREATE TABLE %s %s (%s%s)',
             $this->ifNotExists ? 'IF NOT EXISTS' : '',

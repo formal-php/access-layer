@@ -247,12 +247,16 @@ final class Where
         $property = Str::of($specification->property());
 
         $parts = $property->split('.');
+        /** @psalm-suppress ArgumentTypeCoercion */
         $table = $parts
             ->first()
+            ->filter(static fn($name) => !$name->empty())
             ->map(static fn($name) => $name->toString())
             ->map(static fn($name) => new Name($name));
+        /** @psalm-suppress ArgumentTypeCoercion */
         $column = $parts
             ->get(1)
+            ->filter(static fn($name) => !$name->empty())
             ->map(static fn($name) => $name->toString())
             ->map(static fn($name) => new Column\Name($name));
 

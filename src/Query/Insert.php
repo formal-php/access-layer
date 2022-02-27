@@ -56,6 +56,7 @@ final class Insert implements Query
             fn($row) => $this->buildInsert($row),
         );
 
+        /** @var non-empty-string Because there's at least one row */
         return Str::of('; ')->join($inserts)->toString();
     }
 

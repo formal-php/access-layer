@@ -32,6 +32,9 @@ final class Column
         return $this->type;
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function sql(): string
     {
         return "{$this->name->sql()} {$this->type->sql()}";

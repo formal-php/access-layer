@@ -60,6 +60,7 @@ final class Select implements Query
 
     public function sql(): string
     {
+        /** @var non-empty-string */
         return \sprintf(
             'SELECT %s FROM %s %s',
             $this->columns->empty() ? '*' : $this->buildColumns(),
@@ -74,6 +75,7 @@ final class Select implements Query
             static fn($column) => $column->sql(),
         );
 
+        /** @psalm-suppress InvalidArgument Because non-empty-string instead of string */
         return Str::of(', ')->join($columns)->toString();
     }
 }

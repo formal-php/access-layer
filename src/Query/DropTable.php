@@ -42,6 +42,7 @@ final class DropTable implements Query
 
     public function sql(): string
     {
+        /** @var non-empty-string */
         return \sprintf(
             'DROP TABLE %s %s',
             $this->ifExists ? 'IF EXISTS' : '',

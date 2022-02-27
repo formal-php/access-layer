@@ -8,12 +8,16 @@ namespace Formal\AccessLayer\Table\Column;
  */
 final class Type
 {
+    /** @var non-empty-string */
     private string $type;
     private string $precision;
     private bool $nullable = false;
     private null|int|string $default = null;
     private ?string $comment = null;
 
+    /**
+     * @param non-empty-string $type
+     */
     private function __construct(string $type, string $precision = '')
     {
         $this->type = $type;
@@ -204,8 +208,12 @@ final class Type
         return $self;
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function sql(): string
     {
+        /** @var non-empty-string */
         return \sprintf(
             '%s%s %s %s %s',
             $this->type,

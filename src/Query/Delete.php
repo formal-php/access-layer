@@ -43,6 +43,7 @@ final class Delete implements Query
 
     public function sql(): string
     {
+        /** @var non-empty-string */
         return \sprintf(
             'DELETE FROM %s %s',
             $this->table->sql(),

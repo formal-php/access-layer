@@ -11,10 +11,14 @@ use Innmind\Immutable\Sequence;
  */
 final class SQL implements Query
 {
+    /** @var non-empty-string */
     private string $sql;
     /** @var Sequence<Parameter> */
     private Sequence $parameters;
 
+    /**
+     * @param non-empty-string $sql
+     */
     public function __construct(string $sql)
     {
         $this->sql = $sql;

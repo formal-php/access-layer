@@ -83,7 +83,7 @@ final class SelectWhere implements Property
                 return Sign::equality;
             }
 
-            public function value()
+            public function value(): string
             {
                 return $this->uuid;
             }

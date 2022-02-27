@@ -10,10 +10,14 @@ use Formal\AccessLayer\Query\Parameter\Type;
  */
 final class Parameter
 {
+    /** @var ?non-empty-string */
     private ?string $name = null;
     private mixed $value;
     private Type $type;
 
+    /**
+     * @param ?non-empty-string $name
+     */
     private function __construct(?string $name, mixed $value, ?Type $type)
     {
         $this->name = $name;
@@ -31,6 +35,8 @@ final class Parameter
 
     /**
      * @psalm-pure
+     *
+     * @param non-empty-string $name
      */
     public static function named(string $name, mixed $value, Type $type = null): self
     {
@@ -42,7 +48,11 @@ final class Parameter
         return \is_string($this->name);
     }
 
-    /** @psalm-suppress InvalidNullableReturnType */
+    /**
+     * @psalm-suppress InvalidNullableReturnType
+     *
+     * @return non-empty-string
+     */
     public function name(): string
     {
         /** @psalm-suppress NullableReturnStatement */

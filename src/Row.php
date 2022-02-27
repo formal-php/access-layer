@@ -40,6 +40,10 @@ final class Row
          * @var mixed $value
          */
         foreach ($columns as $key => $value) {
+            if ($key === '') {
+                continue;
+            }
+
             $values[] = new Value(new Column\Name($key), $value);
         }
 

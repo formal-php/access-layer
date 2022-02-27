@@ -64,6 +64,7 @@ final class Update implements Query
             },
         );
 
+        /** @var non-empty-string */
         return \sprintf(
             'UPDATE %s SET %s %s',
             $this->table->sql(),
