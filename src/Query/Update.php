@@ -53,7 +53,7 @@ final class Update implements Query
         /** @var list<string> $columns */
         $columns = $this->row->reduce(
             [],
-            static function(array $columns, Column\Name $column, mixed $value): array {
+            static function(array $columns, Column\Name $column, mixed $_): array {
                 /** @psalm-suppress MixedArrayAssignment */
                 $columns[] = "{$column->sql()} = ?";
 

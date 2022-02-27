@@ -44,7 +44,6 @@ final class Insert implements Query
 
     public function sql(): string
     {
-        /** @var Sequence<string> */
         $inserts = $this->rows->mapTo(
             'string',
             fn($row) => $this->buildInsert($row),
@@ -61,7 +60,7 @@ final class Insert implements Query
          */
         ['keys' => $keys, 'values' => $values] = $row->reduce(
             ['keys' => [], 'values' => []],
-            static function(array $row, Column\Name $column, mixed $value): array {
+            static function(array $row, Column\Name $column, mixed $_): array {
                 /** @psalm-suppress MixedArrayAssignment */
                 $row['keys'][] = $column->sql();
                 /** @psalm-suppress MixedArrayAssignment */

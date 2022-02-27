@@ -20,12 +20,18 @@ final class CreateTable implements Query
     private array $constraints = [];
     private bool $ifNotExists = false;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(Name $name, Column $first, Column ...$rest)
     {
         $this->name = $name;
         $this->columns = [$first, ...$rest];
     }
 
+    /**
+     * @no-named-arguments
+     */
     public static function ifNotExists(Name $name, Column $first, Column ...$rest): self
     {
         $self = new self($name, $first, ...$rest);
