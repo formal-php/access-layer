@@ -163,7 +163,7 @@ final class Type
         }
 
         /** @psalm-suppress PossiblyInvalidArgument */
-        return 'DEFAULT '.match(\gettype($this->default)) {
+        return 'DEFAULT '. match (\gettype($this->default)) {
             'integer' => "'$this->default'",
             'string' => "'{$this->escape($this->default)}'",
             'NULL' => 'NULL',

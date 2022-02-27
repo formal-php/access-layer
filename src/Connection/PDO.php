@@ -48,7 +48,7 @@ final class PDO implements Connection
 
     public function __invoke(Query $query): Sequence
     {
-        return match(\get_class($query)) {
+        return match (\get_class($query)) {
             Query\StartTransaction::class => $this->transaction(
                 $query,
                 fn(): bool => $this->pdo->beginTransaction(),
@@ -160,7 +160,7 @@ final class PDO implements Connection
 
     private function castType(Type $type): int
     {
-        return match($type) {
+        return match ($type) {
             Type::bool() => \PDO::PARAM_BOOL,
             Type::null() => \PDO::PARAM_NULL,
             Type::int() => \PDO::PARAM_INT,

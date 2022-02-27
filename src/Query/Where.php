@@ -69,7 +69,7 @@ final class Where
 
     private function buildSql(Specification $specification): string
     {
-        return match(true) {
+        return match (true) {
             $specification instanceof Comparator => $this->buildComparator($specification),
             $specification instanceof Composite => $this->buildComposite($specification),
             $specification instanceof Not => $this->negate($specification),
@@ -79,7 +79,7 @@ final class Where
     private function buildComparator(Comparator $specification): string
     {
         $column = $this->buildColumn($specification);
-        $sign = match($specification->sign()) {
+        $sign = match ($specification->sign()) {
             Sign::equality() => '=',
             Sign::inequality() => '<>',
             Sign::lessThan() => '<',
@@ -94,7 +94,7 @@ final class Where
             Sign::in() => 'IN',
         };
 
-        return match($specification->sign()) {
+        return match ($specification->sign()) {
             Sign::isNull() => \sprintf('%s %s', $column, $sign),
             Sign::isNotNull() => \sprintf('%s %s', $column, $sign),
             Sign::in() => $this->buildInSql($specification),
@@ -147,9 +147,9 @@ final class Where
      */
     private function findParamaters(
         Sequence $parameters,
-        Specification $specification
+        Specification $specification,
     ): Sequence {
-        return match(true) {
+        return match (true) {
             $specification instanceof Not => $this->findParamaters(
                 $parameters,
                 $specification->specification(),
@@ -175,7 +175,7 @@ final class Where
      */
     private function findComparatorParameters(
         Sequence $parameters,
-        Comparator $specification
+        Comparator $specification,
     ): Sequence {
         if (
             $specification->sign()->equals(Sign::isNull()) ||
@@ -212,7 +212,7 @@ final class Where
             $value = $value->value();
         }
 
-        return match($specification->sign()) {
+        return match ($specification->sign()) {
             Sign::startsWith() => "%$value",
             Sign::endsWith() => "$value%",
             Sign::contains() => "%$value%",

@@ -762,7 +762,7 @@ class WhereTest extends TestCase
             ->forAll(
                 Name::any(),
                 Column::any(),
-                Set\Strings::any()
+                Set\Strings::any(),
             )
             ->then(function($table, $column, $value) {
                 $specification = $this->createMock(Comparator::class);

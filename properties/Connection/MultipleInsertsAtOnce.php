@@ -30,7 +30,7 @@ final class MultipleInsertsAtOnce implements Property
         int $number1,
         string $uuid2,
         string $username2,
-        int $number2
+        int $number2,
     ) {
         $this->uuid1 = $uuid1;
         $this->username1 = $username1;
