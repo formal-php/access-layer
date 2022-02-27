@@ -6,6 +6,9 @@ namespace Formal\AccessLayer\Query;
 use Formal\AccessLayer\Query;
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class SQL implements Query
 {
     private string $sql;

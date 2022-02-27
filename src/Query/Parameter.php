@@ -5,6 +5,9 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\Query\Parameter\Type;
 
+/**
+ * @psalm-immutable
+ */
 final class Parameter
 {
     private ?string $name = null;
@@ -18,11 +21,17 @@ final class Parameter
         $this->type = $type ?? Type::unspecified;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(mixed $value, Type $type = null): self
     {
         return new self(null, $value, $type);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function named(string $name, mixed $value, Type $type = null): self
     {
         return new self($name, $value, $type);

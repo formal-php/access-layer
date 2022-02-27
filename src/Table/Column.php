@@ -8,6 +8,9 @@ use Formal\AccessLayer\Table\Column\{
     Type,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Column
 {
     private Name $name;

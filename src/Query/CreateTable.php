@@ -11,6 +11,9 @@ use Formal\AccessLayer\{
 };
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class CreateTable implements Query
 {
     private Name $name;
@@ -31,6 +34,7 @@ final class CreateTable implements Query
 
     /**
      * @no-named-arguments
+     * @psalm-pure
      */
     public static function ifNotExists(Name $name, Column $first, Column ...$rest): self
     {

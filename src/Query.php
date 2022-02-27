@@ -6,6 +6,9 @@ namespace Formal\AccessLayer;
 use Formal\AccessLayer\Query\Parameter;
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 interface Query
 {
     /**

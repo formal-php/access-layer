@@ -5,6 +5,9 @@ namespace Formal\AccessLayer\Table\Column;
 
 use Formal\AccessLayer\Exception\DomainException;
 
+/**
+ * @psalm-immutable
+ */
 final class Name
 {
     private string $value;

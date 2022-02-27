@@ -22,6 +22,9 @@ use Innmind\Immutable\{
     Maybe,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Where
 {
     private ?Specification $specification;
@@ -31,11 +34,17 @@ final class Where
         $this->specification = $specification;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(?Specification $specification): self
     {
         return new self($specification);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function everything(): self
     {
         return new self(null);

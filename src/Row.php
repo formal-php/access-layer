@@ -10,6 +10,9 @@ use Formal\AccessLayer\{
 };
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class Row
 {
     /** @var Sequence<Value> */
@@ -24,6 +27,8 @@ final class Row
     }
 
     /**
+     * @psalm-pure
+     *
      * @param array<string, mixed> $columns
      */
     public static function of(array $columns): self

@@ -10,6 +10,9 @@ use Formal\AccessLayer\{
 };
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class DropTable implements Query
 {
     private Name $name;
@@ -20,6 +23,9 @@ final class DropTable implements Query
         $this->name = $name;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function ifExists(Name $name): self
     {
         $self = new self($name);

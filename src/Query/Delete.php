@@ -14,6 +14,9 @@ use Formal\AccessLayer\{
 use Innmind\Specification\Specification;
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class Delete implements Query
 {
     private Name $table;

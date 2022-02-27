@@ -8,6 +8,9 @@ use Formal\AccessLayer\{
     Query\Parameter\Type,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Value
 {
     private Name $column;

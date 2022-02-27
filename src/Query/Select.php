@@ -16,6 +16,9 @@ use Innmind\Immutable\{
     Str,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Select implements Query
 {
     private Name $table;
