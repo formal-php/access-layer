@@ -34,7 +34,7 @@ class LazyTest extends TestCase
     {
         $this->assertInstanceOf(
             Connection::class,
-            new Lazy(Url::of('mysql://unknown:unknown@127.0.0.1:3306/unknown')),
+            new Lazy(static fn() => PDO::of(Url::of('mysql://unknown:unknown@127.0.0.1:3306/unknown'))),
         );
     }
 
