@@ -1,6 +1,6 @@
 # `Logger`
 
-This connection sits on top of another and will log all queries that will be executed and record any failure that maay occur.
+This connection sits on top of another and will log all queries that will be executed and record any failure that may occur.
 
 ```php
 use Formal\AccessLayer\{
@@ -9,10 +9,12 @@ use Formal\AccessLayer\{
 };
 use Psr\Log\LoggerInterface;
 
-$connection = new Logger(
+$connection = Logger::psr(
     /* any instance of Connection */,
     /* any instance of LoggerInterface */,
 );
 ```
 
 **Note**: it doesn't log any information about the returned rows to prevent _unwrapping_ the deferred `Sequence` returned by [`PDO`](pdo.md).
+
+**Important**: it won't log any errors for lazy queries since the query is not executed until the first call on the sequence.

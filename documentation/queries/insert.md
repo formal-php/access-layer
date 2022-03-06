@@ -34,8 +34,8 @@ use Formal\AccessLayer\{
 $insert = new Insert(
     new Name('users'),
     new Row(
-        new Row\Value(new Column\Name('username'), 'some username', Type::string()),
-        new Row\Value(new Column\Name('name'), 'some name', Type::string()),
+        new Row\Value(new Column\Name('username'), 'some username', Type::string),
+        new Row\Value(new Column\Name('name'), 'some name', Type::string),
     ),
 );
 $connection($insert);

@@ -52,7 +52,7 @@ final class Username implements Comparator
 
     public function sign(): Sign
     {
-        return Sign::equality();
+        return Sign::equality;
     }
 
     public function value(): mixed

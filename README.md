@@ -19,15 +19,16 @@ composer require formal/access-layer
 ```php
 use Formal\AccessLayer\{
     Connection\Lazy,
+    Connection\PDO,
     Query\SQL,
     Row,
 };
 use Innmind\Url\Url;
 use Innmind\Immutable\Sequence;
 
-$connection = new Lazy(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'));
+$connection = new Lazy(static fn() => PDO::of(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name')));
 
-$rows = $connection(new SQL('SELECT * FROM `some_table`'));
+$rows = $connection(SQL::of('SELECT * FROM `some_table`'));
 $rows; // instanceof Sequence<Row>
 ```
 

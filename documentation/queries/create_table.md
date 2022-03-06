@@ -21,7 +21,7 @@ $create = new CreateTable(
 $connection($create);
 ```
 
-This query will fail if the table doesn't exist, you can prevent this like so:
+This query will fail if the table does exist, you can prevent this like so:
 
 ```php
 use Formal\AccessLayer\{
