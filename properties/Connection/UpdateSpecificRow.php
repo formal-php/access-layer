@@ -102,18 +102,30 @@ final class UpdateSpecificRow implements Property
         $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame(24, $rows->first()->match(
-            static fn($row) => $row->column('registerNumber'),
-            static fn() => null,
-        ));
+        Assert::assertSame(
+            24,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
+        );
 
         $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame(42, $rows->first()->match(
-            static fn($row) => $row->column('registerNumber'),
-            static fn() => null,
-        ));
+        Assert::assertSame(
+            42,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
+        );
 
         return $connection;
     }

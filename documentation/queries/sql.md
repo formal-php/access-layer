@@ -11,7 +11,10 @@ use Formal\AccessLayer\{
 $query = SQL::of('SHOW TABLES');
 $tables = $connection($query);
 $tables->foreach(function(Row $row): void {
-    echo $row->column('Tables_in_database_name');
+    echo $row->column('Tables_in_database_name')->match(
+        static fn($name) => $name,
+        static fn() => '',
+    );
 });
 ```
 

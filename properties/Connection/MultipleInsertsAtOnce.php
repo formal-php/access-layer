@@ -90,45 +90,63 @@ final class MultipleInsertsAtOnce implements Property
 
         Assert::assertCount(2, $rows);
         Assert::assertContains(
-            $rows->first()->match(
-                static fn($row) => $row->column('id'),
-                static fn() => null,
-            ),
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('id'))
+                ->match(
+                    static fn($id) => $id,
+                    static fn() => null,
+                ),
             [$this->uuid1, $this->uuid2],
         );
         Assert::assertContains(
-            $rows->first()->match(
-                static fn($row) => $row->column('username'),
-                static fn() => null,
-            ),
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('username'))
+                ->match(
+                    static fn($username) => $username,
+                    static fn() => null,
+                ),
             [$this->username1, $this->username2],
         );
         Assert::assertContains(
-            $rows->first()->match(
-                static fn($row) => $row->column('registerNumber'),
-                static fn() => null,
-            ),
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
             [$this->number1, $this->number2],
         );
         Assert::assertContains(
-            $rows->last()->match(
-                static fn($row) => $row->column('id'),
-                static fn() => null,
-            ),
+            $rows
+                ->last()
+                ->flatMap(static fn($row) => $row->column('id'))
+                ->match(
+                    static fn($id) => $id,
+                    static fn() => null,
+                ),
             [$this->uuid1, $this->uuid2],
         );
         Assert::assertContains(
-            $rows->last()->match(
-                static fn($row) => $row->column('username'),
-                static fn() => null,
-            ),
+            $rows
+                ->last()
+                ->flatMap(static fn($row) => $row->column('username'))
+                ->match(
+                    static fn($username) => $username,
+                    static fn() => null,
+                ),
             [$this->username1, $this->username2],
         );
         Assert::assertContains(
-            $rows->last()->match(
-                static fn($row) => $row->column('registerNumber'),
-                static fn() => null,
-            ),
+            $rows
+                ->last()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
             [$this->number1, $this->number2],
         );
 

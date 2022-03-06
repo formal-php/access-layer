@@ -8,7 +8,10 @@ use Formal\AccessLayer\{
     Table\Column,
     Query\Parameter\Type,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Maybe,
+};
 
 /**
  * @psalm-immutable
@@ -55,16 +58,15 @@ final class Row
         return $this->values->any($this->match($name));
     }
 
-    public function column(string $name): mixed
+    /**
+     * @return Maybe<mixed>
+     */
+    public function column(string $name): Maybe
     {
         return $this
             ->values
             ->find($this->match($name))
-            ->map(static fn($value): mixed => $value->value())
-            ->match(
-                static fn($value): mixed => $value,
-                static fn() => throw new \LogicException("Unknown column $name"),
-            );
+            ->map(static fn($value): mixed => $value->value());
     }
 
     /**
