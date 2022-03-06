@@ -16,5 +16,7 @@
   </testsuites>
   <php>
     <ini name="memory_limit" value="-1" />
+    <env name="BLACKBOX_DETAILED_PROPERTIES" value="1" />
+    <env name="BLACKBOX_DISABLE_SHRINKING" value="1" />
   </php>
 </phpunit>

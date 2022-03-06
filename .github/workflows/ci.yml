@@ -35,8 +35,6 @@ jobs:
       - name: PHPUnit
         run: vendor/bin/phpunit
         env:
-          BLACKBOX_DETAILED_PROPERTIES: 1
-          BLACKBOX_DISABLE_SHRINKING: 1
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
   coverage:
     runs-on: ${{ matrix.os }}
