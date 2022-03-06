@@ -70,27 +70,11 @@ final class Row
     }
 
     /**
-     * The order of provided columns is always the same
-     *
-     * @template T
-     *
-     * @param T $carry
-     * @param callable(T, Column\Name, mixed, Type): T $reducer
-     *
-     * @return T
+     * @return Sequence<Value>
      */
-    public function reduce(mixed $carry, callable $reducer): mixed
+    public function values(): Sequence
     {
-        /** @psalm-suppress MixedArgument */
-        return $this->values->reduce(
-            $carry,
-            static fn(mixed $carry, Value $value) => $reducer(
-                $carry,
-                $value->column(),
-                $value->value(),
-                $value->type(),
-            ),
-        );
+        return $this->values;
     }
 
     /**
