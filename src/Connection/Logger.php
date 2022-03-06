@@ -16,7 +16,7 @@ final class Logger implements Connection
     private Connection $connection;
     private LoggerInterface $logger;
 
-    public function __construct(Connection $connection, LoggerInterface $logger)
+    private function __construct(Connection $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
         $this->logger = $logger;
@@ -55,5 +55,10 @@ final class Logger implements Connection
 
             throw $e;
         }
+    }
+
+    public static function psr(Connection $connection, LoggerInterface $logger): self
+    {
+        return new self($connection, $logger);
     }
 }

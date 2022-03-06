@@ -72,7 +72,7 @@ class LoggerTest extends TestCase
                         ],
                     );
 
-                $connection = new Logger($inner, $logger);
+                $connection = Logger::psr($inner, $logger);
 
                 $this->assertSame($expected, $connection($query));
             });
@@ -106,7 +106,7 @@ class LoggerTest extends TestCase
                         ],
                     );
 
-                $connection = new Logger($inner, $logger);
+                $connection = Logger::psr($inner, $logger);
 
                 try {
                     $connection($query);
@@ -156,7 +156,7 @@ class LoggerTest extends TestCase
     {
         $port = \getenv('DB_PORT') ?: '3306';
 
-        return new Logger(
+        return Logger::psr(
             PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example")),
             new NullLogger,
         );
