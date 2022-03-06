@@ -19,8 +19,12 @@ use Innmind\Specification\{
 use Innmind\Immutable\{
     Sequence,
     Str,
+    Maybe,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Where
 {
     private ?Specification $specification;
@@ -30,11 +34,17 @@ final class Where
         $this->specification = $specification;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function of(?Specification $specification): self
     {
         return new self($specification);
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function everything(): self
     {
         return new self(null);
@@ -45,12 +55,15 @@ final class Where
      */
     public function parameters(): Sequence
     {
+        /** @var Sequence<Parameter> */
+        $parameters = Sequence::of();
+
         if (\is_null($this->specification)) {
-            return Sequence::of(Parameter::class);
+            return $parameters;
         }
 
         return $this->findParamaters(
-            Sequence::of(Parameter::class),
+            $parameters,
             $this->specification,
         );
     }
@@ -69,7 +82,7 @@ final class Where
 
     private function buildSql(Specification $specification): string
     {
-        return match(true) {
+        return match (true) {
             $specification instanceof Comparator => $this->buildComparator($specification),
             $specification instanceof Composite => $this->buildComposite($specification),
             $specification instanceof Not => $this->negate($specification),
@@ -79,25 +92,25 @@ final class Where
     private function buildComparator(Comparator $specification): string
     {
         $column = $this->buildColumn($specification);
-        $sign = match($specification->sign()) {
-            Sign::equality() => '=',
-            Sign::inequality() => '<>',
-            Sign::lessThan() => '<',
-            Sign::moreThan() => '>',
-            Sign::lessThanOrEqual() => '<=',
-            Sign::moreThanOrEqual() => '>=',
-            Sign::isNull() => 'IS NULL',
-            Sign::isNotNull() => 'IS NOT NULL',
-            Sign::startsWith() => 'LIKE',
-            Sign::endsWith() => 'LIKE',
-            Sign::contains() => 'LIKE',
-            Sign::in() => 'IN',
+        $sign = match ($specification->sign()) {
+            Sign::equality => '=',
+            Sign::inequality => '<>',
+            Sign::lessThan => '<',
+            Sign::moreThan => '>',
+            Sign::lessThanOrEqual => '<=',
+            Sign::moreThanOrEqual => '>=',
+            Sign::isNull => 'IS NULL',
+            Sign::isNotNull => 'IS NOT NULL',
+            Sign::startsWith => 'LIKE',
+            Sign::endsWith => 'LIKE',
+            Sign::contains => 'LIKE',
+            Sign::in => 'IN',
         };
 
-        return match($specification->sign()) {
-            Sign::isNull() => \sprintf('%s %s', $column, $sign),
-            Sign::isNotNull() => \sprintf('%s %s', $column, $sign),
-            Sign::in() => $this->buildInSql($specification),
+        return match ($specification->sign()) {
+            Sign::isNull => \sprintf('%s %s', $column, $sign),
+            Sign::isNotNull => \sprintf('%s %s', $column, $sign),
+            Sign::in => $this->buildInSql($specification),
             default => \sprintf(
                 '%s %s ?',
                 $column,
@@ -111,7 +124,7 @@ final class Where
         return \sprintf(
             '(%s %s %s)',
             $this->buildSql($specification->left()),
-            $specification->operator()->equals(Operator::and()) ? 'AND' : 'OR',
+            $specification->operator() === Operator::and ? 'AND' : 'OR',
             $this->buildSql($specification->right()),
         );
     }
@@ -147,9 +160,9 @@ final class Where
      */
     private function findParamaters(
         Sequence $parameters,
-        Specification $specification
+        Specification $specification,
     ): Sequence {
-        return match(true) {
+        return match (true) {
             $specification instanceof Not => $this->findParamaters(
                 $parameters,
                 $specification->specification(),
@@ -175,11 +188,11 @@ final class Where
      */
     private function findComparatorParameters(
         Sequence $parameters,
-        Comparator $specification
+        Comparator $specification,
     ): Sequence {
         if (
-            $specification->sign()->equals(Sign::isNull()) ||
-            $specification->sign()->equals(Sign::isNotNull())
+            $specification->sign() === Sign::isNull ||
+            $specification->sign() === Sign::isNotNull
         ) {
             return $parameters;
         }
@@ -188,7 +201,7 @@ final class Where
         $value = $this->value($specification);
         $type = $this->type($specification);
 
-        if ($specification->sign()->equals(Sign::in())) {
+        if ($specification->sign() === Sign::in) {
             /**
              * @var mixed $in
              */
@@ -212,10 +225,10 @@ final class Where
             $value = $value->value();
         }
 
-        return match($specification->sign()) {
-            Sign::startsWith() => "%$value",
-            Sign::endsWith() => "$value%",
-            Sign::contains() => "%$value%",
+        return match ($specification->sign()) {
+            Sign::startsWith => "%$value",
+            Sign::endsWith => "$value%",
+            Sign::contains => "%$value%",
             default => $value,
         };
     }
@@ -233,14 +246,25 @@ final class Where
     {
         $property = Str::of($specification->property());
 
-        if ($property->contains('.')) {
-            $parts = $property->split('.');
-            $table = new Name($parts->get(0)->toString());
-            $column = new Column\Name($parts->get(1)->toString());
+        $parts = $property->split('.');
+        /** @psalm-suppress ArgumentTypeCoercion */
+        $table = $parts
+            ->first()
+            ->filter(static fn($name) => !$name->empty())
+            ->map(static fn($name) => $name->toString())
+            ->map(static fn($name) => new Name($name));
+        /** @psalm-suppress ArgumentTypeCoercion */
+        $column = $parts
+            ->get(1)
+            ->filter(static fn($name) => !$name->empty())
+            ->map(static fn($name) => $name->toString())
+            ->map(static fn($name) => new Column\Name($name));
 
-            return "{$table->sql()}.{$column->sql()}";
-        }
-
-        return (new Column\Name($specification->property()))->sql();
+        return Maybe::all($table, $column)
+            ->map(static fn(Name $table, Column\Name $column) => "{$table->sql()}.{$column->sql()}")
+            ->match(
+                static fn($withTable) => $withTable,
+                static fn() => (new Column\Name($specification->property()))->sql(),
+            );
     }
 }

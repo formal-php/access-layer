@@ -6,16 +6,24 @@ namespace Formal\AccessLayer\Query;
 use Formal\AccessLayer\Query;
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class Rollback implements Query
 {
     public function parameters(): Sequence
     {
         /** @var Sequence<Parameter> */
-        return Sequence::of(Parameter::class);
+        return Sequence::of();
     }
 
     public function sql(): string
     {
         return 'ROLLBACK';
+    }
+
+    public function lazy(): bool
+    {
+        return false;
     }
 }

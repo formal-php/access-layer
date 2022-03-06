@@ -10,35 +10,54 @@ use Formal\AccessLayer\{
 };
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class DropTable implements Query
 {
     private Name $name;
-    private bool $ifExists = false;
+    private bool $ifExists;
 
-    public function __construct(Name $name)
+    private function __construct(bool $ifExists, Name $name)
     {
+        $this->ifExists = $ifExists;
         $this->name = $name;
     }
 
+    /**
+     * @psalm-pure
+     */
+    public static function named(Name $name): self
+    {
+        return new self(false, $name);
+    }
+
+    /**
+     * @psalm-pure
+     */
     public static function ifExists(Name $name): self
     {
-        $self = new self($name);
-        $self->ifExists = true;
-
-        return $self;
+        return new self(true, $name);
     }
 
     public function parameters(): Sequence
     {
-        return Sequence::of(Row::class);
+        /** @var Sequence<Query\Parameter> */
+        return Sequence::of();
     }
 
     public function sql(): string
     {
+        /** @var non-empty-string */
         return \sprintf(
             'DROP TABLE %s %s',
             $this->ifExists ? 'IF EXISTS' : '',
             $this->name->sql(),
         );
+    }
+
+    public function lazy(): bool
+    {
+        return false;
     }
 }

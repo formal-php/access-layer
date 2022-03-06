@@ -6,7 +6,7 @@ use Formal\AccessLayer\{
     Table\Name,
 };
 
-$drop = new DropTable(new Name('users'));
+$drop = DropTable::named(new Name('users'));
 $connection($drop);
 ```
 

@@ -30,7 +30,7 @@ final class MultipleInsertsAtOnce implements Property
         int $number1,
         string $uuid2,
         string $username2,
-        int $number2
+        int $number2,
     ) {
         $this->uuid1 = $uuid1;
         $this->username1 = $username1;
@@ -65,12 +65,12 @@ final class MultipleInsertsAtOnce implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $select = new SQL("SELECT * FROM `test` WHERE `id` IN ('{$this->uuid1}', '{$this->uuid2}')");
+        $select = SQL::of("SELECT * FROM `test` WHERE `id` IN ('{$this->uuid1}', '{$this->uuid2}')");
         $rows = $connection($select);
 
         Assert::assertCount(0, $rows);
 
-        $sequence = $connection(new Query\Insert(
+        $sequence = $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid1,
@@ -90,28 +90,64 @@ final class MultipleInsertsAtOnce implements Property
 
         Assert::assertCount(2, $rows);
         Assert::assertContains(
-            $rows->first()->column('id'),
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('id'))
+                ->match(
+                    static fn($id) => $id,
+                    static fn() => null,
+                ),
             [$this->uuid1, $this->uuid2],
         );
         Assert::assertContains(
-            $rows->first()->column('username'),
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('username'))
+                ->match(
+                    static fn($username) => $username,
+                    static fn() => null,
+                ),
             [$this->username1, $this->username2],
         );
         Assert::assertContains(
-            $rows->first()->column('registerNumber'),
-            [(string) $this->number1, (string) $this->number2],
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
+            [$this->number1, $this->number2],
         );
         Assert::assertContains(
-            $rows->last()->column('id'),
+            $rows
+                ->last()
+                ->flatMap(static fn($row) => $row->column('id'))
+                ->match(
+                    static fn($id) => $id,
+                    static fn() => null,
+                ),
             [$this->uuid1, $this->uuid2],
         );
         Assert::assertContains(
-            $rows->last()->column('username'),
+            $rows
+                ->last()
+                ->flatMap(static fn($row) => $row->column('username'))
+                ->match(
+                    static fn($username) => $username,
+                    static fn() => null,
+                ),
             [$this->username1, $this->username2],
         );
         Assert::assertContains(
-            $rows->last()->column('registerNumber'),
-            [(string) $this->number1, (string) $this->number2],
+            $rows
+                ->last()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
+            [$this->number1, $this->number2],
         );
 
         return $connection;

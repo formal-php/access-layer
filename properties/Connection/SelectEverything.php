@@ -50,19 +50,27 @@ final class SelectEverything implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
-        $insert = $insert
+        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
             ->with(Parameter::of($this->uuid))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
         $connection($insert);
 
-        $rows = $connection(new Select(new Name('test')));
+        $rows = $connection(Select::from(new Name('test')));
 
         Assert::assertGreaterThanOrEqual(1, $rows->size());
-        Assert::assertTrue($rows->first()->contains('id'));
-        Assert::assertTrue($rows->first()->contains('username'));
-        Assert::assertTrue($rows->first()->contains('registerNumber'));
+        Assert::assertTrue($rows->first()->match(
+            static fn($row) => $row->contains('id'),
+            static fn() => null,
+        ));
+        Assert::assertTrue($rows->first()->match(
+            static fn($row) => $row->contains('username'),
+            static fn() => null,
+        ));
+        Assert::assertTrue($rows->first()->match(
+            static fn($row) => $row->contains('registerNumber'),
+            static fn() => null,
+        ));
 
         return $connection;
     }

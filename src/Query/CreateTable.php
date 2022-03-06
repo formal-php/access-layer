@@ -11,6 +11,9 @@ use Formal\AccessLayer\{
 };
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class CreateTable implements Query
 {
     private Name $name;
@@ -18,20 +21,38 @@ final class CreateTable implements Query
     private array $columns;
     /** @var list<string> */
     private array $constraints = [];
-    private bool $ifNotExists = false;
+    private bool $ifNotExists;
 
-    public function __construct(Name $name, Column $first, Column ...$rest)
-    {
+    /**
+     * @no-named-arguments
+     */
+    private function __construct(
+        bool $ifNotExists,
+        Name $name,
+        Column $first,
+        Column ...$rest,
+    ) {
+        $this->ifNotExists = $ifNotExists;
         $this->name = $name;
         $this->columns = [$first, ...$rest];
     }
 
+    /**
+     * @no-named-arguments
+     * @psalm-pure
+     */
+    public static function named(Name $name, Column $first, Column ...$rest): self
+    {
+        return new self(false, $name, $first, ...$rest);
+    }
+
+    /**
+     * @no-named-arguments
+     * @psalm-pure
+     */
     public static function ifNotExists(Name $name, Column $first, Column ...$rest): self
     {
-        $self = new self($name, $first, ...$rest);
-        $self->ifNotExists = true;
-
-        return $self;
+        return new self(true, $name, $first, ...$rest);
     }
 
     public function primaryKey(Column\Name $column): self
@@ -59,11 +80,13 @@ final class CreateTable implements Query
 
     public function parameters(): Sequence
     {
-        return Sequence::of(Row::class);
+        /** @var Sequence<Query\Parameter> */
+        return Sequence::of();
     }
 
     public function sql(): string
     {
+        /** @var non-empty-string */
         return \sprintf(
             'CREATE TABLE %s %s (%s%s)',
             $this->ifNotExists ? 'IF NOT EXISTS' : '',
@@ -74,5 +97,10 @@ final class CreateTable implements Query
             ),
             \count($this->constraints) > 0 ? ', '.\implode(', ', $this->constraints) : '',
         );
+    }
+
+    public function lazy(): bool
+    {
+        return false;
     }
 }

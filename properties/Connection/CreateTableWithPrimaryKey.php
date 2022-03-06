@@ -53,7 +53,7 @@ final class CreateTableWithPrimaryKey implements Property
     public function ensureHeldBy(object $connection): object
     {
         try {
-            $create = new Query\CreateTable($this->name, $this->primaryKey, ...$this->columns);
+            $create = Query\CreateTable::named($this->name, $this->primaryKey, ...$this->columns);
             $create = $create->primaryKey($this->primaryKey->name());
             $rows = $connection($create);
 

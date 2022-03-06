@@ -14,15 +14,26 @@ use Formal\AccessLayer\{
 use Innmind\Specification\Specification;
 use Innmind\Immutable\Sequence;
 
+/**
+ * @psalm-immutable
+ */
 final class Delete implements Query
 {
     private Name $table;
     private Where $where;
 
-    public function __construct(Name $table)
+    private function __construct(Name $table)
     {
         $this->table = $table;
         $this->where = Where::everything();
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function from(Name $table): self
+    {
+        return new self($table);
     }
 
     public function where(Specification $specification): self
@@ -40,10 +51,16 @@ final class Delete implements Query
 
     public function sql(): string
     {
+        /** @var non-empty-string */
         return \sprintf(
             'DELETE FROM %s %s',
             $this->table->sql(),
             $this->where->sql(),
         );
+    }
+
+    public function lazy(): bool
+    {
+        return false;
     }
 }

@@ -16,7 +16,7 @@ final class Logger implements Connection
     private Connection $connection;
     private LoggerInterface $logger;
 
-    public function __construct(Connection $connection, LoggerInterface $logger)
+    private function __construct(Connection $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
         $this->logger = $logger;
@@ -31,19 +31,13 @@ final class Logger implements Connection
                     'sql' => $query->sql(),
                     'parameters' => $query->parameters()->reduce(
                         [],
-                        static function(array $parameters, Parameter $parameter): array {
-                            if ($parameter->boundByName()) {
-                                /** @psalm-suppress MixedAssignment */
-                                $parameters[$parameter->name()] = $parameter->value();
-
-                                return $parameters;
-                            }
-
-                            /** @psalm-suppress MixedAssignment */
-                            $parameters[] = $parameter->value();
-
-                            return $parameters;
-                        },
+                        static fn(array $parameters, $parameter) => \array_merge(
+                            $parameters,
+                            $parameter->name()->match(
+                                static fn($name) => [$name => $parameter->value()],
+                                static fn() => [$parameter->value()],
+                            ),
+                        ),
                     ),
                 ],
             );
@@ -61,5 +55,10 @@ final class Logger implements Connection
 
             throw $e;
         }
+    }
+
+    public static function psr(Connection $connection, LoggerInterface $logger): self
+    {
+        return new self($connection, $logger);
     }
 }

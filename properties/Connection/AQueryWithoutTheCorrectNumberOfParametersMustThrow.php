@@ -33,7 +33,7 @@ final class AQueryWithoutTheCorrectNumberOfParametersMustThrow implements Proper
     public function ensureHeldBy(object $connection): object
     {
         try {
-            $query = new SQL('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
+            $query = SQL::of('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
             $connection($query);
             Assert::fail('it should throw an exception');
         } catch (QueryFailed $e) {

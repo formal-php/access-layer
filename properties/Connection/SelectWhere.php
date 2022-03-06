@@ -55,14 +55,13 @@ final class SelectWhere implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
-        $insert = $insert
+        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
             ->with(Parameter::of($this->uuid))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
         $connection($insert);
 
-        $select = new Select(new Name('test'));
+        $select = Select::from(new Name('test'));
         $select = $select->where(new class($this->uuid) implements Comparator {
             use Composable;
 
@@ -80,10 +79,10 @@ final class SelectWhere implements Property
 
             public function sign(): Sign
             {
-                return Sign::equality();
+                return Sign::equality;
             }
 
-            public function value()
+            public function value(): string
             {
                 return $this->uuid;
             }
@@ -91,7 +90,16 @@ final class SelectWhere implements Property
         $rows = $connection($select);
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame($this->uuid, $rows->first()->column('id'));
+        Assert::assertSame(
+            $this->uuid,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('id'))
+                ->match(
+                static fn($id) => $id,
+                static fn() => null,
+            ),
+        );
 
         return $connection;
     }

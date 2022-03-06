@@ -52,8 +52,7 @@ final class ContentIsAccessibleAfterCommit implements Property
     {
         $connection(new StartTransaction);
 
-        $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
-        $insert = $insert
+        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
             ->with(Parameter::of($this->uuid))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
@@ -61,12 +60,39 @@ final class ContentIsAccessibleAfterCommit implements Property
 
         $connection(new Commit);
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame($this->uuid, $rows->first()->column('id'));
-        Assert::assertSame($this->username, $rows->first()->column('username'));
-        Assert::assertSame((string) $this->number, $rows->first()->column('registerNumber'));
+        Assert::assertSame(
+            $this->uuid,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('id'))
+                ->match(
+                    static fn($id) => $id,
+                    static fn() => null,
+                ),
+        );
+        Assert::assertSame(
+            $this->username,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('username'))
+                ->match(
+                    static fn($username) => $username,
+                    static fn() => null,
+                ),
+        );
+        Assert::assertSame(
+            $this->number,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
+        );
 
         return $connection;
     }

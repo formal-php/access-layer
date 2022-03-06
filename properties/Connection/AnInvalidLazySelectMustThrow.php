@@ -4,7 +4,8 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\SQL,
+    Query\Select,
+    Table\Name,
     Exception\QueryFailed,
 };
 use Innmind\BlackBox\{
@@ -13,7 +14,7 @@ use Innmind\BlackBox\{
 };
 use PHPUnit\Framework\Assert;
 
-final class AnInvalidQueryMustThrow implements Property
+final class AnInvalidLazySelectMustThrow implements Property
 {
     public static function any(): Set
     {
@@ -22,7 +23,7 @@ final class AnInvalidQueryMustThrow implements Property
 
     public function name(): string
     {
-        return 'An invalid query must throw';
+        return 'An invalid lazy SELECT must throw';
     }
 
     public function applicableTo(object $connection): bool
@@ -32,9 +33,12 @@ final class AnInvalidQueryMustThrow implements Property
 
     public function ensureHeldBy(object $connection): object
     {
+        $query = Select::onDemand(new Name('unknown'));
+        $result = $connection($query);
+
         try {
-            $query = SQL::of('INSERT');
-            $connection($query);
+            // throw only now because the force the execution of the sequence
+            $result->toList();
             Assert::fail('it should throw an exception');
         } catch (QueryFailed $e) {
             Assert::assertSame($query, $e->query());

@@ -52,7 +52,7 @@ final class UpdateSpecificRow implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $connection(new Query\Insert(
+        $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid1,
@@ -66,7 +66,7 @@ final class UpdateSpecificRow implements Property
             ]),
         ));
 
-        $update = new Query\Update(
+        $update = Query\Update::set(
             new Table\Name('test'),
             Row::of(['registerNumber' => 24]),
         );
@@ -87,10 +87,10 @@ final class UpdateSpecificRow implements Property
 
             public function sign(): Sign
             {
-                return Sign::equality();
+                return Sign::equality;
             }
 
-            public function value()
+            public function value(): string
             {
                 return $this->uuid;
             }
@@ -99,15 +99,33 @@ final class UpdateSpecificRow implements Property
 
         Assert::assertCount(0, $sequence);
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame('24', $rows->first()->column('registerNumber'));
+        Assert::assertSame(
+            24,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
+        );
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame('42', $rows->first()->column('registerNumber'));
+        Assert::assertSame(
+            42,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
+        );
 
         return $connection;
     }
