@@ -23,11 +23,16 @@ final class Update implements Query
     private Row $row;
     private Where $where;
 
-    public function __construct(Name $table, Row $row)
+    private function __construct(Name $table, Row $row)
     {
         $this->table = $table;
         $this->row = $row;
         $this->where = Where::everything();
+    }
+
+    public static function set(Name $table, Row $row): self
+    {
+        return new self($table, $row);
     }
 
     public function where(Specification $specification): self

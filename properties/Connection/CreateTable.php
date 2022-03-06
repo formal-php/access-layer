@@ -47,7 +47,7 @@ final class CreateTable implements Property
     public function ensureHeldBy(object $connection): object
     {
         try {
-            $rows = $connection(new Query\CreateTable($this->name, ...$this->columns));
+            $rows = $connection(Query\CreateTable::named($this->name, ...$this->columns));
 
             Assert::assertCount(0, $rows);
         } finally {

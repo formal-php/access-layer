@@ -52,7 +52,7 @@ final class UpdateSpecificRow implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $connection(new Query\Insert(
+        $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid1,
@@ -66,7 +66,7 @@ final class UpdateSpecificRow implements Property
             ]),
         ));
 
-        $update = new Query\Update(
+        $update = Query\Update::set(
             new Table\Name('test'),
             Row::of(['registerNumber' => 24]),
         );

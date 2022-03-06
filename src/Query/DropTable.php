@@ -16,11 +16,17 @@ use Innmind\Immutable\Sequence;
 final class DropTable implements Query
 {
     private Name $name;
-    private bool $ifExists = false;
+    private bool $ifExists;
 
-    public function __construct(Name $name)
+    private function __construct(bool $ifExists, Name $name)
     {
+        $this->ifExists = $ifExists;
         $this->name = $name;
+    }
+
+    public static function named(Name $name): self
+    {
+        return new self(false, $name);
     }
 
     /**
@@ -28,10 +34,7 @@ final class DropTable implements Query
      */
     public static function ifExists(Name $name): self
     {
-        $self = new self($name);
-        $self->ifExists = true;
-
-        return $self;
+        return new self(true, $name);
     }
 
     public function parameters(): Sequence

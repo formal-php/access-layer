@@ -51,7 +51,7 @@ class PDOTest extends TestCase
             ->then(function($table) {
                 $connection = $this->connection();
 
-                $connection(new CreateTable(
+                $connection(CreateTable::named(
                     $table,
                     new Column(
                         new Column\Name('i'),
@@ -60,7 +60,7 @@ class PDOTest extends TestCase
                 ));
 
                 for ($i = 0; $i < 100_000; $i++) {
-                    $insert = new Insert(
+                    $insert = Insert::into(
                         $table,
                         Row::of([
                             'i' => $i,
@@ -83,7 +83,7 @@ class PDOTest extends TestCase
                 // when deferred this would take about 80Mo
                 $this->assertLessThan(3_000_000, \memory_get_peak_usage() - $memory);
 
-                $connection(new DropTable($table));
+                $connection(DropTable::named($table));
             });
     }
 
@@ -129,7 +129,7 @@ class PDOTest extends TestCase
             ->then(function($table) {
                 $connection = $this->persistent();
 
-                $connection(new CreateTable(
+                $connection(CreateTable::named(
                     $table,
                     new Column(
                         new Column\Name('i'),
@@ -138,7 +138,7 @@ class PDOTest extends TestCase
                 ));
 
                 for ($i = 0; $i < 100_000; $i++) {
-                    $insert = new Insert(
+                    $insert = Insert::into(
                         $table,
                         Row::of([
                             'i' => $i,
@@ -161,7 +161,7 @@ class PDOTest extends TestCase
                 // when deferred this would take about 80Mo
                 $this->assertLessThan(3_000_000, \memory_get_peak_usage() - $memory);
 
-                $connection(new DropTable($table));
+                $connection(DropTable::named($table));
             });
     }
 

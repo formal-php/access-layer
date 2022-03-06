@@ -7,7 +7,7 @@ use Formal\AccessLayer\{
     Table\Column,
 };
 
-$create = new CreateTable(
+$create = CreateTable::named(
     new Name('users'),
     new Column(
         new Column\Name('username'),
@@ -51,7 +51,7 @@ $connection($create);
 You can specify the primary key of the table like so:
 
 ```php
-$create = new CreateTable(
+$create = CreateTable::named(
     new Name('users'),
     new Column(
         new Column\Name('id'),
@@ -65,7 +65,7 @@ $connection($create);
 ### Foreign key
 
 ```php
-$create = new CreateTable(
+$create = CreateTable::named(
     new Name('address'),
     new Column(
         new Column\Name('user'),

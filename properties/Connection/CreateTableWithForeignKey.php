@@ -57,13 +57,13 @@ final class CreateTableWithForeignKey implements Property
     public function ensureHeldBy(object $connection): object
     {
         try {
-            $create = new Query\CreateTable($this->name1, $this->primaryKey);
+            $create = Query\CreateTable::named($this->name1, $this->primaryKey);
             $create = $create->primaryKey($this->primaryKey->name());
             $rows = $connection($create);
 
             Assert::assertCount(0, $rows);
 
-            $create = new Query\CreateTable($this->name2, new ConcreteColumn(
+            $create = Query\CreateTable::named($this->name2, new ConcreteColumn(
                 $this->foreignKey->name(),
                 $this->primaryKey->type(),
             ));

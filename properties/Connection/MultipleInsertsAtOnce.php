@@ -70,7 +70,7 @@ final class MultipleInsertsAtOnce implements Property
 
         Assert::assertCount(0, $rows);
 
-        $sequence = $connection(new Query\Insert(
+        $sequence = $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid1,

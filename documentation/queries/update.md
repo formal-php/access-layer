@@ -7,7 +7,7 @@ use Formal\AccessLayer\{
     Row,
 };
 
-$update = new Update(
+$update = Update::set(
     new Name('users'),
     Row::of([
         'name' => 'some value',
@@ -61,7 +61,7 @@ final class Username implements Comparator
     }
 }
 
-$update = new Update(
+$update = Update::set(
     new Name('users'),
     Row::of([
         'name' => 'some value',

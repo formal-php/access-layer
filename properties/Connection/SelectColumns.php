@@ -57,7 +57,7 @@ final class SelectColumns implements Property
             ->with(Parameter::of($this->number));
         $connection($insert);
 
-        $select = Select::of(new Name('test'))->columns(new Column\Name('id'));
+        $select = Select::from(new Name('test'))->columns(new Column\Name('id'));
         $rows = $connection($select);
 
         Assert::assertGreaterThanOrEqual(1, $rows->size());

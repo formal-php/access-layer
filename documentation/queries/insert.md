@@ -8,7 +8,7 @@ use Formal\AccessLayer\{
     Row,
 };
 
-$insert = new Insert(
+$insert = Insert::into(
     new Name('users'),
     Row::of([
         'username' => 'some username',
@@ -31,7 +31,7 @@ use Formal\AccessLayer\{
     Row,
 };
 
-$insert = new Insert(
+$insert = Insert::into(
     new Name('users'),
     new Row(
         new Row\Value(new Column\Name('username'), 'some username', Type::string),

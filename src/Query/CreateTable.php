@@ -21,15 +21,28 @@ final class CreateTable implements Query
     private array $columns;
     /** @var list<string> */
     private array $constraints = [];
-    private bool $ifNotExists = false;
+    private bool $ifNotExists;
 
     /**
      * @no-named-arguments
      */
-    public function __construct(Name $name, Column $first, Column ...$rest)
-    {
+    private function __construct(
+        bool $ifNotExists,
+        Name $name,
+        Column $first,
+        Column ...$rest,
+    ) {
+        $this->ifNotExists = $ifNotExists;
         $this->name = $name;
         $this->columns = [$first, ...$rest];
+    }
+
+    /**
+     * @no-named-arguments
+     */
+    public static function named(Name $name, Column $first, Column ...$rest): self
+    {
+        return new self(false, $name, $first, ...$rest);
     }
 
     /**
@@ -38,10 +51,7 @@ final class CreateTable implements Query
      */
     public static function ifNotExists(Name $name, Column $first, Column ...$rest): self
     {
-        $self = new self($name, $first, ...$rest);
-        $self->ifNotExists = true;
-
-        return $self;
+        return new self(true, $name, $first, ...$rest);
     }
 
     public function primaryKey(Column\Name $column): self

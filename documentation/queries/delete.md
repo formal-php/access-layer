@@ -6,7 +6,7 @@ use Formal\AccessLayer\{
     Table\Name,
 };
 
-$delete = new Delete(new Name('users'));
+$delete = Delete::from(new Name('users'));
 $connection($delete);
 ```
 
@@ -54,8 +54,7 @@ final class Username implements Comparator
     }
 }
 
-$delete = new Delete(new Name('users'));
-$delete = $delete->where(
+$delete = Delete::from(new Name('users'))->where(
     (new Username('some username'))->or(new Username('other username')),
 );
 $connection($delete);

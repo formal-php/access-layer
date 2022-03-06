@@ -61,7 +61,7 @@ final class SelectWhere implements Property
             ->with(Parameter::of($this->number));
         $connection($insert);
 
-        $select = Select::of(new Name('test'));
+        $select = Select::from(new Name('test'));
         $select = $select->where(new class($this->uuid) implements Comparator {
             use Composable;
 

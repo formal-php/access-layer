@@ -28,10 +28,18 @@ final class Insert implements Query
     /**
      * @no-named-arguments
      */
-    public function __construct(Name $table, Row $first, Row ...$rest)
+    private function __construct(Name $table, Row $first, Row ...$rest)
     {
         $this->table = $table;
         $this->rows = Sequence::of($first, ...$rest);
+    }
+
+    /**
+     * @no-named-arguments
+     */
+    public static function into(Name $table, Row $first, Row ...$rest): self
+    {
+        return new self($table, $first, ...$rest);
     }
 
     public function parameters(): Sequence

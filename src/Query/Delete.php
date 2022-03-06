@@ -22,10 +22,15 @@ final class Delete implements Query
     private Name $table;
     private Where $where;
 
-    public function __construct(Name $table)
+    private function __construct(Name $table)
     {
         $this->table = $table;
         $this->where = Where::everything();
+    }
+
+    public static function from(Name $table): self
+    {
+        return new self($table);
     }
 
     public function where(Specification $specification): self

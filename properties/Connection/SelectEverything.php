@@ -56,7 +56,7 @@ final class SelectEverything implements Property
             ->with(Parameter::of($this->number));
         $connection($insert);
 
-        $rows = $connection(Select::of(new Name('test')));
+        $rows = $connection(Select::from(new Name('test')));
 
         Assert::assertGreaterThanOrEqual(1, $rows->size());
         Assert::assertTrue($rows->first()->match(

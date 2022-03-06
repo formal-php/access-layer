@@ -39,7 +39,7 @@ final class Select implements Query
     /**
      * @psalm-pure
      */
-    public static function of(Name $table): self
+    public static function from(Name $table): self
     {
         return new self($table, false);
     }
