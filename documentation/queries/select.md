@@ -6,11 +6,13 @@ use Formal\AccesLayer\{
     Table\Name,
 };
 
-$select = new Select(new Name('users'));
+$select = Select::from(new Name('users'));
 $users = $connection($select);
 ```
 
 This will return all the content of the `users` table.
+
+**Note**: if you replace the constructor `::from()` by `::onDemand()` it will run your query lazily by returning a lazy `Sequence`, meaning it won't keep the results in memory allowing you to handle very large results.
 
 ## Specifying columns to return
 
@@ -21,8 +23,10 @@ use Formal\AccesLayer\{
     Table\Column,
 };
 
-$select = new Select(new Name('users'));
-$select = $select->columns(new Column\Name('username'), new Column\Name('name'));
+$select = Select::from(new Name('users'))->columns(
+    new Column\Name('username'),
+    new Column\Name('name'),
+);
 $users = $connection($select);
 ```
 
@@ -60,7 +64,7 @@ final class Username implements Comparator
 
     public function sign(): Sign
     {
-        return Sign::equality();
+        return Sign::equality;
     }
 
     public function value(): mixed
@@ -69,8 +73,7 @@ final class Username implements Comparator
     }
 }
 
-$select = new Select(new Name('users'));
-$select = $select->where(
+$select = Select::from(new Name('users'))->where(
     (new Username('some username'))->or(new Username('other username')),
 );
 $users = $connection($select);

@@ -8,6 +8,9 @@ use Formal\AccessLayer\Table\Column\{
     Type,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Column
 {
     private Name $name;
@@ -29,6 +32,9 @@ final class Column
         return $this->type;
     }
 
+    /**
+     * @return non-empty-string
+     */
     public function sql(): string
     {
         return "{$this->name->sql()} {$this->type->sql()}";

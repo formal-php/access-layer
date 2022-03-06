@@ -8,19 +8,30 @@ use Formal\AccessLayer\{
     Table\Column,
     Query\Parameter\Type,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Maybe,
+};
 
+/**
+ * @psalm-immutable
+ */
 final class Row
 {
     /** @var Sequence<Value> */
     private Sequence $values;
 
+    /**
+     * @no-named-arguments
+     */
     public function __construct(Value ...$values)
     {
-        $this->values = Sequence::of(Value::class, ...$values);
+        $this->values = Sequence::of(...$values);
     }
 
     /**
+     * @psalm-pure
+     *
      * @param array<string, mixed> $columns
      */
     public static function of(array $columns): self
@@ -32,6 +43,10 @@ final class Row
          * @var mixed $value
          */
         foreach ($columns as $key => $value) {
+            if ($key === '') {
+                continue;
+            }
+
             $values[] = new Value(new Column\Name($key), $value);
         }
 
@@ -43,33 +58,23 @@ final class Row
         return $this->values->any($this->match($name));
     }
 
-    public function column(string $name): mixed
+    /**
+     * @return Maybe<mixed>
+     */
+    public function column(string $name): Maybe
     {
-        return $this->values->find($this->match($name))->value();
+        return $this
+            ->values
+            ->find($this->match($name))
+            ->map(static fn($value): mixed => $value->value());
     }
 
     /**
-     * The order of provided columns is always the same
-     *
-     * @template T
-     *
-     * @param T $carry
-     * @param callable(T, Column\Name, mixed, Type): T $reducer
-     *
-     * @return T
+     * @return Sequence<Value>
      */
-    public function reduce(mixed $carry, callable $reducer): mixed
+    public function values(): Sequence
     {
-        /** @psalm-suppress MixedArgument */
-        return $this->values->reduce(
-            $carry,
-            static fn(mixed $carry, Value $value) => $reducer(
-                $carry,
-                $value->column(),
-                $value->value(),
-                $value->type(),
-            ),
-        );
+        return $this->values;
     }
 
     /**

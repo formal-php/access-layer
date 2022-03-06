@@ -7,7 +7,7 @@ use Formal\AccessLayer\{
     Table\Column,
 };
 
-$create = new CreateTable(
+$create = CreateTable::named(
     new Name('users'),
     new Column(
         new Column\Name('username'),
@@ -21,7 +21,7 @@ $create = new CreateTable(
 $connection($create);
 ```
 
-This query will fail if the table doesn't exist, you can prevent this like so:
+This query will fail if the table does exist, you can prevent this like so:
 
 ```php
 use Formal\AccessLayer\{
@@ -51,7 +51,7 @@ $connection($create);
 You can specify the primary key of the table like so:
 
 ```php
-$create = new CreateTable(
+$create = CreateTable::named(
     new Name('users'),
     new Column(
         new Column\Name('id'),
@@ -65,7 +65,7 @@ $connection($create);
 ### Foreign key
 
 ```php
-$create = new CreateTable(
+$create = CreateTable::named(
     new Name('address'),
     new Column(
         new Column\Name('user'),

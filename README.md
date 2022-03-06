@@ -8,6 +8,8 @@ This a simple abstraction layer on top of builtin `\PDO` class to offer a minima
 
 The goal is separate expression of queries and their execution by using immutable structures and eliminating states wherever possible.
 
+**Important**: you must use [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm) to make sure you use this library correctly.
+
 ## Installation
 
 ```sh
@@ -19,15 +21,16 @@ composer require formal/access-layer
 ```php
 use Formal\AccessLayer\{
     Connection\Lazy,
+    Connection\PDO,
     Query\SQL,
     Row,
 };
 use Innmind\Url\Url;
 use Innmind\Immutable\Sequence;
 
-$connection = new Lazy(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'));
+$connection = new Lazy(static fn() => PDO::of(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name')));
 
-$rows = $connection(new SQL('SELECT * FROM `some_table`'));
+$rows = $connection(SQL::of('SELECT * FROM `some_table`'));
 $rows; // instanceof Sequence<Row>
 ```
 

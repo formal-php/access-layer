@@ -13,7 +13,7 @@ use Innmind\BlackBox\{
 };
 use PHPUnit\Framework\Assert;
 
-final class AnInvalidQueryMustThrow implements Property
+final class AnInvalidLazyQueryMustThrow implements Property
 {
     public static function any(): Set
     {
@@ -22,7 +22,7 @@ final class AnInvalidQueryMustThrow implements Property
 
     public function name(): string
     {
-        return 'An invalid query must throw';
+        return 'An invalid lazy query must throw';
     }
 
     public function applicableTo(object $connection): bool
@@ -32,9 +32,12 @@ final class AnInvalidQueryMustThrow implements Property
 
     public function ensureHeldBy(object $connection): object
     {
+        $query = SQL::onDemand('INSERT');
+        $result = $connection($query);
+
         try {
-            $query = SQL::of('INSERT');
-            $connection($query);
+            // throw only now because the force the execution of the sequence
+            $result->toList();
             Assert::fail('it should throw an exception');
         } catch (QueryFailed $e) {
             Assert::assertSame($query, $e->query());

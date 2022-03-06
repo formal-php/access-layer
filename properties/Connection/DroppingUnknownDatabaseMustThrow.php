@@ -44,7 +44,7 @@ final class DroppingUnknownDatabaseMustThrow implements Property
     public function ensureHeldBy(object $connection): object
     {
         try {
-            $query = new Query\DropTable($this->name);
+            $query = Query\DropTable::named($this->name);
             $connection($query);
             Assert::fail('it should throw');
         } catch (QueryFailed $e) {

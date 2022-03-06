@@ -17,7 +17,7 @@ final class QueryFailed extends RuntimeException
         string $sqlstate,
         ?int $code,
         ?string $message,
-        ?\Throwable $previous
+        ?\Throwable $previous,
     ) {
         $this->query = $query;
         $this->sqlstate = $sqlstate;

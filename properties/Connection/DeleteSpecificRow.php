@@ -52,7 +52,7 @@ final class DeleteSpecificRow implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $connection(new Query\Insert(
+        $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid1,
@@ -66,41 +66,42 @@ final class DeleteSpecificRow implements Property
             ]),
         ));
 
-        $delete = new Query\Delete(new Table\Name('test'));
-        $delete = $delete->where(new class($this->uuid1) implements Comparator {
-            use Composable;
+        $delete = Query\Delete::from(new Table\Name('test'))->where(
+            new class($this->uuid1) implements Comparator {
+                use Composable;
 
-            private string $uuid;
+                private string $uuid;
 
-            public function __construct(string $uuid)
-            {
-                $this->uuid = $uuid;
-            }
+                public function __construct(string $uuid)
+                {
+                    $this->uuid = $uuid;
+                }
 
-            public function property(): string
-            {
-                return 'id';
-            }
+                public function property(): string
+                {
+                    return 'id';
+                }
 
-            public function sign(): Sign
-            {
-                return Sign::equality();
-            }
+                public function sign(): Sign
+                {
+                    return Sign::equality;
+                }
 
-            public function value()
-            {
-                return $this->uuid;
-            }
-        });
+                public function value(): string
+                {
+                    return $this->uuid;
+                }
+            },
+        );
         $sequence = $connection($delete);
 
         Assert::assertCount(0, $sequence);
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
 
         Assert::assertCount(0, $rows);
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
 
         Assert::assertCount(1, $rows);
 

@@ -44,8 +44,8 @@ final class Update implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $select = new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'");
-        $connection(new Query\Insert(
+        $select = SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'");
+        $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid,
@@ -54,7 +54,7 @@ final class Update implements Property
             ]),
         ));
 
-        $sequence = $connection(new Query\Update(
+        $sequence = $connection(Query\Update::set(
             new Table\Name('test'),
             Row::of(['registerNumber' => 24]),
         ));
@@ -65,7 +65,10 @@ final class Update implements Property
 
         Assert::assertGreaterThanOrEqual(1, $rows->size());
         $rows->foreach(static function($row) {
-            Assert::assertSame('24', $row->column('registerNumber'));
+            Assert::assertSame(24, $row->column('registerNumber')->match(
+                static fn($registerNumber) => $registerNumber,
+                static fn() => null,
+            ));
         });
 
         return $connection;

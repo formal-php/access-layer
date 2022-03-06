@@ -7,12 +7,11 @@ This is useful because you can create a database connection object at the start 
 ```php
 use Formal\AccessLayer\{
     Connection\Lazy,
-    Query\SQL,
-    Row,
+    Connection\PDO,
 };
 use Innmind\Url\Url;
 
-$connection = new Lazy(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'));
+$connection = new Lazy(static fn() => PDO::of(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name')));
 ```
 
-**Note**: here we only replaced `PDO` by `Lazy`.
+By passing a callable to the constructor allows you to use [whatever implementation](own.md) of a `Connection` you wish to lazy load.

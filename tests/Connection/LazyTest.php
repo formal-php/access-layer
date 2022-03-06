@@ -5,6 +5,7 @@ namespace Tests\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
     Connection\Lazy,
+    Connection\PDO,
     Connection,
 };
 use Innmind\Url\Url;
@@ -33,7 +34,7 @@ class LazyTest extends TestCase
     {
         $this->assertInstanceOf(
             Connection::class,
-            new Lazy(Url::of('mysql://unknown:unknown@127.0.0.1:3306/unknown')),
+            new Lazy(static fn() => PDO::of(Url::of('mysql://unknown:unknown@127.0.0.1:3306/unknown'))),
         );
     }
 
@@ -76,6 +77,6 @@ class LazyTest extends TestCase
     {
         $port = \getenv('DB_PORT') ?: '3306';
 
-        return new Lazy(Url::of("mysql://root:root@127.0.0.1:$port/example"));
+        return new Lazy(static fn() => PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example")));
     }
 }

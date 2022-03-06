@@ -29,8 +29,8 @@ final class AllowToStartTwoQueriesInParallel implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $result1 = $connection(new SQL('show tables'));
-        $result2 = $connection(new SQL('show tables'));
+        $result1 = $connection(SQL::of('show tables'));
+        $result2 = $connection(SQL::of('show tables'));
 
         // by using any() we only do a partial iteration over the results
         Assert::assertTrue($result1->any(static fn() => true));

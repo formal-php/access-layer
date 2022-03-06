@@ -7,17 +7,20 @@ use Formal\AccessLayer\{
     Connection,
     Query,
 };
-use Innmind\Url\Url;
 use Innmind\Immutable\Sequence;
 
 final class Lazy implements Connection
 {
-    private Url $url;
+    /** @var callable(): Connection */
+    private $load;
     private ?Connection $connection = null;
 
-    public function __construct(Url $url)
+    /**
+     * @param callable(): Connection $load
+     */
+    public function __construct(callable $load)
     {
-        $this->url = $url;
+        $this->load = $load;
     }
 
     public function __invoke(Query $query): Sequence
@@ -27,6 +30,6 @@ final class Lazy implements Connection
 
     private function connection(): Connection
     {
-        return $this->connection ?? $this->connection = new PDO($this->url);
+        return $this->connection ?? $this->connection = ($this->load)();
     }
 }

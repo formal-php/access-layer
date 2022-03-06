@@ -44,12 +44,12 @@ final class Insert implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $select = new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'");
+        $select = SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'");
         $rows = $connection($select);
 
         Assert::assertCount(0, $rows);
 
-        $sequence = $connection(new Query\Insert(
+        $sequence = $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid,
@@ -63,9 +63,36 @@ final class Insert implements Property
         $rows = $connection($select);
 
         Assert::assertCount(1, $rows);
-        Assert::assertSame($this->uuid, $rows->first()->column('id'));
-        Assert::assertSame('foo', $rows->first()->column('username'));
-        Assert::assertSame('42', $rows->first()->column('registerNumber'));
+        Assert::assertSame(
+            $this->uuid,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('id'))
+                ->match(
+                    static fn($id) => $id,
+                    static fn() => null,
+                ),
+        );
+        Assert::assertSame(
+            'foo',
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('username'))
+                ->match(
+                    static fn($username) => $username,
+                    static fn() => null,
+                ),
+        );
+        Assert::assertSame(
+            42,
+            $rows
+                ->first()
+                ->flatMap(static fn($row) => $row->column('registerNumber'))
+                ->match(
+                    static fn($registerNumber) => $registerNumber,
+                    static fn() => null,
+                ),
+        );
 
         return $connection;
     }

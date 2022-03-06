@@ -50,8 +50,8 @@ final class CreatingSameTableTwiceMustThrow implements Property
     public function ensureHeldBy(object $connection): object
     {
         try {
-            $expected = new Query\CreateTable($this->name, ...$this->columns);
-            $connection(new Query\CreateTable($this->name, ...$this->columns));
+            $expected = Query\CreateTable::named($this->name, ...$this->columns);
+            $connection(Query\CreateTable::named($this->name, ...$this->columns));
             $connection($expected);
             Assert::fail('it should throw');
         } catch (QueryFailed $e) {

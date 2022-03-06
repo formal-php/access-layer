@@ -12,19 +12,33 @@ use Formal\AccessLayer\{
     Row,
 };
 use Innmind\Specification\Specification;
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
 
+/**
+ * @psalm-immutable
+ */
 final class Update implements Query
 {
     private Name $table;
     private Row $row;
     private Where $where;
 
-    public function __construct(Name $table, Row $row)
+    private function __construct(Name $table, Row $row)
     {
         $this->table = $table;
         $this->row = $row;
         $this->where = Where::everything();
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function set(Name $table, Row $row): self
+    {
+        return new self($table, $row);
     }
 
     public function where(Specification $specification): self
@@ -37,35 +51,32 @@ final class Update implements Query
 
     public function parameters(): Sequence
     {
-        /** @var Sequence<Parameter> */
-        $parameters = $this->row->reduce(
-            Sequence::of(Parameter::class),
-            static function(Sequence $parameters, Column\Name $_, mixed $value, Type $type): Sequence {
-                return ($parameters)(Parameter::of($value, $type));
-            },
-        );
-
-        return $parameters->append($this->where->parameters());
+        return $this
+            ->row
+            ->values()
+            ->map(static fn($value) => Parameter::of($value->value(), $value->type()))
+            ->append($this->where->parameters());
     }
 
     public function sql(): string
     {
-        /** @var list<string> $columns */
-        $columns = $this->row->reduce(
-            [],
-            static function(array $columns, Column\Name $column, mixed $_): array {
-                /** @psalm-suppress MixedArrayAssignment */
-                $columns[] = "{$column->sql()} = ?";
+        /** @var Sequence<string> */
+        $columns = $this
+            ->row
+            ->values()
+            ->map(static fn($value) => "{$value->column()->sql()} = ?");
 
-                return $columns;
-            },
-        );
-
+        /** @var non-empty-string */
         return \sprintf(
             'UPDATE %s SET %s %s',
             $this->table->sql(),
-            \implode(', ', $columns),
+            Str::of(', ')->join($columns)->toString(),
             $this->where->sql(),
         );
+    }
+
+    public function lazy(): bool
+    {
+        return false;
     }
 }

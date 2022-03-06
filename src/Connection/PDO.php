@@ -22,7 +22,7 @@ final class PDO implements Connection
 {
     private \PDO $pdo;
 
-    public function __construct(Url $dsn)
+    private function __construct(Url $dsn, array $options = [])
     {
         $dsnUser = $dsn->authority()->userInformation()->user();
         $dsnPassword = $dsn->authority()->userInformation()->password();
@@ -43,12 +43,12 @@ final class PDO implements Connection
             $dsn->authority()->host()->toString(),
             $dsn->authority()->port()->toString(),
             \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
-        ), $user, $password);
+        ), $user, $password, $options);
     }
 
     public function __invoke(Query $query): Sequence
     {
-        return match(\get_class($query)) {
+        return match (\get_class($query)) {
             Query\StartTransaction::class => $this->transaction(
                 $query,
                 fn(): bool => $this->pdo->beginTransaction(),
@@ -65,6 +65,16 @@ final class PDO implements Connection
         };
     }
 
+    public static function of(Url $dsn): self
+    {
+        return new self($dsn);
+    }
+
+    public static function persistent(Url $dsn): self
+    {
+        return new self($dsn, [\PDO::ATTR_PERSISTENT => true]);
+    }
+
     /**
      * @param callable(): bool $action
      *
@@ -74,7 +84,8 @@ final class PDO implements Connection
     {
         $this->attempt($query, $action);
 
-        return Sequence::of(Row::class);
+        /** @var Sequence<Row> */
+        return Sequence::of();
     }
 
     /**
@@ -82,29 +93,66 @@ final class PDO implements Connection
      */
     private function execute(Query $query): Sequence
     {
-        $statement = $this->pdo->prepare($query->sql());
+        return match ($query->lazy()) {
+            true => $this->lazy($query),
+            false => $this->defer($query),
+        };
+    }
 
-        $query->parameters()->reduce(
-            0,
-            function(int $index, Parameter $parameter) use ($query, $statement): int {
-                if ($parameter->boundByName()) {
-                    $this->attempt(
-                        $query,
-                        fn(): bool => $statement->bindValue(
-                            $parameter->name(),
-                            $parameter->value(),
-                            $this->castType($parameter->type()),
-                        ),
-                    );
+    /**
+     * @return Sequence<Row>
+     */
+    private function lazy(Query $query): Sequence
+    {
+        /** @var Sequence<Row> */
+        return Sequence::lazy(function() use ($query): \Generator {
+            $statement = $this->prepare($query);
 
-                    return $index;
+            while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+                yield Row::of($row);
+            }
+
+            unset($statement);
+        });
+    }
+
+    /**
+     * @return Sequence<Row>
+     */
+    private function defer(Query $query): Sequence
+    {
+        $statement = $this->prepare($query);
+
+        /** @var Sequence<Row> */
+        return Sequence::defer(
+            (static function(\PDOStatement $statement): \Generator {
+                while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+                    yield Row::of($row);
                 }
 
+                unset($statement);
+            })($statement),
+        );
+    }
+
+    /**
+     * @throws QueryFailed
+     */
+    private function prepare(Query $query): \PDOStatement
+    {
+        $statement = $this->pdo->prepare($query->sql());
+
+        $_ = $query->parameters()->reduce(
+            0,
+            function(int $index, Parameter $parameter) use ($query, $statement): int {
                 ++$index;
                 $this->attempt(
                     $query,
                     fn(): bool => $statement->bindValue(
-                        $index,
+                        $parameter->name()->match(
+                            static fn($name) => $name,
+                            static fn() => $index,
+                        ),
                         $parameter->value(),
                         $this->castType($parameter->type()),
                     ),
@@ -116,17 +164,7 @@ final class PDO implements Connection
 
         $this->attempt($query, static fn(): bool => $statement->execute());
 
-        /** @var Sequence<Row> */
-        return Sequence::defer(
-            Row::class,
-            (static function(\PDOStatement $statement): \Generator {
-                while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-                    yield Row::of($row);
-                }
-
-                unset($statement);
-            })($statement),
-        );
+        return $statement;
     }
 
     /**
@@ -160,12 +198,12 @@ final class PDO implements Connection
 
     private function castType(Type $type): int
     {
-        return match($type) {
-            Type::bool() => \PDO::PARAM_BOOL,
-            Type::null() => \PDO::PARAM_NULL,
-            Type::int() => \PDO::PARAM_INT,
-            Type::string() => \PDO::PARAM_STR,
-            Type::unspecified() => \PDO::PARAM_STR, // this is the default of PDOStatement::bindValue()
+        return match ($type) {
+            Type::bool => \PDO::PARAM_BOOL,
+            Type::null => \PDO::PARAM_NULL,
+            Type::int => \PDO::PARAM_INT,
+            Type::string => \PDO::PARAM_STR,
+            Type::unspecified => \PDO::PARAM_STR, // this is the default of PDOStatement::bindValue()
         };
     }
 }
