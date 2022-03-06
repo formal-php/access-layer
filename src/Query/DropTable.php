@@ -49,4 +49,9 @@ final class DropTable implements Query
             $this->name->sql(),
         );
     }
+
+    public function lazy(): bool
+    {
+        return false;
+    }
 }

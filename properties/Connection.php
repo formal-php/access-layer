@@ -32,6 +32,8 @@ final class Connection
         return [
             Connection\AllowToStartTwoQueriesInParallel::any(),
             Connection\AnInvalidQueryMustThrow::any(),
+            Connection\AnInvalidLazyQueryMustThrow::any(),
+            Connection\AnInvalidLazySelectMustThrow::any(),
             Connection\AQueryWithoutTheCorrectNumberOfParametersMustThrow::any(),
             Connection\MustThrowWhenValueDoesntFitTheSchema::any(),
             Connection\Insert::any(),
@@ -64,6 +66,6 @@ final class Connection
     public static function seed(Concrete $connection): void
     {
         $connection(DropTable::ifExists(new Name('test')));
-        $connection(new SQL('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, `registerNumber` bigint NOT NULL, PRIMARY KEY (id));'));
+        $connection(SQL::of('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, `registerNumber` bigint NOT NULL, PRIMARY KEY (id));'));
     }
 }

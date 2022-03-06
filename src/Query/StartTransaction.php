@@ -21,4 +21,9 @@ final class StartTransaction implements Query
     {
         return 'START TRANSACTION';
     }
+
+    public function lazy(): bool
+    {
+        return false;
+    }
 }

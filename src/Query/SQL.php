@@ -13,17 +13,39 @@ final class SQL implements Query
 {
     /** @var non-empty-string */
     private string $sql;
+    private bool $lazy;
     /** @var Sequence<Parameter> */
     private Sequence $parameters;
 
     /**
      * @param non-empty-string $sql
      */
-    public function __construct(string $sql)
+    private function __construct(string $sql, bool $lazy)
     {
         $this->sql = $sql;
+        $this->lazy = $lazy;
         /** @var Sequence<Parameter> */
         $this->parameters = Sequence::of();
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param non-empty-string $sql
+     */
+    public static function of(string $sql): self
+    {
+        return new self($sql, false);
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param non-empty-string $sql
+     */
+    public static function onDemand(string $sql): self
+    {
+        return new self($sql, true);
     }
 
     public function with(Parameter $parameter): self
@@ -42,5 +64,10 @@ final class SQL implements Query
     public function sql(): string
     {
         return $this->sql;
+    }
+
+    public function lazy(): bool
+    {
+        return $this->lazy;
     }
 }

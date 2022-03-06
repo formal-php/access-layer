@@ -72,4 +72,9 @@ final class Update implements Query
             $this->where->sql(),
         );
     }
+
+    public function lazy(): bool
+    {
+        return false;
+    }
 }

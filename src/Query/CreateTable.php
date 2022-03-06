@@ -87,4 +87,9 @@ final class CreateTable implements Query
             \count($this->constraints) > 0 ? ', '.\implode(', ', $this->constraints) : '',
         );
     }
+
+    public function lazy(): bool
+    {
+        return false;
+    }
 }

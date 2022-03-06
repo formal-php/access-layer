@@ -52,8 +52,7 @@ final class ContentIsAccessibleAfterCommit implements Property
     {
         $connection(new StartTransaction);
 
-        $insert = new SQL('INSERT INTO `test` VALUES (?, ?, ?);');
-        $insert = $insert
+        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
             ->with(Parameter::of($this->uuid))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
@@ -61,7 +60,7 @@ final class ContentIsAccessibleAfterCommit implements Property
 
         $connection(new Commit);
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
 
         Assert::assertCount(1, $rows);
         Assert::assertSame($this->uuid, $rows->first()->match(

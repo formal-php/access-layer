@@ -44,7 +44,7 @@ final class Delete implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $select = new SQL('SELECT * FROM `test`');
+        $select = SQL::of('SELECT * FROM `test`');
         $connection(new Query\Insert(
             new Table\Name('test'),
             Row::of([

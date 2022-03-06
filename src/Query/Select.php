@@ -22,16 +22,34 @@ use Innmind\Immutable\{
 final class Select implements Query
 {
     private Name $table;
+    private bool $lazy;
     /** @var Sequence<Column\Name> */
     private Sequence $columns;
     private Where $where;
 
-    public function __construct(Name $table)
+    private function __construct(Name $table, bool $lazy)
     {
         $this->table = $table;
+        $this->lazy = $lazy;
         /** @var Sequence<Column\Name> */
         $this->columns = Sequence::of();
         $this->where = Where::everything();
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function of(Name $table): self
+    {
+        return new self($table, false);
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function onDemand(Name $table): self
+    {
+        return new self($table, true);
     }
 
     /**
@@ -67,6 +85,11 @@ final class Select implements Query
             $this->table->sql(),
             $this->where->sql(),
         );
+    }
+
+    public function lazy(): bool
+    {
+        return $this->lazy;
     }
 
     private function buildColumns(): string

@@ -50,4 +50,9 @@ final class Delete implements Query
             $this->where->sql(),
         );
     }
+
+    public function lazy(): bool
+    {
+        return false;
+    }
 }

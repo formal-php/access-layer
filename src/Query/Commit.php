@@ -21,4 +21,9 @@ final class Commit implements Query
     {
         return 'COMMIT';
     }
+
+    public function lazy(): bool
+    {
+        return false;
+    }
 }

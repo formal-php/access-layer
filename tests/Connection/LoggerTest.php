@@ -50,7 +50,7 @@ class LoggerTest extends TestCase
                 Set\Integers::any(),
             )
             ->then(function($sql, $value1, $value2) {
-                $query = new SQL($sql);
+                $query = SQL::of($sql);
                 $query = $query
                     ->with(Parameter::of($value1))
                     ->with(Parameter::named('baz', $value2));
@@ -86,7 +86,7 @@ class LoggerTest extends TestCase
                 Set\Strings::any(),
             )
             ->then(function($sql, $message) {
-                $query = new SQL($sql);
+                $query = SQL::of($sql);
                 $inner = $this->createMock(Connection::class);
                 $inner
                     ->expects($this->once())

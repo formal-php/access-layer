@@ -60,6 +60,11 @@ final class Insert implements Query
         return Str::of('; ')->join($inserts)->toString();
     }
 
+    public function lazy(): bool
+    {
+        return false;
+    }
+
     private function buildInsert(Row $row): string
     {
         /**

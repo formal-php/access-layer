@@ -99,7 +99,7 @@ final class UpdateSpecificRow implements Property
 
         Assert::assertCount(0, $sequence);
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
 
         Assert::assertCount(1, $rows);
         Assert::assertSame(24, $rows->first()->match(
@@ -107,7 +107,7 @@ final class UpdateSpecificRow implements Property
             static fn() => null,
         ));
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
 
         Assert::assertCount(1, $rows);
         Assert::assertSame(42, $rows->first()->match(

@@ -20,4 +20,5 @@ interface Query
      * @return non-empty-string
      */
     public function sql(): string;
+    public function lazy(): bool;
 }

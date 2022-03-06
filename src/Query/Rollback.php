@@ -21,4 +21,9 @@ final class Rollback implements Query
     {
         return 'ROLLBACK';
     }
+
+    public function lazy(): bool
+    {
+        return false;
+    }
 }

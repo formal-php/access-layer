@@ -83,6 +83,53 @@ final class PDO implements Connection
      */
     private function execute(Query $query): Sequence
     {
+        return match ($query->lazy()) {
+            true => $this->lazy($query),
+            false => $this->defer($query),
+        };
+    }
+
+    /**
+     * @return Sequence<Row>
+     */
+    private function lazy(Query $query): Sequence
+    {
+        /** @var Sequence<Row> */
+        return Sequence::lazy(function() use ($query): \Generator {
+            $statement = $this->prepare($query);
+
+            while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+                yield Row::of($row);
+            }
+
+            unset($statement);
+        });
+    }
+
+    /**
+     * @return Sequence<Row>
+     */
+    private function defer(Query $query): Sequence
+    {
+        $statement = $this->prepare($query);
+
+        /** @var Sequence<Row> */
+        return Sequence::defer(
+            (static function(\PDOStatement $statement): \Generator {
+                while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+                    yield Row::of($row);
+                }
+
+                unset($statement);
+            })($statement),
+        );
+    }
+
+    /**
+     * @throws QueryFailed
+     */
+    private function prepare(Query $query): \PDOStatement
+    {
         $statement = $this->pdo->prepare($query->sql());
 
         $_ = $query->parameters()->reduce(
@@ -107,16 +154,7 @@ final class PDO implements Connection
 
         $this->attempt($query, static fn(): bool => $statement->execute());
 
-        /** @var Sequence<Row> */
-        return Sequence::defer(
-            (static function(\PDOStatement $statement): \Generator {
-                while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
-                    yield Row::of($row);
-                }
-
-                unset($statement);
-            })($statement),
-        );
+        return $statement;
     }
 
     /**

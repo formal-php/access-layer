@@ -48,14 +48,13 @@ final class ParametersCanBeBoundByName implements Property
 
     public function ensureHeldBy(object $connection): object
     {
-        $insert = new SQL('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
-        $insert = $insert
+        $insert = SQL::of('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);')
             ->with(Parameter::named('uuid', $this->uuid))
             ->with(Parameter::named('username', $this->username))
             ->with(Parameter::named('registerNumber', $this->number));
         $connection($insert);
 
-        $rows = $connection(new SQL("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
+        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
 
         Assert::assertCount(1, $rows);
         Assert::assertSame($this->uuid, $rows->first()->match(
