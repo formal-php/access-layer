@@ -4,6 +4,8 @@ This library is designed to eliminate state wherever possible when dealing with 
 
 The result is an api can consist of only one method on the connection (`__invoke`) and one kind of argument (`Query`). Both can easily be extended through composition.
 
+**Important**: you must use [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm) to make sure you use this library correctly.
+
 ## Installation
 
 ```sh
