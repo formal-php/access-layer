@@ -39,6 +39,7 @@ final class CreateTable implements Query
 
     /**
      * @no-named-arguments
+     * @psalm-pure
      */
     public static function named(Name $name, Column $first, Column ...$rest): self
     {

@@ -28,6 +28,9 @@ final class Delete implements Query
         $this->where = Where::everything();
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function from(Name $table): self
     {
         return new self($table);

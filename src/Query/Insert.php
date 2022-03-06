@@ -36,6 +36,7 @@ final class Insert implements Query
 
     /**
      * @no-named-arguments
+     * @psalm-pure
      */
     public static function into(Name $table, Row $first, Row ...$rest): self
     {

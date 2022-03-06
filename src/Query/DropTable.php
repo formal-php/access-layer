@@ -24,6 +24,9 @@ final class DropTable implements Query
         $this->name = $name;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function named(Name $name): self
     {
         return new self(false, $name);

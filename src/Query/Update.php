@@ -30,6 +30,9 @@ final class Update implements Query
         $this->where = Where::everything();
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function set(Name $table, Row $row): self
     {
         return new self($table, $row);
