@@ -106,7 +106,7 @@
     Table\Column,
 };
 
-$create = new CreateTable(
+$create = CreateTable::named(
     new Name('users'),
     new Column(
         new Column\Name('username'),
@@ -118,7 +118,7 @@ $create = new CreateTable(
     ),
 );
 $connection($create);</code></pre>
-<p>This query will fail if the table doesn't exist, you can prevent this like so:</p>
+<p>This query will fail if the table does exist, you can prevent this like so:</p>
 <pre><code class="language-php">use Formal\AccessLayer\{
     Query\CreateTable,
     Table\Name,
@@ -140,7 +140,7 @@ $connection($create);</code></pre>
 <h2 id="constraints"><a href="#constraints" class="anchor">#</a>Constraints</h2>
 <h3 id="primary-key"><a href="#primary-key" class="anchor">#</a>Primary key</h3>
 <p>You can specify the primary key of the table like so:</p>
-<pre><code class="language-php">$create = new CreateTable(
+<pre><code class="language-php">$create = CreateTable::named(
     new Name('users'),
     new Column(
         new Column\Name('id'),
@@ -150,7 +150,7 @@ $connection($create);</code></pre>
 $create = $create->primaryKey(new Column\Name('id'));
 $connection($create);</code></pre>
 <h3 id="foreign-key"><a href="#foreign-key" class="anchor">#</a>Foreign key</h3>
-<pre><code class="language-php">$create = new CreateTable(
+<pre><code class="language-php">$create = CreateTable::named(
     new Name('address'),
     new Column(
         new Column\Name('user'),

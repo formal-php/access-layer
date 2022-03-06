@@ -105,9 +105,10 @@
     Table\Name,
 };
 
-$select = new Select(new Name('users'));
+$select = Select::from(new Name('users'));
 $users = $connection($select);</code></pre>
 <p>This will return all the content of the <code>users</code> table.</p>
+<p><strong>Note</strong>: if you replace the constructor <code>::from()</code> by <code>::onDemand()</code> it will run your query lazily by returning a lazy <code>Sequence</code>, meaning it won't keep the results in memory allowing you to handle very large results.</p>
 <h2 id="specifying-columns-to-return"><a href="#specifying-columns-to-return" class="anchor">#</a>Specifying columns to return</h2>
 <pre><code class="language-php">use Formal\AccesLayer\{
     Query\Select,
@@ -115,8 +116,10 @@ $users = $connection($select);</code></pre>
     Table\Column,
 };
 
-$select = new Select(new Name('users'));
-$select = $select->columns(new Column\Name('username'), new Column\Name('name'));
+$select = Select::from(new Name('users'))->columns(
+    new Column\Name('username'),
+    new Column\Name('name'),
+);
 $users = $connection($select);</code></pre>
 <h2 id="filter-rows"><a href="#filter-rows" class="anchor">#</a>Filter rows</h2>
 <p>To filter the rows to select this library uses the <a href="https://github.com/innmind/specification">specification pattern</a>.</p>
@@ -149,7 +152,7 @@ final class Username implements Comparator
 
     public function sign(): Sign
     {
-        return Sign::equality();
+        return Sign::equality;
     }
 
     public function value(): mixed
@@ -158,8 +161,7 @@ final class Username implements Comparator
     }
 }
 
-$select = new Select(new Name('users'));
-$select = $select->where(
+$select = Select::from(new Name('users'))->where(
     (new Username('some username'))->or(new Username('other username')),
 );
 $users = $connection($select);</code></pre>

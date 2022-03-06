@@ -104,13 +104,12 @@
 <p>This is useful because you can create a database connection object at the start of your script and it will never connect to the database if you never use the connection.</p>
 <pre><code class="language-php">use Formal\AccessLayer\{
     Connection\Lazy,
-    Query\SQL,
-    Row,
+    Connection\PDO,
 };
 use Innmind\Url\Url;
 
-$connection = new Lazy(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'));</code></pre>
-<p><strong>Note</strong>: here we only replaced <code>PDO</code> by <code>Lazy</code>.</p></main>
+$connection = new Lazy(static fn() => PDO::of(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name')));</code></pre>
+<p>By passing a callable to the constructor allows you to use <a href="own.html">whatever implementation</a> of a <code>Connection</code> you wish to lazy load.</p></main>
     <footer>
         <a href="https://github.com/formal-php/access-layer/" target="_blank">GitHub</a>
     </footer>

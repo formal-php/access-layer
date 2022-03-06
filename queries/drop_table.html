@@ -105,7 +105,7 @@
     Table\Name,
 };
 
-$drop = new DropTable(new Name('users'));
+$drop = DropTable::named(new Name('users'));
 $connection($drop);</code></pre>
 <p>This query will fail if the table doesn't exist, you can prevent this like so:</p>
 <pre><code class="language-php">use Formal\AccessLayer\{

@@ -105,7 +105,7 @@
     Table\Name,
 };
 
-$delete = new Delete(new Name('users'));
+$delete = Delete::from(new Name('users'));
 $connection($delete);</code></pre>
 <p>This example will all the users of the table.</p>
 <h3 id="specify-rows-to-delete"><a href="#specify-rows-to-delete" class="anchor">#</a>Specify rows to delete</h3>
@@ -138,7 +138,7 @@ final class Username implements Comparator
 
     public function sign(): Sign
     {
-        return Sign::equality();
+        return Sign::equality;
     }
 
     public function value(): mixed
@@ -147,8 +147,7 @@ final class Username implements Comparator
     }
 }
 
-$delete = new Delete(new Name('users'));
-$delete = $delete->where(
+$delete = Delete::from(new Name('users'))->where(
     (new Username('some username'))->or(new Username('other username')),
 );
 $connection($delete);</code></pre>

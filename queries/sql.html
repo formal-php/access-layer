@@ -106,26 +106,30 @@
     Row,
 };
 
-$query = new SQL('SHOW TABLES');
+$query = SQL::of('SHOW TABLES');
 $tables = $connection($query);
 $tables->foreach(function(Row $row): void {
-    echo $row->column('Tables_in_database_name');
+    echo $row->column('Tables_in_database_name')->match(
+        static fn($name) => $name,
+        static fn() => '',
+    );
 });</code></pre>
+<p><strong>Note</strong>: if you replace the constructor <code>::of()</code> by <code>::onDemand()</code> it will run your query lazily by returning a lazy <code>Sequence</code>, meaning it won't keep the results in memory allowing you to handle very large results. This is particularly useful for <code>SELECT</code> queries.</p>
 <h2 id="parameters"><a href="#parameters" class="anchor">#</a>Parameters</h2>
 <p>For some queries you will need to specify parameters to provide values, you can bind them either by specifying their name or by an index</p>
 <p><strong>Important</strong>: do not copy the values directly in the sql query as you'll be vulnerable to sql injection.</p>
 <h3 id="bound-by-name"><a href="#bound-by-name" class="anchor">#</a>Bound by name</h3>
-<p>This useful when you use the same parameter multiple times in your query.</p>
+<p>This is useful when you use the same parameter multiple times in your query.</p>
 <pre><code class="language-php">use Formal\AccessLayer\Query\Parameter;
 
-$insert = new SQL('INSERT INTO `users` (`username`, `name`) VALUES (:username, :username)');
+$insert = SQL::of('INSERT INTO `users` (`username`, `name`) VALUES (:username, :username)');
 $insert = $insert->with(Parameter::named('username', 'some username value'));
 $connection($insert);</code></pre>
 <h3 id="bound-by-index"><a href="#bound-by-index" class="anchor">#</a>Bound by index</h3>
 <p>This is the most simple approach as you only have to worry that you add the parameters in the order specified in the sql query.</p>
 <pre><code class="language-php">use Formal\AccessLayer\Query\Parameter;
 
-$insert = new SQL('INSERT INTO `users` (`username`, `name`) VALUES (?, ?)');
+$insert = SQL::of('INSERT INTO `users` (`username`, `name`) VALUES (?, ?)');
 $insert = $insert
     ->with(Parameter::of('some username value'))
     ->with(Parameter::of('some name'));
