@@ -22,7 +22,7 @@ final class PDO implements Connection
 {
     private \PDO $pdo;
 
-    public function __construct(Url $dsn)
+    private function __construct(Url $dsn, array $options = [])
     {
         $dsnUser = $dsn->authority()->userInformation()->user();
         $dsnPassword = $dsn->authority()->userInformation()->password();
@@ -43,7 +43,7 @@ final class PDO implements Connection
             $dsn->authority()->host()->toString(),
             $dsn->authority()->port()->toString(),
             \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
-        ), $user, $password);
+        ), $user, $password, $options);
     }
 
     public function __invoke(Query $query): Sequence
@@ -63,6 +63,16 @@ final class PDO implements Connection
             ),
             default => $this->execute($query),
         };
+    }
+
+    public static function of(Url $dsn): self
+    {
+        return new self($dsn);
+    }
+
+    public static function persistent(Url $dsn): self
+    {
+        return new self($dsn, [\PDO::ATTR_PERSISTENT => true]);
     }
 
     /**

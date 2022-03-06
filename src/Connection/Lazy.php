@@ -27,6 +27,6 @@ final class Lazy implements Connection
 
     private function connection(): Connection
     {
-        return $this->connection ?? $this->connection = new PDO($this->url);
+        return $this->connection ?? $this->connection = PDO::of($this->url);
     }
 }

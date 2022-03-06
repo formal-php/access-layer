@@ -157,7 +157,7 @@ class LoggerTest extends TestCase
         $port = \getenv('DB_PORT') ?: '3306';
 
         return new Logger(
-            new PDO(Url::of("mysql://root:root@127.0.0.1:$port/example")),
+            PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example")),
             new NullLogger,
         );
     }
