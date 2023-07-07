@@ -8,7 +8,7 @@ To build an instance of it you only need the dsn to your database:
 use Formal\AccessLayer\Connection\PDO;
 use Innmind\Url\Url;
 
-$connection = PDO::of(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'));
+$connection = PDO::of(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name?charset=utf8mb4'));
 ```
 
 When executing a [query](../queries/sql.md) through this connection it will return a [deferred `Sequence`](https://innmind.github.io/Immutable/SEQUENCE.html#defer) of rows. This means that the rows returned from the database are only loaded once you iterate over the sequence. (Queries with the named constructor `::onDemand()` will return a lazy `Sequence`).

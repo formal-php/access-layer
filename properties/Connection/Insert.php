@@ -93,6 +93,19 @@ final class Insert implements Property
                     static fn() => null,
                 ),
         );
+        Assert::assertSame(
+            [
+                'id' => $this->uuid,
+                'username' => 'foo',
+                'registerNumber' => 42,
+            ],
+            $rows
+                ->first()
+                ->match(
+                    static fn($row) => $row->toArray(),
+                    static fn() => null,
+                ),
+        );
 
         return $connection;
     }

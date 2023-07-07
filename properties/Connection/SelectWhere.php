@@ -96,9 +96,9 @@ final class SelectWhere implements Property
                 ->first()
                 ->flatMap(static fn($row) => $row->column('id'))
                 ->match(
-                static fn($id) => $id,
-                static fn() => null,
-            ),
+                    static fn($id) => $id,
+                    static fn() => null,
+                ),
         );
 
         return $connection;

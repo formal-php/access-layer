@@ -77,6 +77,19 @@ final class Row
         return $this->values;
     }
 
+    public function toArray(): array
+    {
+        return $this->values->reduce(
+            [],
+            static function(array $values, $value) {
+                /** @psalm-suppress MixedAssignment */
+                $values[$value->column()->toString()] = $value->value();
+
+                return $values;
+            },
+        );
+    }
+
     /**
      * @return callable(Value): bool
      */

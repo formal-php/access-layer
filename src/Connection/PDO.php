@@ -13,6 +13,7 @@ use Formal\AccessLayer\{
 };
 use Innmind\Url\{
     Url,
+    Query as UrlQuery,
     Authority\UserInformation\User,
     Authority\UserInformation\Password,
 };
@@ -28,6 +29,7 @@ final class PDO implements Connection
         $dsnPassword = $dsn->authority()->userInformation()->password();
         $user = null;
         $password = null;
+        $charset = '';
 
         if (!$dsnUser->equals(User::none())) {
             $user = $dsnUser->toString();
@@ -37,12 +39,22 @@ final class PDO implements Connection
             $password = $dsnPassword->toString();
         }
 
+        if (!$dsn->query()->equals(UrlQuery::none())) {
+            \parse_str($dsn->query()->toString(), $query);
+
+            if (\array_key_exists('charset', $query)) {
+                /** @psalm-suppress MixedOperand */
+                $charset = ';charset='.$query['charset'];
+            }
+        }
+
         $this->pdo = new \PDO(\sprintf(
-            '%s:host=%s;port=%s;dbname=%s',
+            '%s:host=%s;port=%s;dbname=%s%s',
             $dsn->scheme()->toString(),
             $dsn->authority()->host()->toString(),
             $dsn->authority()->port()->toString(),
             \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
+            $charset,
         ), $user, $password, $options);
     }
 
