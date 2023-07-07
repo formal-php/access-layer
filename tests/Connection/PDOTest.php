@@ -87,6 +87,54 @@ class PDOTest extends TestCase
             });
     }
 
+    public function testCharset()
+    {
+        $table = new Name('test_charset');
+        $connection = $this->connection();
+
+        $connection(CreateTable::ifNotExists(
+            $table,
+            new Column(
+                new Column\Name('str'),
+                Column\Type::longtext(),
+            ),
+        ));
+
+        $insert = Insert::into(
+            $table,
+            Row::of([
+                'str' => 'gelé',
+            ]),
+        );
+        $connection($insert);
+
+        $select = Select::from($table);
+
+        $this->assertNotSame(
+            'gelé',
+            $this->connection('ascii')($select)
+                ->first()
+                ->flatMap(static fn($row) => $row->column('str'))
+                ->match(
+                    static fn($str) => $str,
+                    static fn() => null,
+                ),
+        );
+
+        $this->assertSame(
+            'gelé',
+            $this->connection('utf8mb4')($select)
+                ->first()
+                ->flatMap(static fn($row) => $row->column('str'))
+                ->match(
+                    static fn($str) => $str,
+                    static fn() => null,
+                ),
+        );
+
+        $connection(DropTable::named($table));
+    }
+
     /**
      * @dataProvider properties
      */
@@ -200,11 +248,15 @@ class PDOTest extends TestCase
         }
     }
 
-    private function connection(): PDO
+    private function connection(string $charset = null): PDO
     {
         $port = \getenv('DB_PORT') ?: '3306';
+        $charset = match ($charset) {
+            null => '',
+            default => '?charset='.$charset,
+        };
 
-        return PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example"));
+        return PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example$charset"));
     }
 
     private function persistent(): PDO
