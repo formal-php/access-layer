@@ -120,7 +120,9 @@ final class PDO implements Connection
         return Sequence::lazy(function() use ($query): \Generator {
             $statement = $this->prepare($query);
 
+            /** @psalm-suppress MixedAssignment */
             while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+                /** @psalm-suppress MixedArgument */
                 yield Row::of($row);
             }
 
@@ -138,7 +140,9 @@ final class PDO implements Connection
         /** @var Sequence<Row> */
         return Sequence::defer(
             (static function(\PDOStatement $statement): \Generator {
+                /** @psalm-suppress MixedAssignment */
                 while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
+                    /** @psalm-suppress MixedArgument */
                     yield Row::of($row);
                 }
 

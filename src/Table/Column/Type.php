@@ -230,7 +230,10 @@ final class Type
             return '';
         }
 
-        /** @psalm-suppress PossiblyInvalidArgument */
+        /**
+         * @psalm-suppress PossiblyInvalidArgument
+         * @psalm-suppress TypeDoesNotContainType
+         */
         return 'DEFAULT '. match (\gettype($this->default)) {
             'integer' => "'$this->default'",
             'string' => "'{$this->escape($this->default)}'",
