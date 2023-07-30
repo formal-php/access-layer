@@ -14,6 +14,14 @@
 - `Formal\AccessLayer\Table\Column\Name\Namespaced`
 - `Formal\AccessLayer\Table\Column\Name\Aliased`
 
+### Changed
+
+- Require `innmind/black-box` `5`
+
+### Removed
+
+- Support for PHP `8.1`
+
 ## 2.1.0 - 2023-07-07
 
 ### Added

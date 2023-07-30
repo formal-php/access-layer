@@ -6,6 +6,7 @@ namespace Properties\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query,
     Exception\QueryFailed,
+    Connection,
 };
 use Fixtures\Formal\AccessLayer\Table\{
     Name,
@@ -14,9 +15,12 @@ use Fixtures\Formal\AccessLayer\Table\{
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class CreatingSameTableTwiceMustThrow implements Property
 {
     private $name;
@@ -30,16 +34,11 @@ final class CreatingSameTableTwiceMustThrow implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Name::any(),
             Column::list(),
         );
-    }
-
-    public function name(): string
-    {
-        return 'Creating same table twice must throw';
     }
 
     public function applicableTo(object $connection): bool
@@ -47,15 +46,15 @@ final class CreatingSameTableTwiceMustThrow implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
             $expected = Query\CreateTable::named($this->name, ...$this->columns);
             $connection(Query\CreateTable::named($this->name, ...$this->columns));
             $connection($expected);
-            Assert::fail('it should throw');
+            $assert->fail('it should throw');
         } catch (QueryFailed $e) {
-            Assert::assertSame($expected, $e->query());
+            $assert->same($expected, $e->query());
         } finally {
             $connection(Query\DropTable::ifExists($this->name));
         }

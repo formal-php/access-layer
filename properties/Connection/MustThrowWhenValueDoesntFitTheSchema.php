@@ -7,13 +7,17 @@ use Formal\AccessLayer\{
     Query\SQL,
     Query\Parameter,
     Exception\QueryFailed,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class MustThrowWhenValueDoesntFitTheSchema implements Property
 {
     private string $uuid;
@@ -29,17 +33,12 @@ final class MustThrowWhenValueDoesntFitTheSchema implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Set\Uuid::any(),
             Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
             Set\Integers::any(),
         );
-    }
-
-    public function name(): string
-    {
-        return "Must throw when value doesn't fit the schema";
     }
 
     public function applicableTo(object $connection): bool
@@ -47,7 +46,7 @@ final class MustThrowWhenValueDoesntFitTheSchema implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
             $query = SQL::of('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
@@ -56,9 +55,9 @@ final class MustThrowWhenValueDoesntFitTheSchema implements Property
                 ->with(Parameter::named('username', $this->username))
                 ->with(Parameter::named('registerNumber', $this->number));
             $connection($query);
-            Assert::fail('it should throw an exception');
+            $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
-            Assert::assertSame($query, $e->query());
+            $assert->same($query, $e->query());
         }
 
         return $connection;

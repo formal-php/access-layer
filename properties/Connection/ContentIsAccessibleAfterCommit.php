@@ -3,18 +3,22 @@ declare(strict_types = 1);
 
 namespace Properties\Formal\AccessLayer\Connection;
 
-use Formal\AccessLayer\Query\{
-    SQL,
-    Parameter,
-    StartTransaction,
-    Commit,
+use Formal\AccessLayer\{
+    Query\SQL,
+    Query\Parameter,
+    Query\StartTransaction,
+    Query\Commit,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class ContentIsAccessibleAfterCommit implements Property
 {
     private string $uuid;
@@ -30,17 +34,12 @@ final class ContentIsAccessibleAfterCommit implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Set\Uuid::any(),
             Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
             Set\Integers::any(),
         );
-    }
-
-    public function name(): string
-    {
-        return 'Content is accessible after commit';
     }
 
     public function applicableTo(object $connection): bool
@@ -48,7 +47,7 @@ final class ContentIsAccessibleAfterCommit implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $connection(new StartTransaction);
 
@@ -62,8 +61,8 @@ final class ContentIsAccessibleAfterCommit implements Property
 
         $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
 
-        Assert::assertCount(1, $rows);
-        Assert::assertSame(
+        $assert->count(1, $rows);
+        $assert->same(
             $this->uuid,
             $rows
                 ->first()
@@ -73,7 +72,7 @@ final class ContentIsAccessibleAfterCommit implements Property
                     static fn() => null,
                 ),
         );
-        Assert::assertSame(
+        $assert->same(
             $this->username,
             $rows
                 ->first()
@@ -83,7 +82,7 @@ final class ContentIsAccessibleAfterCommit implements Property
                     static fn() => null,
                 ),
         );
-        Assert::assertSame(
+        $assert->same(
             $this->number,
             $rows
                 ->first()

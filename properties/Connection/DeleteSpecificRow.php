@@ -8,6 +8,7 @@ use Formal\AccessLayer\{
     Query,
     Table,
     Row,
+    Connection,
 };
 use Innmind\Specification\{
     Comparator,
@@ -17,9 +18,12 @@ use Innmind\Specification\{
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class DeleteSpecificRow implements Property
 {
     private string $uuid1;
@@ -33,16 +37,11 @@ final class DeleteSpecificRow implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Set\Uuid::any(),
             Set\Uuid::any(),
         );
-    }
-
-    public function name(): string
-    {
-        return 'Delete specific row';
     }
 
     public function applicableTo(object $connection): bool
@@ -50,7 +49,7 @@ final class DeleteSpecificRow implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $connection(Query\Insert::into(
             new Table\Name('test'),
@@ -95,15 +94,15 @@ final class DeleteSpecificRow implements Property
         );
         $sequence = $connection($delete);
 
-        Assert::assertCount(0, $sequence);
+        $assert->count(0, $sequence);
 
         $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
 
-        Assert::assertCount(0, $rows);
+        $assert->count(0, $rows);
 
         $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
 
-        Assert::assertCount(1, $rows);
+        $assert->count(1, $rows);
 
         return $connection;
     }

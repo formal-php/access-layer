@@ -15,7 +15,7 @@
         "issues": "http://github.com/formal-php/access-layer/issues"
     },
     "require": {
-        "php": "~8.1",
+        "php": "~8.2",
         "innmind/immutable": "~4.0",
         "innmind/url": "~4.0",
         "innmind/specification": "^3.0.1",
@@ -34,9 +34,17 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "^9.5.14",
         "vimeo/psalm": "~5.13",
-        "innmind/black-box": "~4.17",
+        "innmind/black-box": "^5.1.2",
         "innmind/coding-standard": "~2.0"
+    },
+    "conflict": {
+        "innmind/black-box": "<5.0|~6.0"
+    },
+    "suggest": {
+        "innmind/black-box": "For property based testing"
+    },
+    "provide": {
+        "innmind/black-box-sets": "5.0"
     }
 }

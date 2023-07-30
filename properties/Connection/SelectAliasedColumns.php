@@ -9,13 +9,17 @@ use Formal\AccessLayer\{
     Query\Select,
     Table\Name,
     Table\Column,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class SelectAliasedColumns implements Property
 {
     private string $uuid;
@@ -31,17 +35,12 @@ final class SelectAliasedColumns implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Set\Uuid::any(),
             Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
             Set\Integers::any(),
         );
-    }
-
-    public function name(): string
-    {
-        return 'Select everything';
     }
 
     public function applicableTo(object $connection): bool
@@ -49,7 +48,7 @@ final class SelectAliasedColumns implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
             ->with(Parameter::of($this->uuid))
@@ -63,24 +62,26 @@ final class SelectAliasedColumns implements Property
         );
         $rows = $connection($select);
 
-        Assert::assertGreaterThanOrEqual(1, $rows->size());
-        Assert::assertTrue($rows->first()->match(
+        $assert
+            ->number($rows->size())
+            ->greaterThanOrEqual(1);
+        $assert->true($rows->first()->match(
             static fn($row) => $row->contains('test_id'),
             static fn() => null,
         ));
-        Assert::assertTrue($rows->first()->match(
+        $assert->true($rows->first()->match(
             static fn($row) => $row->contains('test_id_bis'),
             static fn() => null,
         ));
-        Assert::assertFalse($rows->first()->match(
+        $assert->false($rows->first()->match(
             static fn($row) => $row->contains('id'),
             static fn() => null,
         ));
-        Assert::assertFalse($rows->first()->match(
+        $assert->false($rows->first()->match(
             static fn($row) => $row->contains('username'),
             static fn() => null,
         ));
-        Assert::assertFalse($rows->first()->match(
+        $assert->false($rows->first()->match(
             static fn($row) => $row->contains('registerNumber'),
             static fn() => null,
         ));

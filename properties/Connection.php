@@ -19,48 +19,51 @@ final class Connection
     /**
      * @return Set<Property>
      */
-    public static function properties(): Set
+    public static function any(): Set
     {
-        return Set\Properties::any(...self::list());
+        return Set\Properties::any(...\array_map(
+            static fn($class) => [$class, 'any'](),
+            self::list(),
+        ));
     }
 
     /**
-     * @return list<Set<Property>>
+     * @return list<class-string<Property>>
      */
     public static function list(): array
     {
         return [
-            Connection\AllowToStartTwoQueriesInParallel::any(),
-            Connection\AnInvalidQueryMustThrow::any(),
-            Connection\AnInvalidLazyQueryMustThrow::any(),
-            Connection\AnInvalidLazySelectMustThrow::any(),
-            Connection\AQueryWithoutTheCorrectNumberOfParametersMustThrow::any(),
-            Connection\MustThrowWhenValueDoesntFitTheSchema::any(),
-            Connection\Insert::any(),
-            Connection\MultipleInsertsAtOnce::any(),
-            Connection\ParametersCanBeBoundByName::any(),
-            Connection\ParametersCanBeBoundByIndex::any(),
-            Connection\ContentInsertedAfterStartOfTransactionIsAccessible::any(),
-            Connection\ContentIsAccessibleAfterCommit::any(),
-            Connection\ContentIsNotAccessibleAfterRollback::any(),
-            Connection\CommittingAnUnstartedTransactionMustThrow::any(),
-            Connection\RollbackingAnUnstartedTransactionMustThrow::any(),
-            Connection\ParameterTypesCanBeSpecified::any(),
-            Connection\CreateTable::any(),
-            Connection\CreateTableWithPrimaryKey::any(),
-            Connection\CreateTableWithForeignKey::any(),
-            Connection\CreatingSameTableTwiceMustThrow::any(),
-            Connection\CreateTableIfNotExists::any(),
-            Connection\CanDropUnknownDatabaseIfNotExists::any(),
-            Connection\DroppingUnknownDatabaseMustThrow::any(),
-            Connection\SelectEverything::any(),
-            Connection\SelectColumns::any(),
-            Connection\SelectAliasedColumns::any(),
-            Connection\SelectWhere::any(),
-            Connection\Update::any(),
-            Connection\UpdateSpecificRow::any(),
-            Connection\Delete::any(),
-            Connection\DeleteSpecificRow::any(),
+            Connection\AllowToStartTwoQueriesInParallel::class,
+            Connection\AnInvalidQueryMustThrow::class,
+            Connection\AnInvalidLazyQueryMustThrow::class,
+            Connection\AnInvalidLazySelectMustThrow::class,
+            Connection\AQueryWithoutTheCorrectNumberOfParametersMustThrow::class,
+            Connection\MustThrowWhenValueDoesntFitTheSchema::class,
+            Connection\Insert::class,
+            Connection\MultipleInsertsAtOnce::class,
+            Connection\ParametersCanBeBoundByName::class,
+            Connection\ParametersCanBeBoundByIndex::class,
+            Connection\ContentInsertedAfterStartOfTransactionIsAccessible::class,
+            Connection\ContentIsAccessibleAfterCommit::class,
+            Connection\ContentIsNotAccessibleAfterRollback::class,
+            Connection\CommittingAnUnstartedTransactionMustThrow::class,
+            Connection\RollbackingAnUnstartedTransactionMustThrow::class,
+            Connection\ParameterTypesCanBeSpecified::class,
+            Connection\CreateTable::class,
+            Connection\CreateTableWithPrimaryKey::class,
+            Connection\CreateTableWithForeignKey::class,
+            Connection\CreatingSameTableTwiceMustThrow::class,
+            Connection\CreateTableIfNotExists::class,
+            Connection\CanDropUnknownDatabaseIfNotExists::class,
+            Connection\DroppingUnknownDatabaseMustThrow::class,
+            Connection\SelectEverything::class,
+            Connection\SelectColumns::class,
+            Connection\SelectAliasedColumns::class,
+            Connection\SelectWhere::class,
+            Connection\Update::class,
+            Connection\UpdateSpecificRow::class,
+            Connection\Delete::class,
+            Connection\DeleteSpecificRow::class,
         ];
     }
 

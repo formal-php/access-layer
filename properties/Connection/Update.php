@@ -8,13 +8,17 @@ use Formal\AccessLayer\{
     Query,
     Table,
     Row,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class Update implements Property
 {
     private string $uuid;
@@ -26,15 +30,7 @@ final class Update implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
-            Set\Uuid::any(),
-        );
-    }
-
-    public function name(): string
-    {
-        return 'Update';
+        return Set\Uuid::any()->map(static fn($uuid) => new self($uuid));
     }
 
     public function applicableTo(object $connection): bool
@@ -42,7 +38,7 @@ final class Update implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $select = SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'");
         $connection(Query\Insert::into(
@@ -59,17 +55,17 @@ final class Update implements Property
             Row::of(['registerNumber' => 24]),
         ));
 
-        Assert::assertCount(0, $sequence);
+        $assert->count(0, $sequence);
 
         $rows = $connection($select);
 
-        Assert::assertGreaterThanOrEqual(1, $rows->size());
-        $rows->foreach(static function($row) {
-            Assert::assertSame(24, $row->column('registerNumber')->match(
-                static fn($registerNumber) => $registerNumber,
-                static fn() => null,
-            ));
-        });
+        $assert
+            ->number($rows->size())
+            ->greaterThanOrEqual(1);
+        $rows->foreach(static fn($row) => $assert->same(24, $row->column('registerNumber')->match(
+            static fn($registerNumber) => $registerNumber,
+            static fn() => null,
+        )));
 
         return $connection;
     }

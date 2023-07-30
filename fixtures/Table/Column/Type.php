@@ -13,7 +13,7 @@ final class Type
      */
     public static function any(): Set
     {
-        return new Set\Either(
+        return Set\Either::any(
             self::bigint(),
             self::binary(),
             self::bit(),
@@ -36,7 +36,7 @@ final class Type
      */
     public static function constraint(): Set
     {
-        return new Set\Either(
+        return Set\Either::any(
             self::bigint(),
             self::binary(),
             self::bit(),
@@ -55,10 +55,7 @@ final class Type
      */
     private static function bigint(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::bigint($size),
-            Set\Integers::between(1, 255),
-        );
+        return Set\Integers::between(1, 255)->map(Model::bigint(...));
     }
 
     /**
@@ -66,10 +63,7 @@ final class Type
      */
     private static function binary(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::binary($size),
-            Set\Integers::between(1, 255),
-        );
+        return Set\Integers::between(1, 255)->map(Model::binary(...));
     }
 
     /**
@@ -77,10 +71,7 @@ final class Type
      */
     private static function bit(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::bit($size),
-            Set\Integers::between(1, 64),
-        );
+        return Set\Integers::between(1, 64)->map(Model::bit(...));
     }
 
     /**
@@ -88,10 +79,7 @@ final class Type
      */
     private static function char(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::char($size),
-            Set\Integers::between(1, 255),
-        );
+        return Set\Integers::between(1, 255)->map(Model::char(...));
     }
 
     /**
@@ -99,19 +87,15 @@ final class Type
      */
     private static function decimal(): Set
     {
-        return new Set\Either(
-            Set\Decorate::immutable(
-                static fn($precision) => Model::decimal($precision),
+        return Set\Either::any(
+            Set\Integers::between(1, 65)->map(Model::decimal(...)),
+            Set\Composite::immutable(
+                static fn($precision, $scale) => [$precision, $scale],
                 Set\Integers::between(1, 65),
-            ),
-            Set\Decorate::immutable(
-                static fn($precision) => Model::decimal(...$precision),
-                Set\Composite::immutable(
-                    static fn($precision, $scale) => [$precision, $scale],
-                    Set\Integers::between(1, 65),
-                    Set\Integers::between(0, 30),
-                )->filter(static fn($precision) => $precision[1] <= $precision[0]), // scale can't be higher than the precision
-            ),
+                Set\Integers::between(0, 30),
+            )
+                ->filter(static fn($precision) => $precision[1] <= $precision[0]) // scale can't be higher than the precision
+                ->map(static fn($precision) => Model::decimal(...$precision)),
         );
     }
 
@@ -120,10 +104,7 @@ final class Type
      */
     private static function int(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::int($size),
-            Set\Integers::between(1, 255),
-        );
+        return Set\Integers::between(1, 255)->map(Model::int(...));
     }
 
     /**
@@ -131,10 +112,7 @@ final class Type
      */
     private static function mediumint(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::mediumint($size),
-            Set\Integers::between(1, 255),
-        );
+        return Set\Integers::between(1, 255)->map(Model::mediumint(...));
     }
 
     /**
@@ -142,10 +120,7 @@ final class Type
      */
     private static function smallint(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::smallint($size),
-            Set\Integers::between(1, 255),
-        );
+        return Set\Integers::between(1, 255)->map(Model::smallint(...));
     }
 
     /**
@@ -153,10 +128,7 @@ final class Type
      */
     private static function tinyint(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::tinyint($size),
-            Set\Integers::between(1, 255),
-        );
+        return Set\Integers::between(1, 255)->map(Model::tinyint(...));
     }
 
     /**
@@ -164,10 +136,7 @@ final class Type
      */
     private static function varchar(): Set
     {
-        return Set\Decorate::immutable(
-            static fn($size) => Model::varchar($size),
-            Set\Integers::between(1, 255),
-        );
+        return Set\Integers::between(1, 255)->map(Model::varchar(...));
     }
 
     /**

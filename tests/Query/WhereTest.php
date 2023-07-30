@@ -233,7 +233,7 @@ class WhereTest extends TestCase
     public function testWhereIsNullComparator()
     {
         $this
-            ->forAll(Column::any(), Set\AnyType::any())
+            ->forAll(Column::any(), Set\Type::any())
             ->then(function($column, $value) {
                 $specification = $this->createMock(Comparator::class);
                 $specification
@@ -261,7 +261,7 @@ class WhereTest extends TestCase
     public function testWhereIsNotNullComparator()
     {
         $this
-            ->forAll(Column::any(), Set\AnyType::any())
+            ->forAll(Column::any(), Set\Type::any())
             ->then(function($column, $value) {
                 $specification = $this->createMock(Comparator::class);
                 $specification

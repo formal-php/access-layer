@@ -8,13 +8,17 @@ use Formal\AccessLayer\{
     Query,
     Table,
     Row,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class MultipleInsertsAtOnce implements Property
 {
     private string $uuid1;
@@ -42,8 +46,8 @@ final class MultipleInsertsAtOnce implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Set\Uuid::any(),
             Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
             Set\Integers::any(),
@@ -53,22 +57,17 @@ final class MultipleInsertsAtOnce implements Property
         );
     }
 
-    public function name(): string
-    {
-        return 'Multiple inserts at once';
-    }
-
     public function applicableTo(object $connection): bool
     {
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $select = SQL::of("SELECT * FROM `test` WHERE `id` IN ('{$this->uuid1}', '{$this->uuid2}')");
         $rows = $connection($select);
 
-        Assert::assertCount(0, $rows);
+        $assert->count(0, $rows);
 
         $sequence = $connection(Query\Insert::into(
             new Table\Name('test'),
@@ -84,71 +83,77 @@ final class MultipleInsertsAtOnce implements Property
             ]),
         ));
 
-        Assert::assertCount(0, $sequence);
+        $assert->count(0, $sequence);
 
         $rows = $connection($select);
 
-        Assert::assertCount(2, $rows);
-        Assert::assertContains(
-            $rows
-                ->first()
-                ->flatMap(static fn($row) => $row->column('id'))
-                ->match(
-                    static fn($id) => $id,
-                    static fn() => null,
-                ),
-            [$this->uuid1, $this->uuid2],
-        );
-        Assert::assertContains(
-            $rows
-                ->first()
-                ->flatMap(static fn($row) => $row->column('username'))
-                ->match(
-                    static fn($username) => $username,
-                    static fn() => null,
-                ),
-            [$this->username1, $this->username2],
-        );
-        Assert::assertContains(
-            $rows
-                ->first()
-                ->flatMap(static fn($row) => $row->column('registerNumber'))
-                ->match(
-                    static fn($registerNumber) => $registerNumber,
-                    static fn() => null,
-                ),
-            [$this->number1, $this->number2],
-        );
-        Assert::assertContains(
-            $rows
-                ->last()
-                ->flatMap(static fn($row) => $row->column('id'))
-                ->match(
-                    static fn($id) => $id,
-                    static fn() => null,
-                ),
-            [$this->uuid1, $this->uuid2],
-        );
-        Assert::assertContains(
-            $rows
-                ->last()
-                ->flatMap(static fn($row) => $row->column('username'))
-                ->match(
-                    static fn($username) => $username,
-                    static fn() => null,
-                ),
-            [$this->username1, $this->username2],
-        );
-        Assert::assertContains(
-            $rows
-                ->last()
-                ->flatMap(static fn($row) => $row->column('registerNumber'))
-                ->match(
-                    static fn($registerNumber) => $registerNumber,
-                    static fn() => null,
-                ),
-            [$this->number1, $this->number2],
-        );
+        $assert->count(2, $rows);
+        $assert
+            ->expected(
+                $rows
+                    ->first()
+                    ->flatMap(static fn($row) => $row->column('id'))
+                    ->match(
+                        static fn($id) => $id,
+                        static fn() => null,
+                    ),
+            )
+            ->in([$this->uuid1, $this->uuid2]);
+        $assert
+            ->expected(
+                $rows
+                    ->first()
+                    ->flatMap(static fn($row) => $row->column('username'))
+                    ->match(
+                        static fn($username) => $username,
+                        static fn() => null,
+                    ),
+            )
+            ->in([$this->username1, $this->username2]);
+        $assert
+            ->expected(
+                $rows
+                    ->first()
+                    ->flatMap(static fn($row) => $row->column('registerNumber'))
+                    ->match(
+                        static fn($registerNumber) => $registerNumber,
+                        static fn() => null,
+                    ),
+            )
+            ->in([$this->number1, $this->number2]);
+        $assert
+            ->expected(
+                $rows
+                    ->last()
+                    ->flatMap(static fn($row) => $row->column('id'))
+                    ->match(
+                        static fn($id) => $id,
+                        static fn() => null,
+                    ),
+            )
+            ->in([$this->uuid1, $this->uuid2]);
+        $assert
+            ->expected(
+                $rows
+                    ->last()
+                    ->flatMap(static fn($row) => $row->column('username'))
+                    ->match(
+                        static fn($username) => $username,
+                        static fn() => null,
+                    ),
+            )
+            ->in([$this->username1, $this->username2]);
+        $assert
+            ->expected(
+                $rows
+                    ->last()
+                    ->flatMap(static fn($row) => $row->column('registerNumber'))
+                    ->match(
+                        static fn($registerNumber) => $registerNumber,
+                        static fn() => null,
+                    ),
+            )
+            ->in([$this->number1, $this->number2]);
 
         return $connection;
     }

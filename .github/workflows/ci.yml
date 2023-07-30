@@ -3,12 +3,82 @@ name: CI
 on: [push, pull_request]
 
 jobs:
+  blackbox:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['8.2']
+        dependency-versions: ['lowest', 'highest']
+    name: 'BlackBox'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
+        ports:
+            - 3306
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: none
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+        env:
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+  coverage:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        php-version: ['8.2']
+        dependency-versions: ['lowest', 'highest']
+    name: 'Coverage'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
+        ports:
+            - 3306
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: xdebug
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+        env:
+          ENABLE_COVERAGE: 'true'
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+      - uses: codecov/codecov-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
   phpunit:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.1', '8.2']
+        php-version: ['8.2']
         dependencies: ['lowest', 'highest']
     name: 'PHPUnit'
     services:
@@ -36,14 +106,14 @@ jobs:
         run: vendor/bin/phpunit
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
-  coverage:
+  coverage_phpunit:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.1']
+        php-version: ['8.2']
         dependencies: ['lowest', 'highest']
-    name: 'Coverage'
+    name: 'Coverage PHPUnit'
     services:
       mariadb:
         image: mariadb:10
@@ -77,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1']
+        php-version: ['8.2']
         dependencies: ['lowest', 'highest']
     name: 'Psalm'
     steps:
@@ -98,7 +168,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.1']
+        php-version: ['8.2']
     name: 'CS'
     steps:
       - name: Checkout

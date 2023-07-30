@@ -3,18 +3,22 @@ declare(strict_types = 1);
 
 namespace Properties\Formal\AccessLayer\Connection;
 
-use Formal\AccessLayer\Query\{
-    SQL,
-    Parameter,
-    StartTransaction,
-    Rollback,
+use Formal\AccessLayer\{
+    Query\SQL,
+    Query\Parameter,
+    Query\StartTransaction,
+    Query\Rollback,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class ContentIsNotAccessibleAfterRollback implements Property
 {
     private string $uuid;
@@ -30,17 +34,12 @@ final class ContentIsNotAccessibleAfterRollback implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Set\Uuid::any(),
             Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
             Set\Integers::any(),
         );
-    }
-
-    public function name(): string
-    {
-        return 'Content is not accessible after rollback';
     }
 
     public function applicableTo(object $connection): bool
@@ -48,7 +47,7 @@ final class ContentIsNotAccessibleAfterRollback implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $connection(new StartTransaction);
 
@@ -62,7 +61,7 @@ final class ContentIsNotAccessibleAfterRollback implements Property
 
         $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
 
-        Assert::assertCount(0, $rows);
+        $assert->count(0, $rows);
 
         return $connection;
     }
