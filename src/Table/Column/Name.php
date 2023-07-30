@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Table\Column;
 
+use Formal\AccessLayer\Table;
+
 /**
  * @psalm-immutable
  */
@@ -27,6 +29,19 @@ final class Name
     public static function of(string $value): self
     {
         return new self($value);
+    }
+
+    public function in(Table\Name|Table\Name\Aliased $table): Name\Namespaced
+    {
+        return Name\Namespaced::of($this, $table);
+    }
+
+    /**
+     * @param non-empty-string $alias
+     */
+    public function as(string $alias): Name\Aliased
+    {
+        return Name\Aliased::of($this, $alias);
     }
 
     /**

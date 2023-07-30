@@ -21,13 +21,13 @@ use Innmind\Immutable\{
  */
 final class Select implements Query
 {
-    private Name $table;
+    private Name|Name\Aliased $table;
     private bool $lazy;
-    /** @var Sequence<Column\Name> */
+    /** @var Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> */
     private Sequence $columns;
     private Where $where;
 
-    private function __construct(Name $table, bool $lazy)
+    private function __construct(Name|Name\Aliased $table, bool $lazy)
     {
         $this->table = $table;
         $this->lazy = $lazy;
@@ -39,7 +39,7 @@ final class Select implements Query
     /**
      * @psalm-pure
      */
-    public static function from(Name $table): self
+    public static function from(Name|Name\Aliased $table): self
     {
         return new self($table, false);
     }
@@ -47,7 +47,7 @@ final class Select implements Query
     /**
      * @psalm-pure
      */
-    public static function onDemand(Name $table): self
+    public static function onDemand(Name|Name\Aliased $table): self
     {
         return new self($table, true);
     }
@@ -55,8 +55,10 @@ final class Select implements Query
     /**
      * @no-named-arguments
      */
-    public function columns(Column\Name $first, Column\Name ...$rest): self
-    {
+    public function columns(
+        Column\Name|Column\Name\Namespaced|Column\Name\Aliased $first,
+        Column\Name|Column\Name\Namespaced|Column\Name\Aliased ...$rest,
+    ): self {
         $self = clone $this;
         $self->columns = Sequence::of($first, ...$rest);
 

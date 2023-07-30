@@ -55,6 +55,7 @@ final class Connection
             Connection\DroppingUnknownDatabaseMustThrow::any(),
             Connection\SelectEverything::any(),
             Connection\SelectColumns::any(),
+            Connection\SelectAliasedColumns::any(),
             Connection\SelectWhere::any(),
             Connection\Update::any(),
             Connection\UpdateSpecificRow::any(),

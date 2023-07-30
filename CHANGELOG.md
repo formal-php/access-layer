@@ -5,8 +5,14 @@
 ### Added
 
 - `Formal\AccessLayer\Table\Name::of()`
+- `Formal\AccessLayer\Table\Name::as()`
 - `Formal\AccessLayer\Table\Column::of()`
 - `Formal\AccessLayer\Table\Column\Name::of()`
+- `Formal\AccessLayer\Table\Column\Name::in()`
+- `Formal\AccessLayer\Table\Column\Name::as()`
+- `Formal\AccessLayer\Table\Name\Aliased`
+- `Formal\AccessLayer\Table\Column\Name\Namespaced`
+- `Formal\AccessLayer\Table\Column\Name\Aliased`
 
 ## 2.1.0 - 2023-07-07
 

@@ -30,6 +30,14 @@ final class Name
     }
 
     /**
+     * @param non-empty-string $alias
+     */
+    public function as(string $alias): Name\Aliased
+    {
+        return Name\Aliased::of($this, $alias);
+    }
+
+    /**
      * @return non-empty-string
      */
     public function toString(): string
