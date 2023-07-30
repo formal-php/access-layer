@@ -15,7 +15,7 @@ final class Name
     {
         return Set\Composite::immutable(
             static fn(string $firstChar, string $name): Model => new Model($firstChar.$name),
-            new Set\Either( // table name can't start with a number
+            Set\Either::any( // table name can't start with a number
                 Set\Chars::lowercaseLetter(),
                 Set\Chars::uppercaseLetter(),
             ),

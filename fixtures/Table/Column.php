@@ -13,7 +13,7 @@ final class Column
      */
     public static function any(Set $type = null, int $max = null): Set
     {
-        return new Set\Randomize( // randomize to prevent same name used twice
+        return Set\Randomize::of( // randomize to prevent same name used twice
             Set\Composite::immutable(
                 static fn($name, $type): Model => new Model($name, $type),
                 Column\Name::any($max),
@@ -27,27 +27,18 @@ final class Column
      */
     public static function list(): Set
     {
-        return Set\Decorate::immutable(
-            static function($columns) {
-                $names = [];
+        return Set\Sequence::of(self::any())
+            ->between(1, 20)
+            ->map(static function($columns) {
                 $filtered = [];
 
                 foreach ($columns as $column) {
                     // in mysql column names are case insensitive
                     $name = \strtolower($column->name()->toString());
-
-                    if (!\in_array($name, $names, true)) {
-                        $names[] = $name;
-                        $filtered[] = $column;
-                    }
+                    $filtered[$name] = $column;
                 }
 
-                return $filtered;
-            },
-            Set\Sequence::of(
-                self::any(),
-                Set\Integers::between(1, 20),
-            ),
-        );
+                return \array_values($filtered);
+            });
     }
 }

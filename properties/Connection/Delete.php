@@ -8,13 +8,17 @@ use Formal\AccessLayer\{
     Query,
     Table,
     Row,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class Delete implements Property
 {
     private string $uuid;
@@ -26,15 +30,7 @@ final class Delete implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
-            Set\Uuid::any(),
-        );
-    }
-
-    public function name(): string
-    {
-        return 'Delete';
+        return Set\Uuid::any()->map(static fn($uuid) => new self($uuid));
     }
 
     public function applicableTo(object $connection): bool
@@ -42,7 +38,7 @@ final class Delete implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $select = SQL::of('SELECT * FROM `test`');
         $connection(Query\Insert::into(
@@ -56,11 +52,11 @@ final class Delete implements Property
 
         $sequence = $connection(Query\Delete::from(new Table\Name('test')));
 
-        Assert::assertCount(0, $sequence);
+        $assert->count(0, $sequence);
 
         $rows = $connection($select);
 
-        Assert::assertCount(0, $rows);
+        $assert->count(0, $rows);
 
         return $connection;
     }

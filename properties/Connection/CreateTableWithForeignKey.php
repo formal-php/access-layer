@@ -6,6 +6,7 @@ namespace Properties\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query,
     Table\Column as ConcreteColumn,
+    Connection,
 };
 use Fixtures\Formal\AccessLayer\Table\{
     Name,
@@ -14,9 +15,12 @@ use Fixtures\Formal\AccessLayer\Table\{
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class CreateTableWithForeignKey implements Property
 {
     private $name1;
@@ -36,17 +40,12 @@ final class CreateTableWithForeignKey implements Property
     {
         // max length of 30 for column names as combined can't be higher than 64
         // as it's the limit of the created constraint name
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Name::pair(),
             Column::any(Column\Type::constraint(), 30),
             Column::any(null, 30),
         );
-    }
-
-    public function name(): string
-    {
-        return 'Create table with foreign key';
     }
 
     public function applicableTo(object $connection): bool
@@ -54,14 +53,14 @@ final class CreateTableWithForeignKey implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
             $create = Query\CreateTable::named($this->name1, $this->primaryKey);
             $create = $create->primaryKey($this->primaryKey->name());
             $rows = $connection($create);
 
-            Assert::assertCount(0, $rows);
+            $assert->count(0, $rows);
 
             $create = Query\CreateTable::named($this->name2, new ConcreteColumn(
                 $this->foreignKey->name(),
@@ -74,7 +73,7 @@ final class CreateTableWithForeignKey implements Property
             );
             $rows = $connection($create);
 
-            Assert::assertCount(0, $rows);
+            $assert->count(0, $rows);
         } finally {
             $connection(Query\DropTable::ifExists($this->name2));
             $connection(Query\DropTable::ifExists($this->name1));

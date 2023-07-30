@@ -13,12 +13,11 @@ final class Name
      */
     public static function any(int $max = null): Set
     {
-        return Set\Decorate::immutable(
-            static fn(string $name): Model => new Model($name),
-            Set\Strings::madeOf(
-                Set\Chars::alphanumerical(),
-                Set\Elements::of('é', 'è', 'ê', 'ë', '_'),
-            )->between(1, $max ?? 64),
-        );
+        return Set\Strings::madeOf(
+            Set\Chars::alphanumerical(),
+            Set\Elements::of('é', 'è', 'ê', 'ë', '_'),
+        )
+            ->between(1, $max ?? 64)
+            ->map(Model::of(...));
     }
 }

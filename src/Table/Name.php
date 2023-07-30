@@ -20,6 +20,24 @@ final class Name
     }
 
     /**
+     * @psalm-pure
+     *
+     * @param non-empty-string $value
+     */
+    public static function of(string $value): self
+    {
+        return new self($value);
+    }
+
+    /**
+     * @param non-empty-string $alias
+     */
+    public function as(string $alias): Name\Aliased
+    {
+        return Name\Aliased::of($this, $alias);
+    }
+
+    /**
      * @return non-empty-string
      */
     public function toString(): string

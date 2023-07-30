@@ -11,35 +11,17 @@ use Formal\AccessLayer\{
     Query\Parameter,
     Row,
 };
-use Innmind\Url\Url;
 use Innmind\Immutable\Sequence;
-use Psr\Log\{
-    LoggerInterface,
-    NullLogger,
-};
+use Psr\Log\LoggerInterface;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
     Set,
 };
-use Properties\Formal\AccessLayer\Connection as PConnection;
 
 class LoggerTest extends TestCase
 {
     use BlackBox;
-
-    public function setUp(): void
-    {
-        PConnection::seed($this->connection());
-    }
-
-    public function testInterface()
-    {
-        $this->assertInstanceOf(
-            Connection::class,
-            $this->connection(),
-        );
-    }
 
     public function testLogQuery()
     {
@@ -115,50 +97,5 @@ class LoggerTest extends TestCase
                     $this->assertSame($expected, $e);
                 }
             });
-    }
-
-    /**
-     * @dataProvider properties
-     */
-    public function testHoldProperty($property)
-    {
-        $this
-            ->forAll($property)
-            ->then(function($property) {
-                $connection = $this->connection();
-
-                if (!$property->applicableTo($connection)) {
-                    $this->markTestSkipped();
-                }
-
-                $property->ensureHeldBy($connection);
-            });
-    }
-
-    public function testHoldProperties()
-    {
-        $this
-            ->forAll(PConnection::properties())
-            ->disableShrinking()
-            ->then(function($properties) {
-                $properties->ensureHeldBy($this->connection());
-            });
-    }
-
-    public function properties(): iterable
-    {
-        foreach (PConnection::list() as $property) {
-            yield [$property];
-        }
-    }
-
-    private function connection(): Connection
-    {
-        $port = \getenv('DB_PORT') ?: '3306';
-
-        return Logger::psr(
-            PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example")),
-            new NullLogger,
-        );
     }
 }

@@ -6,14 +6,18 @@ namespace Properties\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query,
     Exception\QueryFailed,
+    Connection,
 };
 use Fixtures\Formal\AccessLayer\Table\Name;
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class DroppingUnknownDatabaseMustThrow implements Property
 {
     private $name;
@@ -25,15 +29,7 @@ final class DroppingUnknownDatabaseMustThrow implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
-            Name::any(),
-        );
-    }
-
-    public function name(): string
-    {
-        return 'Dropping unknown database must throw';
+        return Name::any()->map(static fn($name) => new self($name));
     }
 
     public function applicableTo(object $connection): bool
@@ -41,14 +37,14 @@ final class DroppingUnknownDatabaseMustThrow implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
             $query = Query\DropTable::named($this->name);
             $connection($query);
-            Assert::fail('it should throw');
+            $assert->fail('it should throw');
         } catch (QueryFailed $e) {
-            Assert::assertSame($query, $e->query());
+            $assert->same($query, $e->query());
         }
 
         return $connection;

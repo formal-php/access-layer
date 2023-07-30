@@ -3,16 +3,20 @@ declare(strict_types = 1);
 
 namespace Properties\Formal\AccessLayer\Connection;
 
-use Formal\AccessLayer\Query\{
-    SQL,
-    Parameter,
+use Formal\AccessLayer\{
+    Query\SQL,
+    Query\Parameter,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class ParametersCanBeBoundByName implements Property
 {
     private string $uuid;
@@ -28,17 +32,12 @@ final class ParametersCanBeBoundByName implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Set\Uuid::any(),
             Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
             Set\Integers::any(),
         );
-    }
-
-    public function name(): string
-    {
-        return 'Parameters can be bound by name';
     }
 
     public function applicableTo(object $connection): bool
@@ -46,7 +45,7 @@ final class ParametersCanBeBoundByName implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $insert = SQL::of('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);')
             ->with(Parameter::named('uuid', $this->uuid))
@@ -56,8 +55,8 @@ final class ParametersCanBeBoundByName implements Property
 
         $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
 
-        Assert::assertCount(1, $rows);
-        Assert::assertSame(
+        $assert->count(1, $rows);
+        $assert->same(
             $this->uuid,
             $rows
                 ->first()
@@ -67,7 +66,7 @@ final class ParametersCanBeBoundByName implements Property
                     static fn() => null,
                 ),
         );
-        Assert::assertSame(
+        $assert->same(
             $this->username,
             $rows
                 ->first()
@@ -77,7 +76,7 @@ final class ParametersCanBeBoundByName implements Property
                     static fn() => null,
                 ),
         );
-        Assert::assertSame(
+        $assert->same(
             $this->number,
             $rows
                 ->first()

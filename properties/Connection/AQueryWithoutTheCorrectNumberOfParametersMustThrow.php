@@ -6,23 +6,22 @@ namespace Properties\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query\SQL,
     Exception\QueryFailed,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class AQueryWithoutTheCorrectNumberOfParametersMustThrow implements Property
 {
     public static function any(): Set
     {
-        return Set\Property::of(self::class);
-    }
-
-    public function name(): string
-    {
-        return 'A query without the correct number of parameters must throw';
+        return Set\Elements::of(new self);
     }
 
     public function applicableTo(object $connection): bool
@@ -30,16 +29,16 @@ final class AQueryWithoutTheCorrectNumberOfParametersMustThrow implements Proper
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
             $query = SQL::of('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
             $connection($query);
-            Assert::fail('it should throw an exception');
+            $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
-            Assert::assertSame($query, $e->query());
-            Assert::assertIsInt($e->code());
-            Assert::assertIsString($e->message());
+            $assert->same($query, $e->query());
+            $assert->number($e->code())->int();
+            $assert->string($e->message());
         }
 
         return $connection;

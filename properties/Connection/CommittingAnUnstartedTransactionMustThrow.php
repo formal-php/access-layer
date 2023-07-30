@@ -6,23 +6,22 @@ namespace Properties\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query\Commit,
     Exception\QueryFailed,
+    Connection,
 };
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class CommittingAnUnstartedTransactionMustThrow implements Property
 {
     public static function any(): Set
     {
-        return Set\Property::of(self::class);
-    }
-
-    public function name(): string
-    {
-        return 'Committing an unstarted transaction must throw';
+        return Set\Elements::of(new self);
     }
 
     public function applicableTo(object $connection): bool
@@ -30,14 +29,14 @@ final class CommittingAnUnstartedTransactionMustThrow implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
             $query = new Commit;
             $connection($query);
-            Assert::fail('it should throw an exception');
+            $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
-            Assert::assertSame($query, $e->query());
+            $assert->same($query, $e->query());
         }
 
         return $connection;

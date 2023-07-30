@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Properties\Formal\AccessLayer\Connection;
 
-use Formal\AccessLayer\Query;
+use Formal\AccessLayer\{
+    Query,
+    Connection,
+};
 use Fixtures\Formal\AccessLayer\Table\{
     Name,
     Column,
@@ -11,9 +14,12 @@ use Fixtures\Formal\AccessLayer\Table\{
 use Innmind\BlackBox\{
     Property,
     Set,
+    Runner\Assert,
 };
-use PHPUnit\Framework\Assert;
 
+/**
+ * @implements Property<Connection>
+ */
 final class CreateTable implements Property
 {
     private $name;
@@ -27,16 +33,11 @@ final class CreateTable implements Property
 
     public static function any(): Set
     {
-        return Set\Property::of(
-            self::class,
+        return Set\Composite::immutable(
+            static fn(...$args) => new self(...$args),
             Name::any(),
             Column::list(),
         );
-    }
-
-    public function name(): string
-    {
-        return 'Create table';
     }
 
     public function applicableTo(object $connection): bool
@@ -44,12 +45,12 @@ final class CreateTable implements Property
         return true;
     }
 
-    public function ensureHeldBy(object $connection): object
+    public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
             $rows = $connection(Query\CreateTable::named($this->name, ...$this->columns));
 
-            Assert::assertCount(0, $rows);
+            $assert->count(0, $rows);
         } finally {
             $connection(Query\DropTable::ifExists($this->name));
         }
