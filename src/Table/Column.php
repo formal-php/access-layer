@@ -22,6 +22,14 @@ final class Column
         $this->type = $type;
     }
 
+    /**
+     * @psalm-pure
+     */
+    public static function of(Name $name, Type $type): self
+    {
+        return new self($name, $type);
+    }
+
     public function name(): Name
     {
         return $this->name;

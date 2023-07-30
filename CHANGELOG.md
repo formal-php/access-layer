@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Formal\AccessLayer\Table\Name::of()`
+- `Formal\AccessLayer\Table\Column::of()`
+- `Formal\AccessLayer\Table\Column\Name::of()`
+
 ## 2.1.0 - 2023-07-07
 
 ### Added
