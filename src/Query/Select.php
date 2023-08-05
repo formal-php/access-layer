@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query,
     Query\Parameter,
     Query\Select\Direction,
+    Query\Select\Join,
     Row,
     Table\Name,
     Table\Column,
@@ -15,6 +16,7 @@ use Innmind\Specification\Specification;
 use Innmind\Immutable\{
     Sequence,
     Str,
+    Monoid\Concat,
 };
 
 /**
@@ -24,6 +26,8 @@ final class Select implements Query
 {
     private Name|Name\Aliased $table;
     private bool $lazy;
+    /** @var Sequence<Join> */
+    private Sequence $joins;
     /** @var Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> */
     private Sequence $columns;
     private Where $where;
@@ -35,6 +39,7 @@ final class Select implements Query
     private ?int $offset;
 
     /**
+     * @param Sequence<Join> $joins
      * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> $columns
      * @param ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} $orderBy
      * @param ?positive-int $limit
@@ -43,6 +48,7 @@ final class Select implements Query
     private function __construct(
         Name|Name\Aliased $table,
         bool $lazy,
+        Sequence $joins,
         Sequence $columns,
         Where $where,
         ?array $orderBy = null,
@@ -51,6 +57,7 @@ final class Select implements Query
     ) {
         $this->table = $table;
         $this->lazy = $lazy;
+        $this->joins = $joins;
         $this->columns = $columns;
         $this->where = $where;
         $this->orderBy = $orderBy;
@@ -63,7 +70,13 @@ final class Select implements Query
      */
     public static function from(Name|Name\Aliased $table): self
     {
-        return new self($table, false, Sequence::of(), Where::everything());
+        return new self(
+            $table,
+            false,
+            Sequence::of(),
+            Sequence::of(),
+            Where::everything(),
+        );
     }
 
     /**
@@ -71,7 +84,27 @@ final class Select implements Query
      */
     public static function onDemand(Name|Name\Aliased $table): self
     {
-        return new self($table, true, Sequence::of(), Where::everything());
+        return new self(
+            $table,
+            true,
+            Sequence::of(),
+            Sequence::of(),
+            Where::everything(),
+        );
+    }
+
+    public function join(Join $join): self
+    {
+        return new self(
+            $this->table,
+            $this->lazy,
+            ($this->joins)($join),
+            $this->columns,
+            $this->where,
+            $this->orderBy,
+            $this->limit,
+            $this->offset,
+        );
     }
 
     /**
@@ -84,6 +117,7 @@ final class Select implements Query
         return new self(
             $this->table,
             $this->lazy,
+            $this->joins,
             Sequence::of($first, ...$rest),
             $this->where,
             $this->orderBy,
@@ -97,6 +131,7 @@ final class Select implements Query
         return new self(
             $this->table,
             $this->lazy,
+            $this->joins,
             $this->columns,
             Where::of($specification),
             $this->orderBy,
@@ -112,6 +147,7 @@ final class Select implements Query
         return new self(
             $this->table,
             $this->lazy,
+            $this->joins,
             $this->columns,
             $this->where,
             [$column, $direction],
@@ -129,6 +165,7 @@ final class Select implements Query
         return new self(
             $this->table,
             $this->lazy,
+            $this->joins,
             $this->columns,
             $this->where,
             $this->orderBy,
@@ -146,9 +183,15 @@ final class Select implements Query
     {
         /** @var non-empty-string */
         return \sprintf(
-            'SELECT %s FROM %s %s%s%s%s',
+            'SELECT %s FROM %s%s %s%s%s%s',
             $this->columns->empty() ? '*' : $this->buildColumns(),
             $this->table->sql(),
+            $this
+                ->joins
+                ->map(static fn($join) => $join->sql())
+                ->map(Str::of(...))
+                ->fold(new Concat)
+                ->toString(),
             $this->where->sql(),
             match ($this->orderBy) {
                 null => '',

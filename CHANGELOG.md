@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.4.0 - 2023-08-05
+
+### Added
+
+- `Formal\AccessLayer\Query\Select::join()`
+- `Formal\AccessLayer\Query\Select\Join`
+
 ## 2.3.0 - 2023-08-05
 
 ### Added
