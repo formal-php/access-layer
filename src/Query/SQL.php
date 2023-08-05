@@ -19,13 +19,13 @@ final class SQL implements Query
 
     /**
      * @param non-empty-string $sql
+     * @param Sequence<Parameter> $parameters
      */
-    private function __construct(string $sql, bool $lazy)
+    private function __construct(string $sql, bool $lazy, Sequence $parameters)
     {
         $this->sql = $sql;
         $this->lazy = $lazy;
-        /** @var Sequence<Parameter> */
-        $this->parameters = Sequence::of();
+        $this->parameters = $parameters;
     }
 
     /**
@@ -35,7 +35,7 @@ final class SQL implements Query
      */
     public static function of(string $sql): self
     {
-        return new self($sql, false);
+        return new self($sql, false, Sequence::of());
     }
 
     /**
@@ -45,15 +45,16 @@ final class SQL implements Query
      */
     public static function onDemand(string $sql): self
     {
-        return new self($sql, true);
+        return new self($sql, true, Sequence::of());
     }
 
     public function with(Parameter $parameter): self
     {
-        $self = clone $this;
-        $self->parameters = ($this->parameters)($parameter);
-
-        return $self;
+        return new self(
+            $this->sql,
+            $this->lazy,
+            ($this->parameters)($parameter),
+        );
     }
 
     public function parameters(): Sequence

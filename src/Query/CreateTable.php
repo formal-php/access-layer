@@ -9,7 +9,10 @@ use Formal\AccessLayer\{
     Table\Name,
     Table\Column,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+};
 
 /**
  * @psalm-immutable
@@ -17,24 +20,26 @@ use Innmind\Immutable\Sequence;
 final class CreateTable implements Query
 {
     private Name $name;
-    /** @var non-empty-list<Column> */
-    private array $columns;
-    /** @var list<string> */
-    private array $constraints = [];
+    /** @var Sequence<Column> */
+    private Sequence $columns;
+    /** @var Sequence<string> */
+    private Sequence $constraints;
     private bool $ifNotExists;
 
     /**
-     * @no-named-arguments
+     * @param Sequence<Column> $columns
+     * @param Sequence<string> $constraints
      */
     private function __construct(
         bool $ifNotExists,
         Name $name,
-        Column $first,
-        Column ...$rest,
+        Sequence $columns,
+        Sequence $constraints,
     ) {
         $this->ifNotExists = $ifNotExists;
         $this->name = $name;
-        $this->columns = [$first, ...$rest];
+        $this->columns = $columns;
+        $this->constraints = $constraints;
     }
 
     /**
@@ -43,7 +48,12 @@ final class CreateTable implements Query
      */
     public static function named(Name $name, Column $first, Column ...$rest): self
     {
-        return new self(false, $name, $first, ...$rest);
+        return new self(
+            false,
+            $name,
+            Sequence::of($first, ...$rest),
+            Sequence::of(),
+        );
     }
 
     /**
@@ -52,30 +62,39 @@ final class CreateTable implements Query
      */
     public static function ifNotExists(Name $name, Column $first, Column ...$rest): self
     {
-        return new self(true, $name, $first, ...$rest);
+        return new self(
+            true,
+            $name,
+            Sequence::of($first, ...$rest),
+            Sequence::of(),
+        );
     }
 
     public function primaryKey(Column\Name $column): self
     {
-        $self = clone $this;
-        $self->constraints[] = "PRIMARY KEY ({$column->sql()})";
-
-        return $self;
+        return new self(
+            $this->ifNotExists,
+            $this->name,
+            $this->columns,
+            ($this->constraints)("PRIMARY KEY ({$column->sql()})"),
+        );
     }
 
     public function foreignKey(Column\Name $column, Name $target, Column\Name $reference): self
     {
-        $self = clone $this;
-        $self->constraints[] = \sprintf(
-            'CONSTRAINT `FK_%s_%s` FOREIGN KEY (%s) REFERENCES %s(%s)',
-            $column->toString(),
-            $reference->toString(),
-            $column->sql(),
-            $target->sql(),
-            $reference->sql(),
+        return new self(
+            $this->ifNotExists,
+            $this->name,
+            $this->columns,
+            ($this->constraints)(\sprintf(
+                'CONSTRAINT `FK_%s_%s` FOREIGN KEY (%s) REFERENCES %s(%s)',
+                $column->toString(),
+                $reference->toString(),
+                $column->sql(),
+                $target->sql(),
+                $reference->sql(),
+            )),
         );
-
-        return $self;
     }
 
     public function parameters(): Sequence
@@ -91,11 +110,15 @@ final class CreateTable implements Query
             'CREATE TABLE %s %s (%s%s)',
             $this->ifNotExists ? 'IF NOT EXISTS' : '',
             $this->name->sql(),
-            \implode(
-                ', ',
-                \array_map(static fn($column) => $column->sql(), $this->columns),
+            Str::of(', ')
+                ->join($this->columns->map(static fn($column) => $column->sql()))
+                ->toString(),
+            $this->constraints->match(
+                static fn($first, $rest) => ', '.Str::of(', ')
+                    ->join(Sequence::of($first)->append($rest))
+                    ->toString(),
+                static fn() => '',
             ),
-            \count($this->constraints) > 0 ? ', '.\implode(', ', $this->constraints) : '',
         );
     }
 

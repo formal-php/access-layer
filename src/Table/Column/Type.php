@@ -11,17 +11,25 @@ final class Type
     /** @var non-empty-string */
     private string $type;
     private string $precision;
-    private bool $nullable = false;
-    private null|int|string $default = null;
-    private ?string $comment = null;
+    private bool $nullable;
+    private null|int|string $default;
+    private ?string $comment;
 
     /**
      * @param non-empty-string $type
      */
-    private function __construct(string $type, string $precision = '')
-    {
+    private function __construct(
+        string $type,
+        string $precision = '',
+        bool $nullable = false,
+        null|int|string $default = null,
+        ?string $comment = null,
+    ) {
         $this->type = $type;
         $this->precision = $precision;
+        $this->nullable = $nullable;
+        $this->default = $default;
+        $this->comment = $comment;
     }
 
     /**
@@ -186,26 +194,35 @@ final class Type
 
     public function nullable(): self
     {
-        $self = clone $this;
-        $self->nullable = true;
-
-        return $self;
+        return new self(
+            $this->type,
+            $this->precision,
+            true,
+            $this->default,
+            $this->comment,
+        );
     }
 
     public function default(null|int|string $default): self
     {
-        $self = clone $this;
-        $self->default = $default;
-
-        return $self;
+        return new self(
+            $this->type,
+            $this->precision,
+            $this->nullable,
+            $default,
+            $this->comment,
+        );
     }
 
     public function comment(string $comment): self
     {
-        $self = clone $this;
-        $self->comment = $comment;
-
-        return $self;
+        return new self(
+            $this->type,
+            $this->precision,
+            $this->nullable,
+            $this->default,
+            $comment,
+        );
     }
 
     /**

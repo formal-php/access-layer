@@ -22,10 +22,10 @@ final class Delete implements Query
     private Name $table;
     private Where $where;
 
-    private function __construct(Name $table)
+    private function __construct(Name $table, Where $where)
     {
         $this->table = $table;
-        $this->where = Where::everything();
+        $this->where = $where;
     }
 
     /**
@@ -33,15 +33,15 @@ final class Delete implements Query
      */
     public static function from(Name $table): self
     {
-        return new self($table);
+        return new self($table, Where::everything());
     }
 
     public function where(Specification $specification): self
     {
-        $self = clone $this;
-        $self->where = Where::of($specification);
-
-        return $self;
+        return new self(
+            $this->table,
+            Where::of($specification),
+        );
     }
 
     public function parameters(): Sequence

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2.3.0 - 2023-08-05
+
+### Added
+
+- `Formal\AccessLayer\Query\Select::limit()`
+- `Formal\AccessLayer\Query\Select::orderBy()`
+- `Formal\AccessLayer\Query\Select\Direction`
+
 ## 2.2.0 - 2023-07-30
 
 ### Added
