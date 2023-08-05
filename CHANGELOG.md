@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Formal\AccessLayer\Query\Select::limit()`
+
 ## 2.2.0 - 2023-07-30
 
 ### Added

@@ -26,20 +26,30 @@ final class Select implements Query
     /** @var Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> */
     private Sequence $columns;
     private Where $where;
+    /** @var ?positive-int */
+    private ?int $limit;
+    /** @var ?positive-int */
+    private ?int $offset;
 
     /**
      * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> $columns
+     * @param ?positive-int $limit
+     * @param ?positive-int $offset
      */
     private function __construct(
         Name|Name\Aliased $table,
         bool $lazy,
         Sequence $columns,
         Where $where,
+        ?int $limit = null,
+        ?int $offset = null,
     ) {
         $this->table = $table;
         $this->lazy = $lazy;
         $this->columns = $columns;
         $this->where = $where;
+        $this->limit = $limit;
+        $this->offset = $offset;
     }
 
     /**
@@ -70,6 +80,8 @@ final class Select implements Query
             $this->lazy,
             Sequence::of($first, ...$rest),
             $this->where,
+            $this->limit,
+            $this->offset,
         );
     }
 
@@ -80,6 +92,24 @@ final class Select implements Query
             $this->lazy,
             $this->columns,
             Where::of($specification),
+            $this->limit,
+            $this->offset,
+        );
+    }
+
+    /**
+     * @param positive-int $limit
+     * @param positive-int $offset
+     */
+    public function limit(int $limit, int $offset = null): self
+    {
+        return new self(
+            $this->table,
+            $this->lazy,
+            $this->columns,
+            $this->where,
+            $limit,
+            $offset,
         );
     }
 
@@ -92,10 +122,18 @@ final class Select implements Query
     {
         /** @var non-empty-string */
         return \sprintf(
-            'SELECT %s FROM %s %s',
+            'SELECT %s FROM %s %s%s%s',
             $this->columns->empty() ? '*' : $this->buildColumns(),
             $this->table->sql(),
             $this->where->sql(),
+            match ($this->limit) {
+                null => '',
+                default => ' LIMIT '.$this->limit,
+            },
+            match ($this->offset) {
+                null => '',
+                default => ' OFFSET '.$this->offset,
+            },
         );
     }
 

@@ -60,6 +60,8 @@ final class Connection
             Connection\SelectColumns::class,
             Connection\SelectAliasedColumns::class,
             Connection\SelectWhere::class,
+            Connection\SelectOffset::class,
+            Connection\SelectLimit::class,
             Connection\Update::class,
             Connection\UpdateSpecificRow::class,
             Connection\Delete::class,
