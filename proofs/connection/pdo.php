@@ -5,8 +5,10 @@ use Formal\AccessLayer\{
     Connection,
     Connection\PDO,
     Query\CreateTable,
+    Query\Delete,
     Query\Insert,
     Query\Select,
+    Query\Select\Join,
     Query\DropTable,
     Row,
     Table,
@@ -14,6 +16,11 @@ use Formal\AccessLayer\{
 };
 use Properties\Formal\AccessLayer\Connection as Properties;
 use Innmind\Url\Url;
+use Innmind\Specification\{
+    Comparator,
+    Composable,
+    Sign,
+};
 use Innmind\BlackBox\Set;
 
 return static function() {
@@ -123,6 +130,105 @@ return static function() {
                         static fn() => null,
                     ),
             );
+
+            $connection(DropTable::named($table));
+        },
+    );
+
+    yield test(
+        'Select join',
+        static function($assert) use ($connection) {
+            $table = Table\Name::of('test_left_join');
+            $connection(CreateTable::ifNotExists(
+                $table,
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+                Column::of(
+                    Column\Name::of('name'),
+                    Column\Type::varchar(),
+                ),
+                Column::of(
+                    Column\Name::of('parent'),
+                    Column\Type::int()->nullable(),
+                ),
+            ));
+            $connection(Delete::from($table));
+            $connection(Insert::into(
+                $table,
+                Row::of([
+                    'id' => 1,
+                    'name' => 'value_1',
+                ]),
+                Row::of([
+                    'id' => 2,
+                    'name' => 'value_2',
+                    'parent' => 1,
+                ]),
+                Row::of([
+                    'id' => 3,
+                    'name' => 'value_3',
+                    'parent' => 1,
+                ]),
+                Row::of([
+                    'id' => 4,
+                    'name' => 'value_4',
+                ]),
+            ));
+
+            $child = $table->as('child');
+            $rows = $connection(
+                Select::from($table->as('parent'))
+                    ->columns(
+                        Column\Name::of('name')->in($table->as('parent'))->as('parent'),
+                        Column\Name::of('id')->in($child),
+                        Column\Name::of('name')->in($child)->as('child'),
+                    )
+                    ->join(
+                        Join::left($child)->on(
+                            Column\Name::of('id')->in($table->as('parent')),
+                            Column\Name::of('parent')->in($child),
+                        ),
+                    )
+                    ->where(new class implements Comparator {
+                        use Composable;
+
+                        public function property(): string
+                        {
+                            return 'parent.id';
+                        }
+
+                        public function sign(): Sign
+                        {
+                            return Sign::equality;
+                        }
+
+                        public function value(): int
+                        {
+                            return 1;
+                        }
+                    }),
+            );
+
+            $assert
+                ->expected([
+                    [
+                        'parent' => 'value_1',
+                        'id' => 2,
+                        'child' => 'value_2',
+                    ],
+                    [
+                        'parent' => 'value_1',
+                        'id' => 3,
+                        'child' => 'value_3',
+                    ],
+                ])
+                ->same(
+                    $rows
+                        ->map(static fn($row) => $row->toArray())
+                        ->toList(),
+                );
 
             $connection(DropTable::named($table));
         },
