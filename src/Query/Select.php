@@ -27,13 +27,19 @@ final class Select implements Query
     private Sequence $columns;
     private Where $where;
 
-    private function __construct(Name|Name\Aliased $table, bool $lazy)
-    {
+    /**
+     * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> $columns
+     */
+    private function __construct(
+        Name|Name\Aliased $table,
+        bool $lazy,
+        Sequence $columns,
+        Where $where,
+    ) {
         $this->table = $table;
         $this->lazy = $lazy;
-        /** @var Sequence<Column\Name> */
-        $this->columns = Sequence::of();
-        $this->where = Where::everything();
+        $this->columns = $columns;
+        $this->where = $where;
     }
 
     /**
@@ -41,7 +47,7 @@ final class Select implements Query
      */
     public static function from(Name|Name\Aliased $table): self
     {
-        return new self($table, false);
+        return new self($table, false, Sequence::of(), Where::everything());
     }
 
     /**
@@ -49,7 +55,7 @@ final class Select implements Query
      */
     public static function onDemand(Name|Name\Aliased $table): self
     {
-        return new self($table, true);
+        return new self($table, true, Sequence::of(), Where::everything());
     }
 
     /**
@@ -59,18 +65,22 @@ final class Select implements Query
         Column\Name|Column\Name\Namespaced|Column\Name\Aliased $first,
         Column\Name|Column\Name\Namespaced|Column\Name\Aliased ...$rest,
     ): self {
-        $self = clone $this;
-        $self->columns = Sequence::of($first, ...$rest);
-
-        return $self;
+        return new self(
+            $this->table,
+            $this->lazy,
+            Sequence::of($first, ...$rest),
+            $this->where,
+        );
     }
 
     public function where(Specification $specification): self
     {
-        $self = clone $this;
-        $self->where = Where::of($specification);
-
-        return $self;
+        return new self(
+            $this->table,
+            $this->lazy,
+            $this->columns,
+            Where::of($specification),
+        );
     }
 
     public function parameters(): Sequence

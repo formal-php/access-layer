@@ -26,11 +26,11 @@ final class Update implements Query
     private Row $row;
     private Where $where;
 
-    private function __construct(Name $table, Row $row)
+    private function __construct(Name $table, Row $row, Where $where)
     {
         $this->table = $table;
         $this->row = $row;
-        $this->where = Where::everything();
+        $this->where = $where;
     }
 
     /**
@@ -38,15 +38,16 @@ final class Update implements Query
      */
     public static function set(Name $table, Row $row): self
     {
-        return new self($table, $row);
+        return new self($table, $row, Where::everything());
     }
 
     public function where(Specification $specification): self
     {
-        $self = clone $this;
-        $self->where = Where::of($specification);
-
-        return $self;
+        return new self(
+            $this->table,
+            $this->row,
+            Where::of($specification),
+        );
     }
 
     public function parameters(): Sequence
