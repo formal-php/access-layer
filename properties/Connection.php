@@ -62,6 +62,7 @@ final class Connection
             Connection\SelectWhere::class,
             Connection\SelectOffset::class,
             Connection\SelectLimit::class,
+            Connection\SelectOrder::class,
             Connection\Update::class,
             Connection\UpdateSpecificRow::class,
             Connection\Delete::class,

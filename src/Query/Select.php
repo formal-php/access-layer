@@ -6,6 +6,7 @@ namespace Formal\AccessLayer\Query;
 use Formal\AccessLayer\{
     Query,
     Query\Parameter,
+    Query\Select\Direction,
     Row,
     Table\Name,
     Table\Column,
@@ -26,6 +27,8 @@ final class Select implements Query
     /** @var Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> */
     private Sequence $columns;
     private Where $where;
+    /** @var ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} */
+    private ?array $orderBy;
     /** @var ?positive-int */
     private ?int $limit;
     /** @var ?positive-int */
@@ -33,6 +36,7 @@ final class Select implements Query
 
     /**
      * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> $columns
+     * @param ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} $orderBy
      * @param ?positive-int $limit
      * @param ?positive-int $offset
      */
@@ -41,6 +45,7 @@ final class Select implements Query
         bool $lazy,
         Sequence $columns,
         Where $where,
+        ?array $orderBy = null,
         ?int $limit = null,
         ?int $offset = null,
     ) {
@@ -48,6 +53,7 @@ final class Select implements Query
         $this->lazy = $lazy;
         $this->columns = $columns;
         $this->where = $where;
+        $this->orderBy = $orderBy;
         $this->limit = $limit;
         $this->offset = $offset;
     }
@@ -80,6 +86,7 @@ final class Select implements Query
             $this->lazy,
             Sequence::of($first, ...$rest),
             $this->where,
+            $this->orderBy,
             $this->limit,
             $this->offset,
         );
@@ -92,6 +99,22 @@ final class Select implements Query
             $this->lazy,
             $this->columns,
             Where::of($specification),
+            $this->orderBy,
+            $this->limit,
+            $this->offset,
+        );
+    }
+
+    public function orderBy(
+        Column\Name|Column\Name\Namespaced|Column\Name\Aliased $column,
+        Direction $direction,
+    ): self {
+        return new self(
+            $this->table,
+            $this->lazy,
+            $this->columns,
+            $this->where,
+            [$column, $direction],
             $this->limit,
             $this->offset,
         );
@@ -108,6 +131,7 @@ final class Select implements Query
             $this->lazy,
             $this->columns,
             $this->where,
+            $this->orderBy,
             $limit,
             $offset,
         );
@@ -122,10 +146,18 @@ final class Select implements Query
     {
         /** @var non-empty-string */
         return \sprintf(
-            'SELECT %s FROM %s %s%s%s',
+            'SELECT %s FROM %s %s%s%s%s',
             $this->columns->empty() ? '*' : $this->buildColumns(),
             $this->table->sql(),
             $this->where->sql(),
+            match ($this->orderBy) {
+                null => '',
+                default => \sprintf(
+                    ' ORDER BY %s %s',
+                    $this->orderBy[0]->sql(),
+                    $this->orderBy[1]->sql(),
+                ),
+            },
             match ($this->limit) {
                 null => '',
                 default => ' LIMIT '.$this->limit,
