@@ -57,6 +57,7 @@ final class Connection
             Connection\CanDropUnknownDatabaseIfNotExists::class,
             Connection\DroppingUnknownDatabaseMustThrow::class,
             Connection\SelectEverything::class,
+            Connection\SelectCount::class,
             Connection\SelectColumns::class,
             Connection\SelectAliasedColumns::class,
             Connection\SelectWhere::class,

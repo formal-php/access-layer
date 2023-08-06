@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Formal\AccessLayer\Query\Select::count()`
+
 ### Fixed
 
 - Using a number as a column alias crashed because it wasn't a string
