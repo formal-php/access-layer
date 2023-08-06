@@ -54,6 +54,11 @@ final class Join
         );
     }
 
+    public function table(): Table\Name|Table\Name\Aliased
+    {
+        return $this->table;
+    }
+
     /**
      * @return non-empty-string
      */

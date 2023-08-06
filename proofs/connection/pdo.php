@@ -288,6 +288,71 @@ return static function() {
         },
     );
 
+    yield test(
+        'Delete join',
+        static function($assert) use ($connection) {
+            $parent = Table\Name::of('test_join_delete_parent');
+            $child = Table\Name::of('test_join_delete_child');
+            $connection(CreateTable::ifNotExists(
+                $child,
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+            )->primaryKey(Column\Name::of('id')));
+            $connection(
+                CreateTable::ifNotExists(
+                    $parent,
+                    Column::of(
+                        Column\Name::of('id'),
+                        Column\Type::int(),
+                    ),
+                    Column::of(
+                        Column\Name::of('child'),
+                        Column\Type::int(),
+                    ),
+                )
+                    ->primaryKey(Column\Name::of('id'))
+                    ->foreignKey(
+                        Column\Name::of('child'),
+                        $child,
+                        Column\Name::of('id'),
+                    ),
+            );
+            $connection(Insert::into(
+                $child,
+                Row::of([
+                    'id' => 1,
+                ]),
+            ));
+            $connection(Insert::into(
+                $parent,
+                Row::of([
+                    'id' => 1,
+                    'child' => 1,
+                ]),
+            ));
+
+            $connection(
+                Delete::from($parent)->join(
+                    Join::left($child)->on(
+                        Column\Name::of('child')->in($parent),
+                        Column\Name::of('id')->in($child),
+                    ),
+                ),
+            );
+
+            $rows = $connection(Select::from($child));
+            $assert->count(0, $rows);
+
+            $rows = $connection(Select::from($parent));
+            $assert->count(0, $rows);
+
+            $connection(DropTable::named($parent));
+            $connection(DropTable::named($child));
+        },
+    );
+
     yield properties(
         'PDO properties',
         Properties::any(),

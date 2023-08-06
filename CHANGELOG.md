@@ -7,6 +7,7 @@
 - `Formal\AccessLayer\Query\Constraint\PrimaryKey`
 - `Formal\AccessLayer\Query\Constraint\ForeignKey`
 - `Formal\AccessLayer\Query\CreateTable::constraint()`
+- `Formal\AccessLayer\Query\Delete::join()`
 
 ### Fixed
 
