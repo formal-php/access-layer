@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Formal\AccessLayer\Query\Constraint\PrimaryKey`
+- `Formal\AccessLayer\Query\Constraint\ForeignKey`
+
 ### Fixed
 
 - Using a namespaced column as a property of a specification failed when using `Sign::in`
