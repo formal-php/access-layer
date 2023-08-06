@@ -1,5 +1,18 @@
 # Changelog
 
+## 2.6.0 - 2023-08-06
+
+### Added
+
+- `Formal\AccessLayer\Query\Constraint\PrimaryKey`
+- `Formal\AccessLayer\Query\Constraint\ForeignKey`
+- `Formal\AccessLayer\Query\CreateTable::constraint()`
+- `Formal\AccessLayer\Query\Delete::join()`
+
+### Fixed
+
+- Using a namespaced column as a property of a specification failed when using `Sign::in`
+
 ## 2.5.0 - 2023-08-06
 
 ### Added

@@ -5,6 +5,8 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
+    Query\Constraint\PrimaryKey,
+    Query\Constraint\ForeignKey,
     Row,
     Table\Name,
     Table\Column,
@@ -22,13 +24,13 @@ final class CreateTable implements Query
     private Name $name;
     /** @var Sequence<Column> */
     private Sequence $columns;
-    /** @var Sequence<string> */
+    /** @var Sequence<PrimaryKey|ForeignKey> */
     private Sequence $constraints;
     private bool $ifNotExists;
 
     /**
      * @param Sequence<Column> $columns
-     * @param Sequence<string> $constraints
+     * @param Sequence<PrimaryKey|ForeignKey> $constraints
      */
     private function __construct(
         bool $ifNotExists,
@@ -72,28 +74,21 @@ final class CreateTable implements Query
 
     public function primaryKey(Column\Name $column): self
     {
-        return new self(
-            $this->ifNotExists,
-            $this->name,
-            $this->columns,
-            ($this->constraints)("PRIMARY KEY ({$column->sql()})"),
-        );
+        return $this->constraint(PrimaryKey::on($column));
     }
 
     public function foreignKey(Column\Name $column, Name $target, Column\Name $reference): self
+    {
+        return $this->constraint(ForeignKey::of($column, $target, $reference));
+    }
+
+    public function constraint(PrimaryKey|ForeignKey $constraint): self
     {
         return new self(
             $this->ifNotExists,
             $this->name,
             $this->columns,
-            ($this->constraints)(\sprintf(
-                'CONSTRAINT `FK_%s_%s` FOREIGN KEY (%s) REFERENCES %s(%s)',
-                $column->toString(),
-                $reference->toString(),
-                $column->sql(),
-                $target->sql(),
-                $reference->sql(),
-            )),
+            ($this->constraints)($constraint),
         );
     }
 
@@ -115,7 +110,11 @@ final class CreateTable implements Query
                 ->toString(),
             $this->constraints->match(
                 static fn($first, $rest) => ', '.Str::of(', ')
-                    ->join(Sequence::of($first)->append($rest))
+                    ->join(
+                        Sequence::of($first)
+                            ->append($rest)
+                            ->map(static fn($constraint) => $constraint->sql()),
+                    )
                     ->toString(),
                 static fn() => '',
             ),
