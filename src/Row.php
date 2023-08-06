@@ -47,7 +47,8 @@ final class Row
                 continue;
             }
 
-            $values[] = new Value(new Column\Name($key), $value);
+            /** @psalm-suppress RedundantCastGivenDocblockType Because PHP automatically cast a numeric string */
+            $values[] = new Value(new Column\Name((string) $key), $value);
         }
 
         return new self(...$values);
