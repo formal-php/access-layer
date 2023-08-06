@@ -17,6 +17,7 @@ use Innmind\Immutable\{
     Sequence,
     Str,
     Monoid\Concat,
+    Maybe,
 };
 
 /**
@@ -30,6 +31,8 @@ final class Select implements Query
     private Sequence $joins;
     /** @var Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> */
     private Sequence $columns;
+    /** @var Maybe<non-empty-string> */
+    private Maybe $count;
     private Where $where;
     /** @var ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} */
     private ?array $orderBy;
@@ -41,6 +44,7 @@ final class Select implements Query
     /**
      * @param Sequence<Join> $joins
      * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> $columns
+     * @param Maybe<non-empty-string> $count
      * @param ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} $orderBy
      * @param ?positive-int $limit
      * @param ?positive-int $offset
@@ -50,6 +54,7 @@ final class Select implements Query
         bool $lazy,
         Sequence $joins,
         Sequence $columns,
+        Maybe $count,
         Where $where,
         ?array $orderBy = null,
         ?int $limit = null,
@@ -59,6 +64,7 @@ final class Select implements Query
         $this->lazy = $lazy;
         $this->joins = $joins;
         $this->columns = $columns;
+        $this->count = $count;
         $this->where = $where;
         $this->orderBy = $orderBy;
         $this->limit = $limit;
@@ -70,11 +76,15 @@ final class Select implements Query
      */
     public static function from(Name|Name\Aliased $table): self
     {
+        /** @var Maybe<non-empty-string> */
+        $count = Maybe::nothing();
+
         return new self(
             $table,
             false,
             Sequence::of(),
             Sequence::of(),
+            $count,
             Where::everything(),
         );
     }
@@ -84,11 +94,15 @@ final class Select implements Query
      */
     public static function onDemand(Name|Name\Aliased $table): self
     {
+        /** @var Maybe<non-empty-string> */
+        $count = Maybe::nothing();
+
         return new self(
             $table,
             true,
             Sequence::of(),
             Sequence::of(),
+            $count,
             Where::everything(),
         );
     }
@@ -100,6 +114,7 @@ final class Select implements Query
             $this->lazy,
             ($this->joins)($join),
             $this->columns,
+            $this->count,
             $this->where,
             $this->orderBy,
             $this->limit,
@@ -114,11 +129,33 @@ final class Select implements Query
         Column\Name|Column\Name\Namespaced|Column\Name\Aliased $first,
         Column\Name|Column\Name\Namespaced|Column\Name\Aliased ...$rest,
     ): self {
+        /** @var Maybe<non-empty-string> */
+        $count = Maybe::nothing();
+
         return new self(
             $this->table,
             $this->lazy,
             $this->joins,
             Sequence::of($first, ...$rest),
+            $count,
+            $this->where,
+            $this->orderBy,
+            $this->limit,
+            $this->offset,
+        );
+    }
+
+    /**
+     * @param non-empty-string $alias
+     */
+    public function count(string $alias): self
+    {
+        return new self(
+            $this->table,
+            $this->lazy,
+            $this->joins,
+            $this->columns->clear(),
+            Maybe::just($alias),
             $this->where,
             $this->orderBy,
             $this->limit,
@@ -133,6 +170,7 @@ final class Select implements Query
             $this->lazy,
             $this->joins,
             $this->columns,
+            $this->count,
             Where::of($specification),
             $this->orderBy,
             $this->limit,
@@ -149,6 +187,7 @@ final class Select implements Query
             $this->lazy,
             $this->joins,
             $this->columns,
+            $this->count,
             $this->where,
             [$column, $direction],
             $this->limit,
@@ -167,6 +206,7 @@ final class Select implements Query
             $this->lazy,
             $this->joins,
             $this->columns,
+            $this->count,
             $this->where,
             $this->orderBy,
             $limit,
@@ -184,7 +224,10 @@ final class Select implements Query
         /** @var non-empty-string */
         return \sprintf(
             'SELECT %s FROM %s%s %s%s%s%s',
-            $this->columns->empty() ? '*' : $this->buildColumns(),
+            $this->count->match(
+                static fn($alias) => "COUNT(1) AS `$alias`",
+                fn() => $this->columns->empty() ? '*' : $this->buildColumns(),
+            ),
             $this->table->sql(),
             $this
                 ->joins

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2.5.0 - 2023-08-06
+
+### Added
+
+- `Formal\AccessLayer\Query\Select::count()`
+
+### Fixed
+
+- Using a number as a column alias crashed because it wasn't a string
+
 ## 2.4.0 - 2023-08-05
 
 ### Added
