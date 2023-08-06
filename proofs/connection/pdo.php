@@ -5,6 +5,7 @@ use Formal\AccessLayer\{
     Connection,
     Connection\PDO,
     Query\CreateTable,
+    Query\Constraint\ForeignKey,
     Query\Delete,
     Query\Insert,
     Query\Select,
@@ -231,6 +232,59 @@ return static function() {
                 );
 
             $connection(DropTable::named($table));
+        },
+    );
+
+    yield test(
+        'Delete cascade',
+        static function($assert) use ($connection) {
+            $parent = Table\Name::of('test_cascade_delete_parent');
+            $child = Table\Name::of('test_cascade_delete_child');
+            $connection(CreateTable::ifNotExists(
+                $parent,
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+            )->primaryKey(Column\Name::of('id')));
+            $connection(CreateTable::ifNotExists(
+                $child,
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+                Column::of(
+                    Column\Name::of('parent'),
+                    Column\Type::int(),
+                ),
+            )->constraint(
+                ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))->onDeleteCascade(),
+            ));
+            $connection(Insert::into(
+                $parent,
+                Row::of([
+                    'id' => 1,
+                ]),
+            ));
+            $connection(Insert::into(
+                $child,
+                Row::of([
+                    'id' => 1,
+                    'parent' => 1,
+                ]),
+                Row::of([
+                    'id' => 2,
+                    'parent' => 1,
+                ]),
+            ));
+
+            $connection(Delete::from($parent));
+            $rows = $connection(Select::from($child));
+
+            $assert->count(0, $rows);
+
+            $connection(DropTable::named($child));
+            $connection(DropTable::named($parent));
         },
     );
 

@@ -74,21 +74,21 @@ final class CreateTable implements Query
 
     public function primaryKey(Column\Name $column): self
     {
-        return new self(
-            $this->ifNotExists,
-            $this->name,
-            $this->columns,
-            ($this->constraints)(PrimaryKey::on($column)),
-        );
+        return $this->constraint(PrimaryKey::on($column));
     }
 
     public function foreignKey(Column\Name $column, Name $target, Column\Name $reference): self
+    {
+        return $this->constraint(ForeignKey::of($column, $target, $reference));
+    }
+
+    public function constraint(PrimaryKey|ForeignKey $constraint): self
     {
         return new self(
             $this->ifNotExists,
             $this->name,
             $this->columns,
-            ($this->constraints)(ForeignKey::of($column, $target, $reference)),
+            ($this->constraints)($constraint),
         );
     }
 
