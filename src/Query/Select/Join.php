@@ -8,6 +8,9 @@ use Formal\AccessLayer\{
     Table\Column,
 };
 
+/**
+ * @psalm-immutable
+ */
 final class Join
 {
     private Table\Name|Table\Name\Aliased $table;
@@ -33,6 +36,9 @@ final class Join
         $this->on = $on;
     }
 
+    /**
+     * @psalm-pure
+     */
     public static function left(Table\Name|Table\Name\Aliased $table): self
     {
         return new self($table);
