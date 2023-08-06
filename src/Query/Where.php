@@ -148,7 +148,7 @@ final class Where
 
         return \sprintf(
             '%s IN (%s)',
-            (new Column\Name($specification->property()))->sql(),
+            $this->buildColumn($specification),
             \implode(', ', $placeholders),
         );
     }

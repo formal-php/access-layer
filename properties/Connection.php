@@ -61,6 +61,7 @@ final class Connection
             Connection\SelectColumns::class,
             Connection\SelectAliasedColumns::class,
             Connection\SelectWhere::class,
+            Connection\SelectWhereIn::class,
             Connection\SelectOffset::class,
             Connection\SelectLimit::class,
             Connection\SelectOrder::class,
