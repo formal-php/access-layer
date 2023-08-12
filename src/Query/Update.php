@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query,
     Query\Parameter,
     Query\Parameter\Type,
+    Query\Select\Join,
     Table\Name,
     Table\Column,
     Row,
@@ -15,6 +16,7 @@ use Innmind\Specification\Specification;
 use Innmind\Immutable\{
     Sequence,
     Str,
+    Monoid\Concat,
 };
 
 /**
@@ -22,23 +24,43 @@ use Innmind\Immutable\{
  */
 final class Update implements Query
 {
-    private Name $table;
+    private Name|Name\Aliased $table;
     private Row $row;
+    /** @var Sequence<Join> */
+    private Sequence $joins;
     private Where $where;
 
-    private function __construct(Name $table, Row $row, Where $where)
-    {
+    /**
+     * @param Sequence<Join> $joins
+     */
+    private function __construct(
+        Name|Name\Aliased $table,
+        Row $row,
+        Sequence $joins,
+        Where $where,
+    ) {
         $this->table = $table;
         $this->row = $row;
+        $this->joins = $joins;
         $this->where = $where;
     }
 
     /**
      * @psalm-pure
      */
-    public static function set(Name $table, Row $row): self
+    public static function set(Name|Name\Aliased $table, Row $row): self
     {
-        return new self($table, $row, Where::everything());
+        return new self($table, $row, Sequence::of(), Where::everything());
+    }
+
+    public function join(Join $join): self
+    {
+        return new self(
+            $this->table,
+            $this->row,
+            ($this->joins)($join),
+            $this->where,
+        );
     }
 
     public function where(Specification $specification): self
@@ -46,6 +68,7 @@ final class Update implements Query
         return new self(
             $this->table,
             $this->row,
+            $this->joins,
             Where::of($specification),
         );
     }
@@ -69,8 +92,14 @@ final class Update implements Query
 
         /** @var non-empty-string */
         return \sprintf(
-            'UPDATE %s SET %s %s',
+            'UPDATE %s%s SET %s %s',
             $this->table->sql(),
+            $this
+                ->joins
+                ->map(static fn($join) => $join->sql())
+                ->map(Str::of(...))
+                ->fold(new Concat)
+                ->toString(),
             Str::of(', ')->join($columns)->toString(),
             $this->where->sql(),
         );
