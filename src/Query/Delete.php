@@ -87,14 +87,12 @@ final class Delete implements Query
             'DELETE %s FROM %s%s %s',
             Str::of(', ')->join($tables)->toString(),
             $this->table->sql(),
-            $this->joins->match(
-                static fn($join, $rest) => $join->sql().$rest
-                    ->map(static fn($join) => $join->sql())
-                    ->map(Str::of(...))
-                    ->fold(new Concat)
-                    ->toString(),
-                static fn() => '',
-            ),
+            $this
+                ->joins
+                ->map(static fn($join) => $join->sql())
+                ->map(Str::of(...))
+                ->fold(new Concat)
+                ->toString(),
             $this->where->sql(),
         );
     }
