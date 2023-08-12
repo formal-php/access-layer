@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.8.0 - 2023-08-12
+
+### Added
+
+- You can now use an aliased table name to update from with `Formal\AccessLayer\Update`
+- `Formal\AccessLayer\Update::join()`
+
 ## 2.7.1 - 2023-08-12
 
 ### Fixed
