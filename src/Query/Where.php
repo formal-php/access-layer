@@ -225,10 +225,33 @@ final class Where
             $value = $value->value();
         }
 
+        // Blackslash, underscore and percentage are special characters in a
+        // LIKE condition in order to build patterns, they are escaped here so
+        // the user can use these characters for an exact match as would suggest
+        // the Sign name.
+        // If you land here because your pattern doesn't work, know that you
+        // can't achieve this with a specification, you'll need to build the SQL
+        // query yourself.
         return match ($specification->sign()) {
-            Sign::startsWith => "%$value",
-            Sign::endsWith => "$value%",
-            Sign::contains => "%$value%",
+            Sign::startsWith => Str::of((string) $value)
+                ->replace('\\', '\\\\')
+                ->replace('_', '\_')
+                ->replace('%', '\%')
+                ->append('%')
+                ->toString(),
+            Sign::endsWith => Str::of((string) $value)
+                ->replace('\\', '\\\\')
+                ->replace('_', '\_')
+                ->replace('%', '\%')
+                ->prepend('%')
+                ->toString(),
+            Sign::contains => Str::of((string) $value)
+                ->replace('\\', '\\\\')
+                ->replace('_', '\_')
+                ->replace('%', '\%')
+                ->append('%')
+                ->prepend('%')
+                ->toString(),
             default => $value,
         };
     }
