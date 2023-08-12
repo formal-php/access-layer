@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.10.0 - 2023-08-12
+
+### Changed
+
+- `Formal\AccessLayer\Query\Delete` deletes from the main table instead of all joined tables as well
+
 ## 2.9.0 - 2023-08-12
 
 ### Added

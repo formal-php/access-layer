@@ -383,28 +383,47 @@ return static function() {
             $connection(Insert::into(
                 $child->name(),
                 Row::of([
-                    'id' => 1,
+                    'id' => 2,
                 ]),
             ));
             $connection(Insert::into(
                 $parent->name(),
                 Row::of([
                     'id' => 1,
-                    'child' => 1,
+                    'child' => 2,
                 ]),
             ));
 
             $connection(
-                Delete::from($parent)->join(
-                    Join::left($child)->on(
-                        Column\Name::of('child')->in($parent),
-                        Column\Name::of('id')->in($child),
-                    ),
-                ),
+                Delete::from($parent)
+                    ->join(
+                        Join::left($child)->on(
+                            Column\Name::of('child')->in($parent),
+                            Column\Name::of('id')->in($child),
+                        ),
+                    )
+                    ->where(new class implements Comparator {
+                        use Composable;
+
+                        public function property(): string
+                        {
+                            return 'child.id';
+                        }
+
+                        public function sign(): Sign
+                        {
+                            return Sign::equality;
+                        }
+
+                        public function value(): int
+                        {
+                            return 2;
+                        }
+                    }),
             );
 
             $rows = $connection(Select::from($child));
-            $assert->count(0, $rows);
+            $assert->count(1, $rows);
 
             $rows = $connection(Select::from($parent));
             $assert->count(0, $rows);
