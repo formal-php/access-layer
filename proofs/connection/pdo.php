@@ -291,10 +291,10 @@ return static function() {
     yield test(
         'Delete join',
         static function($assert) use ($connection) {
-            $parent = Table\Name::of('test_join_delete_parent');
-            $child = Table\Name::of('test_join_delete_child');
+            $parent = Table\Name::of('test_join_delete_parent')->as('parent');
+            $child = Table\Name::of('test_join_delete_child')->as('child');
             $connection(CreateTable::ifNotExists(
-                $child,
+                $child->name(),
                 Column::of(
                     Column\Name::of('id'),
                     Column\Type::int(),
@@ -302,7 +302,7 @@ return static function() {
             )->primaryKey(Column\Name::of('id')));
             $connection(
                 CreateTable::ifNotExists(
-                    $parent,
+                    $parent->name(),
                     Column::of(
                         Column\Name::of('id'),
                         Column\Type::int(),
@@ -315,18 +315,18 @@ return static function() {
                     ->primaryKey(Column\Name::of('id'))
                     ->foreignKey(
                         Column\Name::of('child'),
-                        $child,
+                        $child->name(),
                         Column\Name::of('id'),
                     ),
             );
             $connection(Insert::into(
-                $child,
+                $child->name(),
                 Row::of([
                     'id' => 1,
                 ]),
             ));
             $connection(Insert::into(
-                $parent,
+                $parent->name(),
                 Row::of([
                     'id' => 1,
                     'child' => 1,
@@ -348,8 +348,8 @@ return static function() {
             $rows = $connection(Select::from($parent));
             $assert->count(0, $rows);
 
-            $connection(DropTable::named($parent));
-            $connection(DropTable::named($child));
+            $connection(DropTable::named($parent->name()));
+            $connection(DropTable::named($child->name()));
         },
     );
 

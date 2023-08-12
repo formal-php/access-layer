@@ -24,7 +24,7 @@ use Innmind\Immutable\{
  */
 final class Delete implements Query
 {
-    private Name $table;
+    private Name|Name\Aliased $table;
     /** @var Sequence<Join> */
     private Sequence $joins;
     private Where $where;
@@ -33,7 +33,7 @@ final class Delete implements Query
      * @param Sequence<Join> $joins
      */
     private function __construct(
-        Name $table,
+        Name|Name\Aliased $table,
         Sequence $joins,
         Where $where,
     ) {
@@ -45,7 +45,7 @@ final class Delete implements Query
     /**
      * @psalm-pure
      */
-    public static function from(Name $table): self
+    public static function from(Name|Name\Aliased $table): self
     {
         return new self($table, Sequence::of(), Where::everything());
     }
@@ -75,9 +75,7 @@ final class Delete implements Query
 
     public function sql(): string
     {
-        /** @var Sequence<Name|Name\Aliased> */
-        $tables = Sequence::of($this->table);
-        $tables = $tables
+        $tables = Sequence::of($this->table)
             ->append($this->joins->map(static fn($join) => $join->table()))
             ->map(static fn($table) => match (true) {
                 $table instanceof Name\Aliased => "`{$table->alias()}`",

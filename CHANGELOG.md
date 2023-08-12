@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.7.0 - 2023-08-12
+
+### Added
+
+- You can now use an aliased table name to delete from with `Formal\AccessLayer\Delete`
+
 ## 2.6.0 - 2023-08-06
 
 ### Added
