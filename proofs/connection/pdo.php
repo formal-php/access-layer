@@ -290,6 +290,66 @@ return static function() {
     );
 
     yield test(
+        'Delete set null',
+        static function($assert) use ($connection) {
+            $parent = Table\Name::of('test_set_null_delete_parent');
+            $child = Table\Name::of('test_set_null_delete_child');
+            $connection(CreateTable::ifNotExists(
+                $parent,
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+            )->primaryKey(Column\Name::of('id')));
+            $connection(CreateTable::ifNotExists(
+                $child,
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+                Column::of(
+                    Column\Name::of('parent'),
+                    Column\Type::int()->nullable(),
+                ),
+            )->constraint(
+                ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))->onDeleteSetNull(),
+            ));
+            $connection(Insert::into(
+                $parent,
+                Row::of([
+                    'id' => 1,
+                ]),
+            ));
+            $connection(Insert::into(
+                $child,
+                Row::of([
+                    'id' => 1,
+                    'parent' => 1,
+                ]),
+                Row::of([
+                    'id' => 2,
+                    'parent' => 1,
+                ]),
+            ));
+
+            $connection(Delete::from($parent));
+            $rows = $connection(Select::from($child))
+                ->map(static fn($row) => $row->toArray())
+                ->toList();
+
+            $assert
+                ->expected([
+                    ['id' => 1, 'parent' => null],
+                    ['id' => 2, 'parent' => null],
+                ])
+                ->same($rows);
+
+            $connection(DropTable::named($child));
+            $connection(DropTable::named($parent));
+        },
+    );
+
+    yield test(
         'Delete join',
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_join_delete_parent')->as('parent');
