@@ -75,26 +75,20 @@ final class Delete implements Query
 
     public function sql(): string
     {
-        $tables = Sequence::of($this->table)
-            ->append($this->joins->map(static fn($join) => $join->table()))
-            ->map(static fn($table) => match (true) {
-                $table instanceof Name\Aliased => "`{$table->alias()}`",
-                default => $table->sql(),
-            });
-
         /** @var non-empty-string */
         return \sprintf(
             'DELETE %s FROM %s%s %s',
-            Str::of(', ')->join($tables)->toString(),
+            match (true) {
+                $this->table instanceof Name\Aliased => "`{$this->table->alias()}`",
+                default => $this->table->sql(),
+            },
             $this->table->sql(),
-            $this->joins->match(
-                static fn($join, $rest) => $join->sql().$rest
-                    ->map(static fn($join) => $join->sql())
-                    ->map(Str::of(...))
-                    ->fold(new Concat)
-                    ->toString(),
-                static fn() => '',
-            ),
+            $this
+                ->joins
+                ->map(static fn($join) => $join->sql())
+                ->map(Str::of(...))
+                ->fold(new Concat)
+                ->toString(),
             $this->where->sql(),
         );
     }
