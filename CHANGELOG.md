@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.9.0 - 2023-08-12
+
+### Added
+
+- `Formal\AccessLayer\Query\Constraint\ForeignKey::onDeleteSetNull()`
+
 ## 2.8.0 - 2023-08-12
 
 ### Added

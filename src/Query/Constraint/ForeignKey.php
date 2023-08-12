@@ -7,6 +7,7 @@ use Formal\AccessLayer\Table\{
     Name,
     Column,
 };
+use Innmind\Immutable\Maybe;
 
 /**
  * @psalm-immutable
@@ -16,18 +17,22 @@ final class ForeignKey
     private Column\Name $column;
     private Name $target;
     private Column\Name $reference;
-    private bool $cascadeDelete;
+    /** @var Maybe<non-empty-string> */
+    private Maybe $onDelete;
 
+    /**
+     * @param Maybe<non-empty-string> $onDelete
+     */
     private function __construct(
         Column\Name $column,
         Name $target,
         Column\Name $reference,
-        bool $cascadeDelete = false,
+        Maybe $onDelete,
     ) {
         $this->column = $column;
         $this->target = $target;
         $this->reference = $reference;
-        $this->cascadeDelete = $cascadeDelete;
+        $this->onDelete = $onDelete;
     }
 
     /**
@@ -38,7 +43,10 @@ final class ForeignKey
         Name $target,
         Column\Name $reference,
     ): self {
-        return new self($column, $target, $reference);
+        /** @var Maybe<non-empty-string> */
+        $onDelete = Maybe::nothing();
+
+        return new self($column, $target, $reference, $onDelete);
     }
 
     public function onDeleteCascade(): self
@@ -47,7 +55,17 @@ final class ForeignKey
             $this->column,
             $this->target,
             $this->reference,
-            true,
+            Maybe::just('CASCADE'),
+        );
+    }
+
+    public function onDeleteSetNull(): self
+    {
+        return new self(
+            $this->column,
+            $this->target,
+            $this->reference,
+            Maybe::just('SET NULL'),
         );
     }
 
@@ -65,9 +83,9 @@ final class ForeignKey
             $this->reference->sql(),
         );
 
-        return $sql.(match ($this->cascadeDelete) {
-            true => ' ON DELETE CASCADE',
-            false => '',
-        });
+        return $sql.$this->onDelete->match(
+            static fn($strategy) => " ON DELETE $strategy",
+            static fn() => '',
+        );
     }
 }
