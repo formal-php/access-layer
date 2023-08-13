@@ -68,7 +68,7 @@ final class Insert implements Query
     private function buildInsert(Row $row): string
     {
         /** @var Sequence<string> */
-        $keys = $row->values()->map(static fn($value) => $value->column()->sql());
+        $keys = $row->values()->map(static fn($value) => $value->columnSql());
         /** @var Sequence<string> */
         $values = $row->values()->map(static fn() => '?');
 

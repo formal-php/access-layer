@@ -88,7 +88,7 @@ final class Update implements Query
         $columns = $this
             ->row
             ->values()
-            ->map(static fn($value) => "{$value->column()->sql()} = ?");
+            ->map(static fn($value) => "{$value->columnSql()} = ?");
 
         /** @var non-empty-string */
         return \sprintf(
