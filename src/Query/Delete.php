@@ -10,7 +10,6 @@ use Formal\AccessLayer\{
     Query\Parameter\Type,
     Table\Name,
     Table\Column,
-    Row,
 };
 use Innmind\Specification\Specification;
 use Innmind\Immutable\{

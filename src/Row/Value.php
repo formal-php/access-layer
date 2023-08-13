@@ -13,11 +13,11 @@ use Formal\AccessLayer\{
  */
 final class Value
 {
-    private Name $column;
+    private Name|Name\Namespaced $column;
     private mixed $value;
     private Type $type;
 
-    public function __construct(Name $column, mixed $value, Type $type = null)
+    public function __construct(Name|Name\Namespaced $column, mixed $value, Type $type = null)
     {
         $this->column = $column;
         $this->value = $value;
@@ -26,7 +26,18 @@ final class Value
 
     public function column(): Name
     {
-        return $this->column;
+        return match (true) {
+            $this->column instanceof Name => $this->column,
+            default => $this->column->column(),
+        };
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    public function columnSql(): string
+    {
+        return $this->column->sql();
     }
 
     public function value(): mixed

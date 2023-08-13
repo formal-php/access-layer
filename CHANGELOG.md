@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.11.0 - 2023-08-13
+
+### Added
+
+- `Formal\AccessLayer\Row\Value` now accepts a namespaced column name
+- `Formal\AccessLayer\Row\Value::columnSql()`
+
 ## 2.10.0 - 2023-08-12
 
 ### Changed

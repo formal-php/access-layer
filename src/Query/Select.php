@@ -8,7 +8,6 @@ use Formal\AccessLayer\{
     Query\Parameter,
     Query\Select\Direction,
     Query\Select\Join,
-    Row,
     Table\Name,
     Table\Column,
 };
