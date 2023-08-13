@@ -5,7 +5,6 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
-    Row,
     Table\Name,
 };
 use Innmind\Immutable\Sequence;
