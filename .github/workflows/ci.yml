@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.2']
+        php-version: ['8.2', '8.3']
         dependency-versions: ['lowest', 'highest']
     name: 'BlackBox'
     services:
@@ -41,7 +41,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.2']
+        php-version: ['8.2', '8.3']
         dependency-versions: ['lowest', 'highest']
     name: 'Coverage'
     services:
@@ -78,7 +78,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.2']
+        php-version: ['8.2', '8.3']
         dependencies: ['lowest', 'highest']
     name: 'PHPUnit'
     services:
@@ -111,7 +111,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.2']
+        php-version: ['8.2', '8.3']
         dependencies: ['lowest', 'highest']
     name: 'Coverage PHPUnit'
     services:
@@ -147,7 +147,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.2']
+        php-version: ['8.2', '8.3']
         dependencies: ['lowest', 'highest']
     name: 'Psalm'
     steps:
