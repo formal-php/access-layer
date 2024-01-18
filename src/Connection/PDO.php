@@ -46,9 +46,39 @@ final class PDO implements Connection
         );
     }
 
+    public function __invoke(Query $query): Sequence
+    {
+        return match (\get_class($query)) {
+            Query\StartTransaction::class => $this->transaction(
+                $query,
+                fn(): bool => $this->pdo->beginTransaction(),
+            ),
+            Query\Commit::class => $this->transaction(
+                $query,
+                fn(): bool => $this->pdo->commit(),
+            ),
+            Query\Rollback::class => $this->transaction(
+                $query,
+                fn(): bool => $this->pdo->rollBack(),
+            ),
+            default => $this->execute($query),
+        };
+    }
+
+    public static function of(Url $dsn): self
+    {
+        return new self($dsn);
+    }
+
+    public static function persistent(Url $dsn): self
+    {
+        return new self($dsn, [\PDO::ATTR_PERSISTENT => true]);
+    }
+
     private function parseDsn(Url $dsn): string
     {
         $charset = '';
+
         if (!$dsn->query()->equals(UrlQuery::none())) {
             \parse_str($dsn->query()->toString(), $query);
 
@@ -81,35 +111,6 @@ final class PDO implements Connection
             \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
             $charset,
         );
-    }
-
-    public function __invoke(Query $query): Sequence
-    {
-        return match (\get_class($query)) {
-            Query\StartTransaction::class => $this->transaction(
-                $query,
-                fn(): bool => $this->pdo->beginTransaction(),
-            ),
-            Query\Commit::class => $this->transaction(
-                $query,
-                fn(): bool => $this->pdo->commit(),
-            ),
-            Query\Rollback::class => $this->transaction(
-                $query,
-                fn(): bool => $this->pdo->rollBack(),
-            ),
-            default => $this->execute($query),
-        };
-    }
-
-    public static function of(Url $dsn): self
-    {
-        return new self($dsn);
-    }
-
-    public static function persistent(Url $dsn): self
-    {
-        return new self($dsn, [\PDO::ATTR_PERSISTENT => true]);
     }
 
     /**
