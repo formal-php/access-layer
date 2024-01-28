@@ -24,6 +24,7 @@ use Innmind\Specification\{
     Sign,
 };
 use Innmind\BlackBox\Set;
+use Innmind\BlackBox\Tag;
 
 return static function() {
     $port = \getenv('DB_PORT') ?: '3306';
@@ -522,4 +523,20 @@ return static function() {
             Set\Elements::of($connection, $persistent),
         )->named('PDO');
     }
+
+    yield test(
+        'Regression on sub query',
+        static function($assert) use ($connection) {
+            $property = new Properties\SelectWhereInQuery(
+                '774e8874-85cb-d82d-78eb-1d0769ef9638',
+                '6504d5b2-93dd-b16c-580b-ac21e175f010',
+                'hj9 6dSu$FC=fllrAF=91>nR9}AHz+3]RT4Mv1asIT/\'<=*FD8:)xQPv3|Rp6{zh~K$;"/q_%[{*tm8FV:H^]|AVf;$Y\|Xvz\'Swe;sXQw]fuuCOEBz`tm@Py:8fJ$NzXM %2Q8Y;Xj6DCoF.b0$xT',
+                -1984601467926813946,
+                '',
+                'Sd',
+            );
+
+            $property->ensureHeldBy($assert, $connection);
+        },
+    )->tag(Tag::wip);
 };
