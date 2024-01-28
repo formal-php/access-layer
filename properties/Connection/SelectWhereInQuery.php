@@ -133,8 +133,6 @@ final class SelectWhereInQuery implements Property
                     );
             }
         });
-        dump($select->parameters());
-        dd($select->sql());
         $rows = $connection($select);
 
         $assert->count(1, $rows);
