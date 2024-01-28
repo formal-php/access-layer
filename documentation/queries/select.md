@@ -79,4 +79,4 @@ $select = Select::from(new Name('users'))->where(
 $users = $connection($select);
 ```
 
-**Note**: the property name can include the name of the table to match by using the format `'{table}.{column}'`.
+**Note**: the property name can include the name of the table to match by using the format `'{table}.{column}'`. The value of the specification can also be a query (this will translated to a sub query).

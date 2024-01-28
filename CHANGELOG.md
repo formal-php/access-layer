@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- Queries can be used a value of a specification in a where clause
+
 ## 2.12.0 - 2023-09-23
 
 ### Added

@@ -65,6 +65,7 @@ final class Connection
             Connection\SelectWhereEndsWith::class,
             Connection\SelectWhereContains::class,
             Connection\SelectWhereIn::class,
+            Connection\SelectWhereInQuery::class,
             Connection\SelectOffset::class,
             Connection\SelectLimit::class,
             Connection\SelectOrder::class,
@@ -78,6 +79,8 @@ final class Connection
     public static function seed(Concrete $connection): void
     {
         $connection(DropTable::ifExists(new Name('test')));
+        $connection(DropTable::ifExists(new Name('test_values')));
         $connection(SQL::of('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, `registerNumber` bigint NOT NULL, PRIMARY KEY (id));'));
+        $connection(SQL::of('CREATE TABLE `test_values` (`id` varchar(36) NOT NULL, `value` varchar(255) NOT NULL);'));
     }
 }
