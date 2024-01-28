@@ -237,7 +237,7 @@ final class Type
             $this->precision,
             $this->nullable ? '' : 'NOT NULL',
             $this->buildDefault(),
-            $this->comment ? "COMMENT '{$this->escape($this->comment)}'" : '',
+            \is_string($this->comment) ? "COMMENT '{$this->escape($this->comment)}'" : '',
         );
     }
 

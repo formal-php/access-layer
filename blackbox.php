@@ -25,6 +25,5 @@ Application::new($argv)
         false => 100,
         default => 1,
     })
-    ->disableShrinking()
     ->tryToProve(Load::everythingIn(__DIR__.'/proofs/'))
     ->exit();

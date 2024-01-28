@@ -18,6 +18,11 @@ return static function() {
         new NullLogger,
     );
     Properties::seed($connection);
+    $connections = Set\Call::of(static function() use ($connection) {
+        Properties::seed($connection);
+
+        return $connection;
+    });
 
     yield test(
         'Logger interface',
@@ -29,13 +34,13 @@ return static function() {
     yield properties(
         'Logger properties',
         Properties::any(),
-        Set\Elements::of($connection),
+        $connections,
     );
 
     foreach (Properties::list() as $property) {
         yield property(
             $property,
-            Set\Elements::of($connection),
+            $connections,
         )->named('Logger');
     }
 };

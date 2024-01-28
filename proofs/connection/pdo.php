@@ -30,6 +30,18 @@ return static function() {
     $connection = PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example"));
     $persistent = PDO::persistent(Url::of("mysql://root:root@127.0.0.1:$port/example"));
     Properties::seed($connection);
+    $connections = Set\Either::any(
+        Set\Call::of(static function() use ($connection) {
+            Properties::seed($connection);
+
+            return $connection;
+        }),
+        Set\Call::of(static function() use ($persistent) {
+            Properties::seed($persistent);
+
+            return $persistent;
+        }),
+    );
 
     yield test(
         'PDO interface',
@@ -513,13 +525,13 @@ return static function() {
     yield properties(
         'PDO properties',
         Properties::any(),
-        Set\Elements::of($connection, $persistent),
+        $connections,
     );
 
     foreach (Properties::list() as $property) {
         yield property(
             $property,
-            Set\Elements::of($connection, $persistent),
+            $connections,
         )->named('PDO');
     }
 };

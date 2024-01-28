@@ -60,4 +60,5 @@ $delete = Delete::from(new Name('users'))->where(
 $connection($delete);
 ```
 
-**Note**: the property name can include the name of the table to match by using the format `'{table}.{column}'`.
+> [!NOTE]
+> the property name can include the name of the table to match by using the format `'{table}.{column}'`.
