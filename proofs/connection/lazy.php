@@ -16,6 +16,11 @@ return static function() {
         static fn() => PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example")),
     );
     Properties::seed($connection);
+    $connections = Set\Call::of(static function() use ($connection) {
+        Properties::seed($connection);
+
+        return $connection;
+    });
 
     yield test(
         'Lazy interface',
@@ -34,13 +39,13 @@ return static function() {
     yield properties(
         'Lazy properties',
         Properties::any(),
-        Set\Elements::of($connection),
+        $connections,
     );
 
     foreach (Properties::list() as $property) {
         yield property(
             $property,
-            Set\Elements::of($connection),
+            $connections,
         )->named('Lazy');
     }
 };
