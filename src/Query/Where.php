@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Table\Name,
     Table\Column,
     Row\Value,
+    Query,
 };
 use Innmind\Specification\{
     Specification,
@@ -139,6 +140,14 @@ final class Where
 
     private function buildInSql(Comparator $specification): string
     {
+        if ($specification->value() instanceof Query) {
+            return \sprintf(
+                '%s IN (%s)',
+                $this->buildColumn($specification),
+                $specification->value()->sql(),
+            );
+        }
+
         /** @var array */
         $value = $this->value($specification);
         $placeholders = \array_map(
@@ -202,6 +211,10 @@ final class Where
         $type = $this->type($specification);
 
         if ($specification->sign() === Sign::in) {
+            if ($specification->value() instanceof Query) {
+                return $parameters->append($specification->value()->parameters());
+            }
+
             /**
              * @var mixed $in
              */
