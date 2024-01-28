@@ -164,7 +164,10 @@ $update = $update->where(
     (new Username('some username'))->or(new Username('other username')),
 );
 $connection($update);</code></pre>
-<p><strong>Note</strong>: the property name can include the name of the table to match by using the format <code>'{table}.{column}'</code>.</p></main>
+<blockquote>
+<p>[!NOTE]
+the property name can include the name of the table to match by using the format <code>'{table}.{column}'</code>.</p>
+</blockquote></main>
     <footer>
         <a href="https://github.com/formal-php/access-layer/" target="_blank">GitHub</a>
     </footer>

@@ -107,7 +107,10 @@ use Innmind\Url\Url;
 
 $connection = PDO::of(Url::of('mysql://user:pwd@127.0.0.1:3306/database_name?charset=utf8mb4'));</code></pre>
 <p>When executing a <a href="../queries/sql.html">query</a> through this connection it will return a <a href="https://innmind.github.io/Immutable/SEQUENCE.html#defer">deferred <code>Sequence</code></a> of rows. This means that the rows returned from the database are only loaded once you iterate over the sequence. (Queries with the named constructor <code>::onDemand()</code> will return a lazy <code>Sequence</code>).</p>
-<p><strong>Important</strong>: as soon as you instanciate the class it will open a connection to the database, if you want to open it upon first query take a look at the <a href="lazy.html"><code>Lazy</code> connection</a>.</p></main>
+<blockquote>
+<p>[!IMPORTANT]
+as soon as you instanciate the class it will open a connection to the database, if you want to open it upon first query take a look at the <a href="lazy.html"><code>Lazy</code> connection</a>.</p>
+</blockquote></main>
     <footer>
         <a href="https://github.com/formal-php/access-layer/" target="_blank">GitHub</a>
     </footer>

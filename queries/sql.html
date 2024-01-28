@@ -114,10 +114,16 @@ $tables->foreach(function(Row $row): void {
         static fn() => '',
     );
 });</code></pre>
-<p><strong>Note</strong>: if you replace the constructor <code>::of()</code> by <code>::onDemand()</code> it will run your query lazily by returning a lazy <code>Sequence</code>, meaning it won't keep the results in memory allowing you to handle very large results. This is particularly useful for <code>SELECT</code> queries.</p>
+<blockquote>
+<p>[!NOTE]
+if you replace the constructor <code>::of()</code> by <code>::onDemand()</code> it will run your query lazily by returning a lazy <code>Sequence</code>, meaning it won't keep the results in memory allowing you to handle very large results. This is particularly useful for <code>SELECT</code> queries.</p>
+</blockquote>
 <h2 id="parameters"><a href="#parameters" class="anchor">#</a>Parameters</h2>
 <p>For some queries you will need to specify parameters to provide values, you can bind them either by specifying their name or by an index</p>
-<p><strong>Important</strong>: do not copy the values directly in the sql query as you'll be vulnerable to sql injection.</p>
+<blockquote>
+<p>[!IMPORTANT]
+do not copy the values directly in the sql query as you'll be vulnerable to sql injection.</p>
+</blockquote>
 <h3 id="bound-by-name"><a href="#bound-by-name" class="anchor">#</a>Bound by name</h3>
 <p>This is useful when you use the same parameter multiple times in your query.</p>
 <pre><code class="language-php">use Formal\AccessLayer\Query\Parameter;
@@ -134,7 +140,10 @@ $insert = $insert
     ->with(Parameter::of('some username value'))
     ->with(Parameter::of('some name'));
 $connection($insert);</code></pre>
-<p><strong>Note</strong>: traditionally the index value rely on the user (you) to be specified (see <a href="https://www.php.net/manual/en/pdostatement.bindvalue.php"><code>PDOStatement::bindValue</code></a>), but this increase the probability for you to make an error. This problem is resolved here as the order in which the parameters are provided is always respected, this allows the connection to correctly provide the index to <code>\PDO</code>.</p></main>
+<blockquote>
+<p>[!NOTE]
+traditionally the index value rely on the user (you) to be specified (see <a href="https://www.php.net/manual/en/pdostatement.bindvalue.php"><code>PDOStatement::bindValue</code></a>), but this increase the probability for you to make an error. This problem is resolved here as the order in which the parameters are provided is always respected, this allows the connection to correctly provide the index to <code>\PDO</code>.</p>
+</blockquote></main>
     <footer>
         <a href="https://github.com/formal-php/access-layer/" target="_blank">GitHub</a>
     </footer>
