@@ -84,4 +84,5 @@ $create = $create->foreignKey(
 $connection($create);
 ```
 
-**Note**: this will name the foreign key `FK_user_id` so it's easier to reference it afterwards.
+> [!NOTE]
+> this will name the foreign key `FK_user_id` so it's easier to reference it afterwards.

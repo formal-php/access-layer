@@ -18,13 +18,15 @@ $tables->foreach(function(Row $row): void {
 });
 ```
 
-**Note**: if you replace the constructor `::of()` by `::onDemand()` it will run your query lazily by returning a lazy `Sequence`, meaning it won't keep the results in memory allowing you to handle very large results. This is particularly useful for `SELECT` queries.
+> [!NOTE]
+> if you replace the constructor `::of()` by `::onDemand()` it will run your query lazily by returning a lazy `Sequence`, meaning it won't keep the results in memory allowing you to handle very large results. This is particularly useful for `SELECT` queries.
 
 ## Parameters
 
 For some queries you will need to specify parameters to provide values, you can bind them either by specifying their name or by an index
 
-**Important**: do not copy the values directly in the sql query as you'll be vulnerable to sql injection.
+> [!IMPORTANT]
+> do not copy the values directly in the sql query as you'll be vulnerable to sql injection.
 
 ### Bound by name
 
@@ -52,4 +54,5 @@ $insert = $insert
 $connection($insert);
 ```
 
-**Note**: traditionally the index value rely on the user (you) to be specified (see [`PDOStatement::bindValue`](https://www.php.net/manual/en/pdostatement.bindvalue.php)), but this increase the probability for you to make an error. This problem is resolved here as the order in which the parameters are provided is always respected, this allows the connection to correctly provide the index to `\PDO`.
+> [!NOTE]
+> traditionally the index value rely on the user (you) to be specified (see [`PDOStatement::bindValue`](https://www.php.net/manual/en/pdostatement.bindvalue.php)), but this increase the probability for you to make an error. This problem is resolved here as the order in which the parameters are provided is always respected, this allows the connection to correctly provide the index to `\PDO`.

@@ -8,7 +8,8 @@ This a simple abstraction layer on top of builtin `\PDO` class to offer a minima
 
 The goal is separate expression of queries and their execution by using immutable structures and eliminating states wherever possible.
 
-**Important**: you must use [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm) to make sure you use this library correctly.
+> [!IMPORTANT]
+> you must use [`vimeo/psalm`](https://packagist.org/packages/vimeo/psalm) to make sure you use this library correctly.
 
 ## Installation
 
