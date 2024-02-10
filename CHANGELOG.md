@@ -1,5 +1,12 @@
 # Changelog
 
+## 2.15.0 - 2024-02-10
+
+### Added
+
+- `Formal\AccessLayer\Query\CreateTable::unique()`
+- `Formal\AccessLayer\Query\Constraint\Unique`
+
 ## 2.14.0 - 2024-02-10
 
 ### Added

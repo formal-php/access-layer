@@ -536,6 +536,50 @@ return static function() {
         },
     );
 
+    yield proof(
+        'Unique constraint',
+        given(Set\Integers::between(0, 1_000_000)),
+        static function($assert, $int) use ($connection) {
+            $table = Table\Name::of('test_unique');
+            $connection(CreateTable::ifNotExists(
+                $table,
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+                Column::of(
+                    Column\Name::of('other'),
+                    Column\Type::varchar(3),
+                ),
+            )->unique(Column\Name::of('id'), Column\Name::of('other')));
+
+            $connection(Insert::into(
+                $table,
+                Row::of([
+                    'id' => $int,
+                    'other' => 'foo',
+                ]),
+            ));
+            $connection(Insert::into(
+                $table,
+                Row::of([
+                    'id' => $int,
+                    'other' => 'bar',
+                ]),
+            ));
+
+            $assert->throws(fn() => $connection(Insert::into(
+                $table,
+                Row::of([
+                    'id' => $int,
+                    'other' => 'foo',
+                ]),
+            )));
+
+            $connection(DropTable::named($table));
+        },
+    );
+
     yield properties(
         'PDO properties',
         Properties::any(),

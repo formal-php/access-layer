@@ -39,15 +39,13 @@ final class SelectWhereInQuery implements Property
         string $uuid2,
         string $username,
         int $number,
-        string $value1,
-        string $value2,
+        array $values,
     ) {
         $this->uuid1 = $uuid1;
         $this->uuid2 = $uuid2;
         $this->username = $username;
         $this->number = $number;
-        $this->value1 = $value1;
-        $this->value2 = $value2;
+        [$this->value1, $this->value2] = $values;
     }
 
     public static function any(): Set
@@ -58,8 +56,10 @@ final class SelectWhereInQuery implements Property
             Set\Uuid::any(),
             Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
             Set\Integers::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
+            Set\MutuallyExclusive::of(
+                Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
+                Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
+            ),
         );
     }
 
