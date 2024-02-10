@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query,
     Query\Constraint\PrimaryKey,
     Query\Constraint\ForeignKey,
+    Query\Constraint\Unique,
     Table\Name,
     Table\Column,
 };
@@ -23,13 +24,13 @@ final class CreateTable implements Query
     private Name $name;
     /** @var Sequence<Column> */
     private Sequence $columns;
-    /** @var Sequence<PrimaryKey|ForeignKey> */
+    /** @var Sequence<PrimaryKey|ForeignKey|Unique> */
     private Sequence $constraints;
     private bool $ifNotExists;
 
     /**
      * @param Sequence<Column> $columns
-     * @param Sequence<PrimaryKey|ForeignKey> $constraints
+     * @param Sequence<PrimaryKey|ForeignKey|Unique> $constraints
      */
     private function __construct(
         bool $ifNotExists,
@@ -81,7 +82,15 @@ final class CreateTable implements Query
         return $this->constraint(ForeignKey::of($column, $target, $reference));
     }
 
-    public function constraint(PrimaryKey|ForeignKey $constraint): self
+    /**
+     * @no-named-arguments
+     */
+    public function unique(Column\Name $column, Column\Name ...$columns): self
+    {
+        return $this->constraint(Unique::of($column, ...$columns));
+    }
+
+    public function constraint(PrimaryKey|ForeignKey|Unique $constraint): self
     {
         return new self(
             $this->ifNotExists,
