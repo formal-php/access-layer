@@ -367,7 +367,7 @@ return static function() {
             $parent = Table\Name::of('parent_table');
 
             $assert->same(
-                'CONSTRAINT FK_foo FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
+                'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))
                     ->named('foo')
                     ->sql(),
