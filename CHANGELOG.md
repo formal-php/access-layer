@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.14.0 - 2024-02-10
+
+### Added
+
+- `Formal\AccessLayer\Query\Constraint\ForeignKey::named()`
+
 ## 2.13.0 - 2024-01-28
 
 ### Added
