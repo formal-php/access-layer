@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Changed
+
+- The type of a raw value is now determined from the value instead of using `unspecified` instead.
+
 ## 2.16.0 - 2024-05-29
 
 ### Added
