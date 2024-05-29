@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Query\Constraint;
 
-use Formal\AccessLayer\Table\{
-    Name,
-    Column,
-};
+use Formal\AccessLayer\Table\Column;
 use Innmind\Immutable\{
     Maybe,
     Sequence,

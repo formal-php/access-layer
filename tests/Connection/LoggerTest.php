@@ -5,7 +5,6 @@ namespace Tests\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
     Connection\Logger,
-    Connection\PDO,
     Connection,
     Query\SQL,
     Query\Parameter,

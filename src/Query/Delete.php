@@ -6,10 +6,7 @@ namespace Formal\AccessLayer\Query;
 use Formal\AccessLayer\{
     Query,
     Query\Select\Join,
-    Query\Parameter,
-    Query\Parameter\Type,
     Table\Name,
-    Table\Column,
 };
 use Innmind\Specification\Specification;
 use Innmind\Immutable\{

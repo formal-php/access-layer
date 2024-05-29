@@ -6,7 +6,6 @@ namespace Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Connection,
     Query,
-    Query\Parameter,
 };
 use Innmind\Immutable\Sequence;
 use Psr\Log\LoggerInterface;

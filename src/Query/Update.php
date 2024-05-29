@@ -5,11 +5,8 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
-    Query\Parameter,
-    Query\Parameter\Type,
     Query\Select\Join,
     Table\Name,
-    Table\Column,
     Row,
 };
 use Innmind\Specification\Specification;
