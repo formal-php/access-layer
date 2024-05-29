@@ -5,7 +5,6 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
-    Query\Parameter,
     Query\Select\Direction,
     Query\Select\Join,
     Table\Name,

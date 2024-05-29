@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.16.0 - 2024-05-29
+
+### Added
+
+- `Formal\AccessLayer\Query\Parameter\Type::for()` to determine a type for any given value
+
 ## 2.15.0 - 2024-02-10
 
 ### Added

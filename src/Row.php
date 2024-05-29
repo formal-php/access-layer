@@ -6,7 +6,6 @@ namespace Formal\AccessLayer;
 use Formal\AccessLayer\{
     Row\Value,
     Table\Column,
-    Query\Parameter\Type,
 };
 use Innmind\Immutable\{
     Sequence,
