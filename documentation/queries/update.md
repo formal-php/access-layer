@@ -73,5 +73,5 @@ $update = $update->where(
 $connection($update);
 ```
 
-> [!NOTE]
-> the property name can include the name of the table to match by using the format `'{table}.{column}'`.
+!!! note ""
+    The property name can include the name of the table to match by using the format `'{table}.{column}'`.

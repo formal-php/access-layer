@@ -15,8 +15,8 @@ $connection = Logger::psr(
 );
 ```
 
-> [!NOTE]
-> it doesn't log any information about the returned rows to prevent _unwrapping_ the deferred `Sequence` returned by [`PDO`](pdo.md).
+!!! note ""
+    It doesn't log any information about the returned rows to prevent _unwrapping_ the deferred `Sequence` returned by [`PDO`](pdo.md).
 
-> [!IMPORTANT]
-> it won't log any errors for lazy queries since the query is not executed until the first call on the sequence.
+!!! warning ""
+    It won't log any errors for lazy queries since the query is not executed until the first call on the sequence.
