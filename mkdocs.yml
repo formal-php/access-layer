@@ -100,6 +100,6 @@ plugins:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/Innmind
+      link: https://github.com/formal-php
     - icon: fontawesome/brands/x-twitter
       link: https://twitter.com/Baptouuuu
