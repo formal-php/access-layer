@@ -4,6 +4,20 @@ docs_dir: documentation/
 
 nav:
   - Home: index.md
+  - Connections:
+    - PDO: connections/pdo.md
+    - Lazy: connections/lazy.md
+    - Logger: connections/logger.md
+    - Create your own: connections/own.md
+  - Queries:
+    - SQL: queries/sql.md
+    - Create table: queries/create_table.md
+    - Drop table: queries/drop_table.md
+    - Insert: queries/insert.md
+    - Select: queries/select.md
+    - Update: queries/update.md
+    - Delete: queries/delete.md
+    - Transactions: queries/transactions.md
 
 theme:
   name: material
