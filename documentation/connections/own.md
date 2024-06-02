@@ -40,63 +40,30 @@ final class Sentry implements Connection
 
 An important part of extending the behaviour of the connection with your own logic is to not change the current behaviour that other code may rely upon. This library helps you make sure you don't break these behaviours by providing you properties.
 
-Below is an example of a PHPUnit test case that you can extend to add your specific test cases:
+Below is an example of running properties via [BlackBox](https://innmind.github.io/BlackBox/):
 
 ```php
-use PHPUnit\Framework\TestCase;
-use Innmind\BlackBox\PHPUnit\BlackBox;
-use Properties\Formal\AccessLayer\Connection;
+use Innmind\BlackBox\Set;
+use Properties\Formal\AccessLayer\Connection as Properties;
 
-class SentryTest extends TestCase
-{
-    use BlackBox;
+$sentry = new Sentry(/* add the arguments of your implementation here */);
+$connection = Set\Call::of(static function() use ($sentry) {
+    Properties::seed($sentry);
 
-    public function setUp(): void
-    {
-        Connection::seed($this->connection());
-    }
+    return $sentry;
+});
 
-    // you can add here test cases like in any other PHPUnit class
+yield properties(
+    'Sentry properties',
+    Properties::any(),
+    $connection,
+);
 
-    /**
-     * @dataProvider properties
-     */
-    public function testHoldProperty($property)
-    {
-        $this
-            ->forAll($property)
-            ->then(function($property) {
-                $connection = $this->connection();
-
-                if (!$property->applicableTo($connection)) {
-                    $this->markTestSkipped();
-                }
-
-                $property->ensureHeldBy($connection);
-            });
-    }
-
-    public function testHoldProperties()
-    {
-        $this
-            ->forAll(Connection::properties())
-            ->disableShrinking()
-            ->then(function($properties) {
-                $properties->ensureHeldBy($this->connection());
-            });
-    }
-
-    public function properties(): iterable
-    {
-        foreach (Connection::list() as $property) {
-            yield [$property];
-        }
-    }
-
-    private function connection(): PDO
-    {
-        return new Sentry(/* add the arguments of your implementation here */);
-    }
+foreach (Properties::list() as $property) {
+    yield property(
+        $property,
+        $connection,
+    )->named('Sentry');
 }
 ```
 

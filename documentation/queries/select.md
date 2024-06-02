@@ -12,8 +12,8 @@ $users = $connection($select);
 
 This will return all the content of the `users` table.
 
-> [!NOTE]
-> if you replace the constructor `::from()` by `::onDemand()` it will run your query lazily by returning a lazy `Sequence`, meaning it won't keep the results in memory allowing you to handle very large results.
+!!! note ""
+    If you replace the constructor `::from()` by `::onDemand()` it will run your query lazily by returning a lazy `Sequence`, meaning it won't keep the results in memory allowing you to handle very large results.
 
 ## Specifying columns to return
 
@@ -80,5 +80,7 @@ $select = Select::from(new Name('users'))->where(
 $users = $connection($select);
 ```
 
-> [!NOTE]
-> the property name can include the name of the table to match by using the format `'{table}.{column}'`. The value of the specification can also be a query (this will translated to a sub query).
+!!! note ""
+    The property name can include the name of the table to match by using the format `'{table}.{column}'`.
+
+    The value of the specification can also be a query (this will translated to a sub query).
