@@ -29,7 +29,6 @@ final class PDO implements Connection
         $dsnPassword = $dsn->authority()->userInformation()->password();
         $user = null;
         $password = null;
-        $charset = '';
 
         if (!$dsnUser->equals(User::none())) {
             $user = $dsnUser->toString();
@@ -39,23 +38,12 @@ final class PDO implements Connection
             $password = $dsnPassword->toString();
         }
 
-        if (!$dsn->query()->equals(UrlQuery::none())) {
-            \parse_str($dsn->query()->toString(), $query);
-
-            if (\array_key_exists('charset', $query)) {
-                /** @psalm-suppress MixedOperand */
-                $charset = ';charset='.$query['charset'];
-            }
-        }
-
-        $this->pdo = new \PDO(\sprintf(
-            '%s:host=%s;port=%s;dbname=%s%s',
-            $dsn->scheme()->toString(),
-            $dsn->authority()->host()->toString(),
-            $dsn->authority()->port()->toString(),
-            \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
-            $charset,
-        ), $user, $password, $options);
+        $this->pdo = new \PDO(
+            self::parseDsn($dsn),
+            $user,
+            $password,
+            $options,
+        );
     }
 
     public function __invoke(Query $query): Sequence
@@ -85,6 +73,44 @@ final class PDO implements Connection
     public static function persistent(Url $dsn): self
     {
         return new self($dsn, [\PDO::ATTR_PERSISTENT => true]);
+    }
+
+    private function parseDsn(Url $dsn): string
+    {
+        $charset = '';
+
+        if (!$dsn->query()->equals(UrlQuery::none())) {
+            \parse_str($dsn->query()->toString(), $query);
+
+            if (\array_key_exists('charset', $query)) {
+                /** @psalm-suppress MixedOperand */
+                $charset = ';charset='.$query['charset'];
+            }
+        }
+
+        // si pas de port alors socket
+        if (!$dsn->authority()->port()->value()) {
+            $path = $dsn->path()->toString();
+            $dbName = \basename($path);
+            $socketPath = \dirname($path);
+
+            return \sprintf(
+                '%s:unix_socket=%s;dbname=%s%s',
+                $dsn->scheme()->toString(),
+                $socketPath,
+                $dbName,
+                $charset,
+            );
+        }
+
+        return \sprintf(
+            '%s:host=%s;port=%s;dbname=%s%s',
+            $dsn->scheme()->toString(),
+            $dsn->authority()->host()->toString(),
+            $dsn->authority()->port()->toString(),
+            \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
+            $charset,
+        );
     }
 
     /**
