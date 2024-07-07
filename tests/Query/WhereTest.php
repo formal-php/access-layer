@@ -391,6 +391,56 @@ class WhereTest extends TestCase
                     static fn() => null,
                 ));
             });
+        $this
+            ->forAll(
+                Column::any(),
+                Set\Strings::any(),
+                Set\Strings::any(),
+            )
+            ->then(function($column, $leftValue, $rightValue) {
+                $left = $this->createMock(Comparator::class);
+                $left
+                    ->expects($this->any())
+                    ->method('property')
+                    ->willReturn($column->name()->toString());
+                $left
+                    ->expects($this->any())
+                    ->method('sign')
+                    ->willReturn(Sign::equality);
+                $left
+                    ->expects($this->any())
+                    ->method('value')
+                    ->willReturn($leftValue);
+                $right = $this->createMock(Comparator::class);
+                $right
+                    ->expects($this->any())
+                    ->method('property')
+                    ->willReturn($column->name()->toString());
+                $right
+                    ->expects($this->any())
+                    ->method('sign')
+                    ->willReturn(Sign::equality);
+                $right
+                    ->expects($this->any())
+                    ->method('value')
+                    ->willReturn($rightValue);
+                $specification = new OrSpecification($left, $right);
+                $where = Where::of(new Not\Implementation($specification));
+
+                $this->assertSame(
+                    "WHERE NOT(({$column->name()->sql()} = ? OR {$column->name()->sql()} = ?))",
+                    $where->sql(),
+                );
+                $this->assertCount(2, $where->parameters());
+                $this->assertSame($leftValue, $where->parameters()->get(0)->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+                $this->assertSame($rightValue, $where->parameters()->get(1)->match(
+                    static fn($parameter) => $parameter->value(),
+                    static fn() => null,
+                ));
+            });
     }
 
     public function testWhereAnd()
