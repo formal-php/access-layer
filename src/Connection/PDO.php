@@ -48,14 +48,22 @@ final class PDO implements Connection
             }
         }
 
-        $this->pdo = new \PDO(\sprintf(
-            '%s:host=%s;port=%s;dbname=%s%s',
-            $dsn->scheme()->toString(),
-            $dsn->authority()->host()->toString(),
-            $dsn->authority()->port()->toString(),
-            \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
-            $charset,
-        ), $user, $password, $options);
+        $pdoDsn = match ($dsn->scheme()->toString()) {
+            'sqlite' => \sprintf(
+                'sqlite:%s',
+                $dsn->path()->toString(),
+            ),
+            default => \sprintf(
+                '%s:host=%s;port=%s;dbname=%s%s',
+                $dsn->scheme()->toString(),
+                $dsn->authority()->host()->toString(),
+                $dsn->authority()->port()->toString(),
+                \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
+                $charset,
+            ),
+        };
+
+        $this->pdo = new \PDO($pdoDsn, $user, $password, $options);
     }
 
     public function __invoke(Query $query): Sequence

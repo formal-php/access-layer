@@ -17,7 +17,10 @@ use Formal\AccessLayer\{
     Table\Column,
 };
 use Properties\Formal\AccessLayer\Connection as Properties;
-use Innmind\Url\Url;
+use Innmind\Url\{
+    Url,
+    Query,
+};
 use Innmind\Specification\{
     Comparator,
     Composable,
@@ -25,10 +28,9 @@ use Innmind\Specification\{
 };
 use Innmind\BlackBox\Set;
 
-return static function() {
-    $port = \getenv('DB_PORT') ?: '3306';
-    $connection = PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example"));
-    $persistent = PDO::persistent(Url::of("mysql://root:root@127.0.0.1:$port/example"));
+$proofs = static function(Url $dsn, string $driver) {
+    $connection = PDO::of($dsn);
+    $persistent = PDO::persistent($dsn);
     Properties::seed($connection);
     $connections = Set\Either::any(
         Set\Call::of(static function() use ($connection) {
@@ -44,14 +46,14 @@ return static function() {
     );
 
     yield test(
-        'PDO interface',
+        "PDO interface($driver)",
         static fn($assert) => $assert
             ->object($connection)
             ->instance(Connection::class),
     );
 
     $lazy = static fn($connection) => test(
-        'PDO lazy select doesnt load everything in memory',
+        "PDO lazy select doesnt load everything in memory($driver)",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_lazy_load');
 
@@ -97,8 +99,8 @@ return static function() {
     yield $lazy($persistent);
 
     yield test(
-        'PDO charset',
-        static function($assert) use ($connection, $port) {
+        "PDO charset($driver)",
+        static function($assert) use ($connection, $dsn) {
             $table = Table\Name::of('test_charset');
 
             $connection(CreateTable::ifNotExists(
@@ -119,7 +121,7 @@ return static function() {
 
             $select = Select::from($table);
 
-            $ascii = PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example?charset=ascii"));
+            $ascii = PDO::of($dsn->withQuery(Query::of('charset=ascii')));
             $assert
                 ->expected('gelé')
                 ->not()
@@ -133,7 +135,7 @@ return static function() {
                         ),
                 );
 
-            $utf8 = PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example?charset=utf8mb4"));
+            $utf8 = PDO::of($dsn->withQuery(Query::of('charset=utf8mb4')));
             $assert->same(
                 'gelé',
                 $utf8($select)
@@ -150,7 +152,7 @@ return static function() {
     );
 
     yield test(
-        'Select join',
+        "Select join($driver)",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_left_join');
             $connection(CreateTable::ifNotExists(
@@ -249,7 +251,7 @@ return static function() {
     );
 
     yield test(
-        'Delete cascade',
+        "Delete cascade($driver)",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_cascade_delete_parent');
             $child = Table\Name::of('test_cascade_delete_child');
@@ -302,7 +304,7 @@ return static function() {
     );
 
     yield test(
-        'Delete set null',
+        "Delete set null($driver)",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_set_null_delete_parent');
             $child = Table\Name::of('test_set_null_delete_child');
@@ -362,7 +364,7 @@ return static function() {
     );
 
     yield test(
-        'Foreign key name',
+        "Foreign key name($driver)",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('parent_table');
 
@@ -376,7 +378,7 @@ return static function() {
     );
 
     yield test(
-        'Delete join',
+        "Delete join($driver)",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_join_delete_parent')->as('parent');
             $child = Table\Name::of('test_join_delete_child')->as('child');
@@ -460,7 +462,7 @@ return static function() {
     );
 
     yield test(
-        'Update join',
+        "Update join($driver)",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_join_update_parent')->as('parent');
             $child = Table\Name::of('test_join_update_child')->as('child');
@@ -537,7 +539,7 @@ return static function() {
     );
 
     yield proof(
-        'Unique constraint',
+        "Unique constraint($driver)",
         given(Set\Integers::between(0, 1_000_000)),
         static function($assert, $int) use ($connection) {
             $table = Table\Name::of('test_unique');
@@ -581,7 +583,7 @@ return static function() {
     );
 
     yield properties(
-        'PDO properties',
+        "PDO properties($driver)",
         Properties::any(),
         $connections,
     );
@@ -590,6 +592,22 @@ return static function() {
         yield property(
             $property,
             $connections,
-        )->named('PDO');
+        )->named("PDO($driver)");
     }
+};
+
+return static function() use ($proofs) {
+    $port = \getenv('DB_PORT') ?: '3306';
+
+    yield from $proofs(
+        Url::of("mysql://root:root@127.0.0.1:$port/example"),
+        'mysql',
+    );
+
+    $tmp = \getcwd().'/tmp';
+
+    yield from $proofs(
+        Url::of("sqlite:$tmp/formal.sq3"),
+        'sqlite',
+    );
 };
