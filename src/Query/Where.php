@@ -95,22 +95,19 @@ final class Where
         $column = $this->buildColumn($specification);
         $sign = match ($specification->sign()) {
             Sign::equality => '=',
-            Sign::inequality => '<>',
             Sign::lessThan => '<',
             Sign::moreThan => '>',
-            Sign::lessThanOrEqual => '<=',
-            Sign::moreThanOrEqual => '>=',
-            Sign::isNull => 'IS NULL',
-            Sign::isNotNull => 'IS NOT NULL',
             Sign::startsWith => 'LIKE',
             Sign::endsWith => 'LIKE',
             Sign::contains => 'LIKE',
             Sign::in => 'IN',
         };
 
+        if ($specification->sign() === Sign::equality && \is_null($specification->value())) {
+            return \sprintf('%s IS NULL', $column);
+        }
+
         return match ($specification->sign()) {
-            Sign::isNull => \sprintf('%s %s', $column, $sign),
-            Sign::isNotNull => \sprintf('%s %s', $column, $sign),
             Sign::in => $this->buildInSql($specification),
             default => \sprintf(
                 '%s %s ?',
@@ -122,6 +119,34 @@ final class Where
 
     private function buildComposite(Composite $specification): string
     {
+        if (
+            $specification->operator() === Operator::or &&
+            $specification->left() instanceof Comparator &&
+            $specification->left()->sign() === Sign::moreThan &&
+            $specification->right() instanceof Comparator &&
+            $specification->right()->sign() === Sign::equality &&
+            $specification->left()->value() === $specification->right()->value()
+        ) {
+            return \sprintf(
+                '%s >= ?',
+                $this->buildColumn($specification->left()),
+            );
+        }
+
+        if (
+            $specification->operator() === Operator::or &&
+            $specification->left() instanceof Comparator &&
+            $specification->left()->sign() === Sign::lessThan &&
+            $specification->right() instanceof Comparator &&
+            $specification->right()->sign() === Sign::equality &&
+            $specification->left()->value() === $specification->right()->value()
+        ) {
+            return \sprintf(
+                '%s <= ?',
+                $this->buildColumn($specification->left()),
+            );
+        }
+
         return \sprintf(
             '(%s %s %s)',
             $this->buildSql($specification->left()),
@@ -132,9 +157,32 @@ final class Where
 
     private function negate(Not $specification): string
     {
+        $inner = $specification->specification();
+
+        if (
+            $inner instanceof Comparator &&
+            $inner->sign() === Sign::equality &&
+            \is_null($inner->value())
+        ) {
+            return \sprintf(
+                '%s IS NOT NULL',
+                $this->buildColumn($inner),
+            );
+        }
+
+        if (
+            $inner instanceof Comparator &&
+            $inner->sign() === Sign::equality
+        ) {
+            return \sprintf(
+                '%s <> ?',
+                $this->buildColumn($inner),
+            );
+        }
+
         return \sprintf(
             'NOT(%s)',
-            $this->buildSql($specification->specification()),
+            $this->buildSql($inner),
         );
     }
 
@@ -171,6 +219,36 @@ final class Where
         Sequence $parameters,
         Specification $specification,
     ): Sequence {
+        if (
+            $specification instanceof Composite &&
+            $specification->operator() === Operator::or &&
+            $specification->left() instanceof Comparator &&
+            $specification->left()->sign() === Sign::moreThan &&
+            $specification->right() instanceof Comparator &&
+            $specification->right()->sign() === Sign::equality &&
+            $specification->left()->value() === $specification->right()->value()
+        ) {
+            return $this->findComparatorParameters(
+                $parameters,
+                $specification->left(),
+            );
+        }
+
+        if (
+            $specification instanceof Composite &&
+            $specification->operator() === Operator::or &&
+            $specification->left() instanceof Comparator &&
+            $specification->left()->sign() === Sign::lessThan &&
+            $specification->right() instanceof Comparator &&
+            $specification->right()->sign() === Sign::equality &&
+            $specification->left()->value() === $specification->right()->value()
+        ) {
+            return $this->findComparatorParameters(
+                $parameters,
+                $specification->left(),
+            );
+        }
+
         return match (true) {
             $specification instanceof Not => $this->findParamaters(
                 $parameters,
@@ -200,8 +278,8 @@ final class Where
         Comparator $specification,
     ): Sequence {
         if (
-            $specification->sign() === Sign::isNull ||
-            $specification->sign() === Sign::isNotNull
+            $specification->sign() === Sign::equality &&
+            \is_null($specification->value())
         ) {
             return $parameters;
         }
