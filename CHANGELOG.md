@@ -6,6 +6,11 @@
 
 - Requires `innmind/specification:~4.0`
 
+### Removed
+
+- `Formal\AccessLayer\Query\Delete::join()`
+- `Formal\AccessLayer\Query\Update::join()`
+
 ## 2.17.0 - 2024-05-29
 
 ### Changed
