@@ -9,6 +9,7 @@ use Formal\AccessLayer\{
     Query\Parameter,
     Query\Parameter\Type,
     Row,
+    Driver,
     Exception\QueryFailed,
 };
 use Innmind\Url\{
@@ -22,6 +23,7 @@ use Innmind\Immutable\Sequence;
 final class PDO implements Connection
 {
     private \PDO $pdo;
+    private Driver $driver;
 
     private function __construct(Url $dsn, array $options = [])
     {
@@ -48,8 +50,13 @@ final class PDO implements Connection
             }
         }
 
-        $pdoDsn = match ($dsn->scheme()->toString()) {
-            'sqlite' => \sprintf(
+        $this->driver = match ($dsn->scheme()->toString()) {
+            'sqlite' => Driver::sqlite,
+            'mysql' => Driver::mysql,
+        };
+
+        $pdoDsn = match ($this->driver) {
+            Driver::sqlite => \sprintf(
                 'sqlite:%s',
                 $dsn->path()->toString(),
             ),
@@ -164,7 +171,7 @@ final class PDO implements Connection
      */
     private function prepare(Query $query): \PDOStatement
     {
-        $statement = $this->pdo->prepare($query->sql());
+        $statement = $this->pdo->prepare($query->sql($this->driver));
 
         $_ = $query->parameters()->reduce(
             0,
@@ -212,6 +219,7 @@ final class PDO implements Connection
         }
 
         throw new QueryFailed(
+            $this->driver,
             $query,
             $errorInfo[0],
             $errorInfo[1],

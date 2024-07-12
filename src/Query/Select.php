@@ -9,6 +9,7 @@ use Formal\AccessLayer\{
     Query\Select\Join,
     Table\Name,
     Table\Column,
+    Driver,
 };
 use Innmind\Specification\Specification;
 use Innmind\Immutable\{
@@ -217,28 +218,31 @@ final class Select implements Query
         return $this->where->parameters();
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
         return \sprintf(
             'SELECT %s FROM %s%s %s%s%s%s',
-            $this->count->match(
-                static fn($alias) => "COUNT(1) AS `$alias`",
-                fn() => $this->columns->empty() ? '*' : $this->buildColumns(),
-            ),
-            $this->table->sql(),
+            $this
+                ->count
+                ->map($driver->escapeName(...))
+                ->match(
+                    static fn($alias) => "COUNT(1) AS $alias",
+                    fn() => $this->columns->empty() ? '*' : $this->buildColumns($driver),
+                ),
+            $this->table->sql($driver),
             $this
                 ->joins
-                ->map(static fn($join) => $join->sql())
+                ->map(static fn($join) => $join->sql($driver))
                 ->map(Str::of(...))
                 ->fold(new Concat)
                 ->toString(),
-            $this->where->sql(),
+            $this->where->sql($driver),
             match ($this->orderBy) {
                 null => '',
                 default => \sprintf(
                     ' ORDER BY %s %s',
-                    $this->orderBy[0]->sql(),
+                    $this->orderBy[0]->sql($driver),
                     $this->orderBy[1]->sql(),
                 ),
             },
@@ -258,10 +262,10 @@ final class Select implements Query
         return $this->lazy;
     }
 
-    private function buildColumns(): string
+    private function buildColumns(Driver $driver): string
     {
         $columns = $this->columns->map(
-            static fn($column) => $column->sql(),
+            static fn($column) => $column->sql($driver),
         );
 
         /** @psalm-suppress InvalidArgument Because non-empty-string instead of string */

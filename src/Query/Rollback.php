@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Query;
 
-use Formal\AccessLayer\Query;
+use Formal\AccessLayer\{
+    Query,
+    Driver,
+};
 use Innmind\Immutable\Sequence;
 
 /**
@@ -17,7 +20,7 @@ final class Rollback implements Query
         return Sequence::of();
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         return 'ROLLBACK';
     }

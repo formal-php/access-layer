@@ -8,6 +8,7 @@ use Formal\AccessLayer\{
     Query\Select\Join,
     Table\Name,
     Row,
+    Driver,
 };
 use Innmind\Specification\Specification;
 use Innmind\Immutable\{
@@ -79,26 +80,26 @@ final class Update implements Query
             ->append($this->where->parameters());
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         /** @var Sequence<string> */
         $columns = $this
             ->row
             ->values()
-            ->map(static fn($value) => "{$value->columnSql()} = ?");
+            ->map(static fn($value) => "{$value->columnSql($driver)} = ?");
 
         /** @var non-empty-string */
         return \sprintf(
             'UPDATE %s%s SET %s %s',
-            $this->table->sql(),
+            $this->table->sql($driver),
             $this
                 ->joins
-                ->map(static fn($join) => $join->sql())
+                ->map(static fn($join) => $join->sql($driver))
                 ->map(Str::of(...))
                 ->fold(new Concat)
                 ->toString(),
             Str::of(', ')->join($columns)->toString(),
-            $this->where->sql(),
+            $this->where->sql($driver),
         );
     }
 

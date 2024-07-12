@@ -10,6 +10,7 @@ use Formal\AccessLayer\{
     Query\Constraint\Unique,
     Table\Name,
     Table\Column,
+    Driver,
 };
 use Innmind\Immutable\{
     Sequence,
@@ -106,22 +107,22 @@ final class CreateTable implements Query
         return Sequence::of();
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
         return \sprintf(
             'CREATE TABLE %s %s (%s%s)',
             $this->ifNotExists ? 'IF NOT EXISTS' : '',
-            $this->name->sql(),
+            $this->name->sql($driver),
             Str::of(', ')
-                ->join($this->columns->map(static fn($column) => $column->sql()))
+                ->join($this->columns->map(static fn($column) => $column->sql($driver)))
                 ->toString(),
             $this->constraints->match(
                 static fn($first, $rest) => ', '.Str::of(', ')
                     ->join(
                         Sequence::of($first)
                             ->append($rest)
-                            ->map(static fn($constraint) => $constraint->sql()),
+                            ->map(static fn($constraint) => $constraint->sql($driver)),
                     )
                     ->toString(),
                 static fn() => '',

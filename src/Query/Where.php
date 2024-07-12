@@ -8,6 +8,7 @@ use Formal\AccessLayer\{
     Table\Column,
     Row\Value,
     Query,
+    Driver,
 };
 use Innmind\Specification\{
     Specification,
@@ -69,7 +70,7 @@ final class Where
         );
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         if (\is_null($this->specification)) {
             return '';
@@ -77,22 +78,26 @@ final class Where
 
         return \sprintf(
             'WHERE %s',
-            $this->buildSql($this->specification),
+            $this->buildSql($driver, $this->specification),
         );
     }
 
-    private function buildSql(Specification $specification): string
-    {
+    private function buildSql(
+        Driver $driver,
+        Specification $specification,
+    ): string {
         return match (true) {
-            $specification instanceof Comparator => $this->buildComparator($specification),
-            $specification instanceof Composite => $this->buildComposite($specification),
-            $specification instanceof Not => $this->negate($specification),
+            $specification instanceof Comparator => $this->buildComparator($driver, $specification),
+            $specification instanceof Composite => $this->buildComposite($driver, $specification),
+            $specification instanceof Not => $this->negate($driver, $specification),
         };
     }
 
-    private function buildComparator(Comparator $specification): string
-    {
-        $column = $this->buildColumn($specification);
+    private function buildComparator(
+        Driver $driver,
+        Comparator $specification,
+    ): string {
+        $column = $this->buildColumn($driver, $specification);
         $sign = match ($specification->sign()) {
             Sign::equality => '=',
             Sign::lessThan => '<',
@@ -108,7 +113,7 @@ final class Where
         }
 
         return match ($specification->sign()) {
-            Sign::in => $this->buildInSql($specification),
+            Sign::in => $this->buildInSql($driver, $specification),
             default => \sprintf(
                 '%s %s ?',
                 $column,
@@ -117,8 +122,10 @@ final class Where
         };
     }
 
-    private function buildComposite(Composite $specification): string
-    {
+    private function buildComposite(
+        Driver $driver,
+        Composite $specification,
+    ): string {
         if (
             $specification->operator() === Operator::or &&
             $specification->left() instanceof Comparator &&
@@ -129,7 +136,7 @@ final class Where
         ) {
             return \sprintf(
                 '%s >= ?',
-                $this->buildColumn($specification->left()),
+                $this->buildColumn($driver, $specification->left()),
             );
         }
 
@@ -143,19 +150,19 @@ final class Where
         ) {
             return \sprintf(
                 '%s <= ?',
-                $this->buildColumn($specification->left()),
+                $this->buildColumn($driver, $specification->left()),
             );
         }
 
         return \sprintf(
             '(%s %s %s)',
-            $this->buildSql($specification->left()),
+            $this->buildSql($driver, $specification->left()),
             $specification->operator() === Operator::and ? 'AND' : 'OR',
-            $this->buildSql($specification->right()),
+            $this->buildSql($driver, $specification->right()),
         );
     }
 
-    private function negate(Not $specification): string
+    private function negate(Driver $driver, Not $specification): string
     {
         $inner = $specification->specification();
 
@@ -166,7 +173,7 @@ final class Where
         ) {
             return \sprintf(
                 '%s IS NOT NULL',
-                $this->buildColumn($inner),
+                $this->buildColumn($driver, $inner),
             );
         }
 
@@ -176,23 +183,25 @@ final class Where
         ) {
             return \sprintf(
                 '%s <> ?',
-                $this->buildColumn($inner),
+                $this->buildColumn($driver, $inner),
             );
         }
 
         return \sprintf(
             'NOT(%s)',
-            $this->buildSql($inner),
+            $this->buildSql($driver, $inner),
         );
     }
 
-    private function buildInSql(Comparator $specification): string
-    {
+    private function buildInSql(
+        Driver $driver,
+        Comparator $specification,
+    ): string {
         if ($specification->value() instanceof Query) {
             return \sprintf(
                 '%s IN (%s)',
-                $this->buildColumn($specification),
-                $specification->value()->sql(),
+                $this->buildColumn($driver, $specification),
+                $specification->value()->sql($driver),
             );
         }
 
@@ -205,7 +214,7 @@ final class Where
 
         return \sprintf(
             '%s IN (%s)',
-            $this->buildColumn($specification),
+            $this->buildColumn($driver, $specification),
             \implode(', ', $placeholders),
         );
     }
@@ -356,8 +365,10 @@ final class Where
         return null;
     }
 
-    private function buildColumn(Comparator $specification): string
-    {
+    private function buildColumn(
+        Driver $driver,
+        Comparator $specification,
+    ): string {
         $property = Str::of($specification->property());
 
         $parts = $property->split('.');
@@ -375,10 +386,10 @@ final class Where
             ->map(static fn($name) => new Column\Name($name));
 
         return Maybe::all($table, $column)
-            ->map(static fn(Name $table, Column\Name $column) => "{$table->sql()}.{$column->sql()}")
+            ->map(static fn(Name $table, Column\Name $column) => "{$table->sql($driver)}.{$column->sql($driver)}")
             ->match(
                 static fn($withTable) => $withTable,
-                static fn() => (new Column\Name($specification->property()))->sql(),
+                static fn() => (new Column\Name($specification->property()))->sql($driver),
             );
     }
 }

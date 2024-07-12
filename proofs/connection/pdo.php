@@ -15,6 +15,7 @@ use Formal\AccessLayer\{
     Row,
     Table,
     Table\Column,
+    Driver,
 };
 use Properties\Formal\AccessLayer\Connection as Properties;
 use Innmind\Url\{
@@ -28,7 +29,7 @@ use Innmind\Specification\{
 };
 use Innmind\BlackBox\Set;
 
-$proofs = static function(Url $dsn, string $driver) {
+$proofs = static function(Url $dsn, Driver $driver) {
     $connection = PDO::of($dsn);
     $persistent = PDO::persistent($dsn);
     Properties::seed($connection);
@@ -46,17 +47,18 @@ $proofs = static function(Url $dsn, string $driver) {
     );
 
     yield test(
-        "PDO interface($driver)",
+        "PDO interface({$driver->name})",
         static fn($assert) => $assert
             ->object($connection)
             ->instance(Connection::class),
     );
 
     $lazy = static fn($connection) => test(
-        "PDO lazy select doesnt load everything in memory($driver)",
+        "PDO lazy select doesnt load everything in memory({$driver->name})",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_lazy_load');
 
+            $connection(DropTable::ifExists($table));
             $connection(CreateTable::named(
                 $table,
                 Column::of(
@@ -99,7 +101,7 @@ $proofs = static function(Url $dsn, string $driver) {
     yield $lazy($persistent);
 
     yield test(
-        "PDO charset($driver)",
+        "PDO charset({$driver->name})",
         static function($assert) use ($connection, $dsn) {
             $table = Table\Name::of('test_charset');
 
@@ -152,7 +154,7 @@ $proofs = static function(Url $dsn, string $driver) {
     );
 
     yield test(
-        "Select join($driver)",
+        "Select join({$driver->name})",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_left_join');
             $connection(CreateTable::ifNotExists(
@@ -251,7 +253,7 @@ $proofs = static function(Url $dsn, string $driver) {
     );
 
     yield test(
-        "Delete cascade($driver)",
+        "Delete cascade({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_cascade_delete_parent');
             $child = Table\Name::of('test_cascade_delete_child');
@@ -304,7 +306,7 @@ $proofs = static function(Url $dsn, string $driver) {
     );
 
     yield test(
-        "Delete set null($driver)",
+        "Delete set null({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_set_null_delete_parent');
             $child = Table\Name::of('test_set_null_delete_child');
@@ -364,21 +366,21 @@ $proofs = static function(Url $dsn, string $driver) {
     );
 
     yield test(
-        "Foreign key name($driver)",
-        static function($assert) use ($connection) {
+        "Foreign key name({$driver->name})",
+        static function($assert) use ($driver) {
             $parent = Table\Name::of('parent_table');
 
             $assert->same(
                 'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))
                     ->named('foo')
-                    ->sql(),
+                    ->sql($driver),
             );
         },
     );
 
     yield test(
-        "Delete join($driver)",
+        "Delete join({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_join_delete_parent')->as('parent');
             $child = Table\Name::of('test_join_delete_child')->as('child');
@@ -462,7 +464,7 @@ $proofs = static function(Url $dsn, string $driver) {
     );
 
     yield test(
-        "Update join($driver)",
+        "Update join({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_join_update_parent')->as('parent');
             $child = Table\Name::of('test_join_update_child')->as('child');
@@ -539,7 +541,7 @@ $proofs = static function(Url $dsn, string $driver) {
     );
 
     yield proof(
-        "Unique constraint($driver)",
+        "Unique constraint({$driver->name})",
         given(Set\Integers::between(0, 1_000_000)),
         static function($assert, $int) use ($connection) {
             $table = Table\Name::of('test_unique');
@@ -583,7 +585,7 @@ $proofs = static function(Url $dsn, string $driver) {
     );
 
     yield properties(
-        "PDO properties($driver)",
+        "PDO properties({$driver->name})",
         Properties::any(),
         $connections,
     );
@@ -592,7 +594,7 @@ $proofs = static function(Url $dsn, string $driver) {
         yield property(
             $property,
             $connections,
-        )->named("PDO($driver)");
+        )->named("PDO({$driver->name})");
     }
 };
 
@@ -601,13 +603,13 @@ return static function() use ($proofs) {
 
     yield from $proofs(
         Url::of("mysql://root:root@127.0.0.1:$port/example"),
-        'mysql',
+        Driver::mysql,
     );
 
     $tmp = \getcwd().'/tmp';
 
     yield from $proofs(
         Url::of("sqlite:$tmp/formal.sq3"),
-        'sqlite',
+        Driver::sqlite,
     );
 };

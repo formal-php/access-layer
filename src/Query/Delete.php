@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query,
     Query\Select\Join,
     Table\Name,
+    Driver,
 };
 use Innmind\Specification\Specification;
 use Innmind\Immutable\{
@@ -69,23 +70,19 @@ final class Delete implements Query
         return $this->where->parameters();
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
         return \sprintf(
-            'DELETE %s FROM %s%s %s',
-            match (true) {
-                $this->table instanceof Name\Aliased => "`{$this->table->alias()}`",
-                default => $this->table->sql(),
-            },
-            $this->table->sql(),
+            'DELETE FROM %s%s %s',
+            $this->table->sql($driver),
             $this
                 ->joins
-                ->map(static fn($join) => $join->sql())
+                ->map(static fn($join) => $join->sql($driver))
                 ->map(Str::of(...))
                 ->fold(new Concat)
                 ->toString(),
-            $this->where->sql(),
+            $this->where->sql($driver),
         );
     }
 

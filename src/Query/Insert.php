@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query,
     Table\Name,
     Row,
+    Driver,
 };
 use Innmind\Immutable\{
     Sequence,
@@ -47,10 +48,10 @@ final class Insert implements Query
         ));
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         $inserts = $this->rows->map(
-            fn($row) => $this->buildInsert($row),
+            fn($row) => $this->buildInsert($driver, $row),
         );
 
         /** @var non-empty-string Because there's at least one row */
@@ -62,16 +63,16 @@ final class Insert implements Query
         return false;
     }
 
-    private function buildInsert(Row $row): string
+    private function buildInsert(Driver $driver, Row $row): string
     {
         /** @var Sequence<string> */
-        $keys = $row->values()->map(static fn($value) => $value->columnSql());
+        $keys = $row->values()->map(static fn($value) => $value->columnSql($driver));
         /** @var Sequence<string> */
         $values = $row->values()->map(static fn() => '?');
 
         return \sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
-            $this->table->sql(),
+            $this->table->sql($driver),
             Str::of(', ')->join($keys)->toString(),
             Str::of(', ')->join($values)->toString(),
         );

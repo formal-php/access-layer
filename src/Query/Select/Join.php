@@ -6,6 +6,7 @@ namespace Formal\AccessLayer\Query\Select;
 use Formal\AccessLayer\{
     Table,
     Table\Column,
+    Driver,
 };
 
 /**
@@ -62,17 +63,17 @@ final class Join
     /**
      * @return non-empty-string
      */
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
-        $sql = ' LEFT JOIN '.$this->table->sql();
+        $sql = ' LEFT JOIN '.$this->table->sql($driver);
 
         if (\is_array($this->on)) {
             [$left, $right] = $this->on;
 
             $sql .= \sprintf(
                 ' ON %s = %s',
-                $left->sql(),
-                $right->sql(),
+                $left->sql($driver),
+                $right->sql($driver),
             );
         }
 
