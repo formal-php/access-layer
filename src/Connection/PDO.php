@@ -71,6 +71,11 @@ final class PDO implements Connection
         };
 
         $this->pdo = new \PDO($pdoDsn, $user, $password, $options);
+
+        $_ = match ($this->driver) {
+            Driver::sqlite => $this->pdo->query('PRAGMA foreign_keys = ON'),
+            default => null,
+        };
     }
 
     public function __invoke(Query $query): Sequence
