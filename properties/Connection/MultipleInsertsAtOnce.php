@@ -10,6 +10,7 @@ use Formal\AccessLayer\{
     Row,
     Connection,
 };
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -69,7 +70,7 @@ final class MultipleInsertsAtOnce implements Property
 
         $assert->count(0, $rows);
 
-        $sequence = $connection(Query\Insert::into(
+        $sequence = Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid1,
@@ -81,7 +82,10 @@ final class MultipleInsertsAtOnce implements Property
                 'username' => $this->username2,
                 'registerNumber' => $this->number2,
             ]),
-        ));
+        )->reduce(
+            Sequence::of(),
+            static fn($results, $insert) => $results->append($connection($insert)),
+        );
 
         $assert->count(0, $sequence);
 

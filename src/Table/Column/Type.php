@@ -3,6 +3,8 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Table\Column;
 
+use Formal\AccessLayer\Driver;
+
 /**
  * @psalm-immutable
  */
@@ -228,7 +230,7 @@ final class Type
     /**
      * @return non-empty-string
      */
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
         return \sprintf(
@@ -237,7 +239,11 @@ final class Type
             $this->precision,
             $this->nullable ? '' : 'NOT NULL',
             $this->buildDefault(),
-            \is_string($this->comment) ? "COMMENT '{$this->escape($this->comment)}'" : '',
+            match (true) {
+                $driver === Driver::sqlite => '',
+                \is_null($this->comment) => '',
+                default => "COMMENT '{$this->escape($this->comment)}'",
+            },
         );
     }
 

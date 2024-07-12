@@ -51,7 +51,7 @@ final class DeleteSpecificRow implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(Query\Insert::into(
+        Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid1,
@@ -63,7 +63,7 @@ final class DeleteSpecificRow implements Property
                 'username' => 'foo',
                 'registerNumber' => 42,
             ]),
-        ));
+        )->foreach($connection);
 
         $delete = Query\Delete::from(new Table\Name('test'))->where(
             new class($this->uuid1) implements Comparator {

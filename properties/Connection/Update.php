@@ -41,14 +41,14 @@ final class Update implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $select = SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'");
-        $connection(Query\Insert::into(
+        Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => 'foo',
                 'registerNumber' => 42,
             ]),
-        ));
+        )->foreach($connection);
 
         $sequence = $connection(Query\Update::set(
             new Table\Name('test'),

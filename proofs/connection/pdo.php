@@ -68,13 +68,12 @@ $proofs = static function(Url $dsn, Driver $driver) {
             ));
 
             for ($i = 0; $i < 100_000; $i++) {
-                $insert = Insert::into(
+                Insert::into(
                     $table,
                     Row::of([
                         'i' => $i,
                     ]),
-                );
-                $connection($insert);
+                )->foreach($connection);
             }
 
             $select = Select::onDemand($table);
@@ -113,13 +112,12 @@ $proofs = static function(Url $dsn, Driver $driver) {
                 ),
             ));
 
-            $insert = Insert::into(
+            Insert::into(
                 $table,
                 Row::of([
                     'str' => 'gelé',
                 ]),
-            );
-            $connection($insert);
+            )->foreach($connection);
 
             $select = Select::from($table);
 
@@ -173,7 +171,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                 ),
             ));
             $connection(Delete::from($table));
-            $connection(Insert::into(
+            Insert::into(
                 $table,
                 Row::of([
                     'id' => 1,
@@ -193,7 +191,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                     'id' => 4,
                     'name' => 'value_4',
                 ]),
-            ));
+            )->foreach($connection);
 
             $child = $table->as('child');
             $rows = $connection(
@@ -277,13 +275,15 @@ $proofs = static function(Url $dsn, Driver $driver) {
             )->constraint(
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))->onDeleteCascade(),
             ));
-            $connection(Insert::into(
+            $connection(Delete::from($child));
+            $connection(Delete::from($parent));
+            Insert::into(
                 $parent,
                 Row::of([
                     'id' => 1,
                 ]),
-            ));
-            $connection(Insert::into(
+            )->foreach($connection);
+            Insert::into(
                 $child,
                 Row::of([
                     'id' => 1,
@@ -293,7 +293,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                     'id' => 2,
                     'parent' => 1,
                 ]),
-            ));
+            )->foreach($connection);
 
             $connection(Delete::from($parent));
             $rows = $connection(Select::from($child));
@@ -330,13 +330,15 @@ $proofs = static function(Url $dsn, Driver $driver) {
             )->constraint(
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))->onDeleteSetNull(),
             ));
-            $connection(Insert::into(
+            $connection(Delete::from($child));
+            $connection(Delete::from($parent));
+            Insert::into(
                 $parent,
                 Row::of([
                     'id' => 1,
                 ]),
-            ));
-            $connection(Insert::into(
+            )->foreach($connection);
+            Insert::into(
                 $child,
                 Row::of([
                     'id' => 1,
@@ -346,7 +348,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                     'id' => 2,
                     'parent' => 1,
                 ]),
-            ));
+            )->foreach($connection);
 
             $connection(Delete::from($parent));
             $rows = $connection(Select::from($child))
@@ -396,28 +398,28 @@ $proofs = static function(Url $dsn, Driver $driver) {
                 ),
             )->unique(Column\Name::of('id'), Column\Name::of('other')));
 
-            $connection(Insert::into(
+            Insert::into(
                 $table,
                 Row::of([
                     'id' => $int,
                     'other' => 'foo',
                 ]),
-            ));
-            $connection(Insert::into(
+            )->foreach($connection);
+            Insert::into(
                 $table,
                 Row::of([
                     'id' => $int,
                     'other' => 'bar',
                 ]),
-            ));
+            )->foreach($connection);
 
-            $assert->throws(fn() => $connection(Insert::into(
+            $assert->throws(fn() => Insert::into(
                 $table,
                 Row::of([
                     'id' => $int,
                     'other' => 'foo',
                 ]),
-            )));
+            )->foreach($connection));
 
             $connection(DropTable::named($table));
         },

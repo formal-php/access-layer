@@ -46,6 +46,6 @@ final class Column
      */
     public function sql(Driver $driver): string
     {
-        return "{$this->name->sql($driver)} {$this->type->sql()}";
+        return "{$this->name->sql($driver)} {$this->type->sql($driver)}";
     }
 }
