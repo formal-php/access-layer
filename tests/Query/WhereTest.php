@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query\Where,
     Query\Parameter\Type,
     Row\Value,
+    Driver,
 };
 use Innmind\Specification\{
     Comparator,
@@ -35,7 +36,7 @@ class WhereTest extends TestCase
         $where = Where::of(null);
 
         $this->assertInstanceOf(Where::class, $where);
-        $this->assertSame('', $where->sql());
+        $this->assertSame('', $where->sql(Driver::mysql));
         $this->assertCount(0, $where->parameters());
     }
 
@@ -60,8 +61,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} = ?",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} = ?",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->match(
@@ -92,8 +93,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} < ?",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} < ?",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->match(
@@ -137,8 +138,8 @@ class WhereTest extends TestCase
                 $where = Where::of(new OrSpecification($lessThan, $equal));
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} <= ?",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} <= ?",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->match(
@@ -169,8 +170,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} > ?",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} > ?",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->match(
@@ -214,8 +215,8 @@ class WhereTest extends TestCase
                 $where = Where::of(new OrSpecification($moreThan, $equal));
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} >= ?",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} >= ?",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->match(
@@ -246,8 +247,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} IS NULL",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} IS NULL",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(0, $where->parameters());
             });
@@ -274,8 +275,8 @@ class WhereTest extends TestCase
                 $where = Where::of(new Not\Implementation($specification));
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} IS NOT NULL",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} IS NOT NULL",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(0, $where->parameters());
             });
@@ -307,8 +308,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} IN (?, ?, ?)",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} IN (?, ?, ?)",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(3, $where->parameters());
                 $this->assertSame($value1, $where->parameters()->get(0)->match(
@@ -350,7 +351,7 @@ class WhereTest extends TestCase
 
                 $this->assertSame(
                     \count($values),
-                    \count_chars($where->sql())[63], // looking for '?' placeholders
+                    \count_chars($where->sql(Driver::mysql))[63], // looking for '?' placeholders
                 );
                 $this->assertCount(\count($values), $where->parameters());
             });
@@ -382,8 +383,8 @@ class WhereTest extends TestCase
                 $where = Where::of($not);
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} <> ?",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} <> ?",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->match(
@@ -428,8 +429,8 @@ class WhereTest extends TestCase
                 $where = Where::of(new Not\Implementation($specification));
 
                 $this->assertSame(
-                    "WHERE NOT(({$column->name()->sql()} = ? OR {$column->name()->sql()} = ?))",
-                    $where->sql(),
+                    "WHERE NOT(({$column->name()->sql(Driver::mysql)} = ? OR {$column->name()->sql(Driver::mysql)} = ?))",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(2, $where->parameters());
                 $this->assertSame($leftValue, $where->parameters()->get(0)->match(
@@ -495,8 +496,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE ({$column1->name()->sql()} = ? AND {$column2->name()->sql()} <> ?)",
-                    $where->sql(),
+                    "WHERE ({$column1->name()->sql(Driver::mysql)} = ? AND {$column2->name()->sql(Driver::mysql)} <> ?)",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(2, $where->parameters());
                 $this->assertSame($value1, $where->parameters()->first()->match(
@@ -558,8 +559,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE ({$column1->name()->sql()} <> ? AND {$column2->name()->sql()} = ?)",
-                    $where->sql(),
+                    "WHERE ({$column1->name()->sql(Driver::mysql)} <> ? AND {$column2->name()->sql(Driver::mysql)} = ?)",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(2, $where->parameters());
                 $this->assertSame($value1, $where->parameters()->first()->match(
@@ -625,8 +626,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE ({$column1->name()->sql()} = ? OR {$column2->name()->sql()} <> ?)",
-                    $where->sql(),
+                    "WHERE ({$column1->name()->sql(Driver::mysql)} = ? OR {$column2->name()->sql(Driver::mysql)} <> ?)",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(2, $where->parameters());
                 $this->assertSame($value1, $where->parameters()->first()->match(
@@ -688,8 +689,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE ({$column1->name()->sql()} <> ? OR {$column2->name()->sql()} = ?)",
-                    $where->sql(),
+                    "WHERE ({$column1->name()->sql(Driver::mysql)} <> ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(2, $where->parameters());
                 $this->assertSame($value1, $where->parameters()->first()->match(
@@ -729,8 +730,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE {$column->name()->sql()} = ?",
-                    $where->sql(),
+                    "WHERE {$column->name()->sql(Driver::mysql)} = ?",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->match(
@@ -769,8 +770,8 @@ class WhereTest extends TestCase
                 $where = Where::of($specification);
 
                 $this->assertSame(
-                    "WHERE {$table->sql()}.{$column->name()->sql()} = ?",
-                    $where->sql(),
+                    "WHERE {$table->sql(Driver::mysql)}.{$column->name()->sql(Driver::mysql)} = ?",
+                    $where->sql(Driver::mysql),
                 );
                 $this->assertCount(1, $where->parameters());
                 $this->assertSame($value, $where->parameters()->first()->match(
