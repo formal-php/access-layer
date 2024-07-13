@@ -112,7 +112,7 @@ final class Where
             return \sprintf('%s IS NULL', $column);
         }
 
-        return match ($specification->sign()) {
+        $comparator = match ($specification->sign()) {
             Sign::in => $this->buildInSql($driver, $specification),
             default => \sprintf(
                 '%s %s ?',
@@ -120,6 +120,19 @@ final class Where
                 $sign,
             ),
         };
+
+        if (
+            $driver === Driver::sqlite &&
+            \in_array(
+                $specification->sign(),
+                [Sign::startsWith, Sign::endsWith, Sign::contains],
+                true
+            )
+        ) {
+            $comparator .= " ESCAPE '\\'";
+        }
+
+        return $comparator;
     }
 
     private function buildComposite(
