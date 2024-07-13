@@ -42,40 +42,24 @@ use Formal\AccesLayer\{
     Table\Column,
 };
 use Innmind\Specification\{
-    Comparator,
-    Composable,
+    Comparator\Property,
     Sign,
 };
 
-final class Username implements Comparator
+final class Username
 {
-    use Composable;
-
-    private string $value;
-
-    public function __construct(string $value)
+    public static function of(string $username): Comparator\Property
     {
-        $this->value = $value;
-    }
-
-    public function property(): string
-    {
-        return 'username'; // this is the name of the column
-    }
-
-    public function sign(): Sign
-    {
-        return Sign::equality;
-    }
-
-    public function value(): mixed
-    {
-        return $this->value;
+        return Comparator\Property::of(
+            'username', // this is the name of the column,
+            Sign::equality,
+            $username,
+        );
     }
 }
 
 $select = Select::from(new Name('users'))->where(
-    (new Username('some username'))->or(new Username('other username')),
+    Username::of('some username')->or(Username::of('other username')),
 );
 $users = $connection($select);
 ```
