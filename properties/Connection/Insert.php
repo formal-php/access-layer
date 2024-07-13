@@ -54,7 +54,6 @@ final class Insert implements Property
             ]),
         ));
 
-        $assert->not()->null($sequence);
         $assert->count(0, $sequence);
 
         $rows = $connection($select);
