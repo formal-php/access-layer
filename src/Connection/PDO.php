@@ -175,7 +175,10 @@ final class PDO implements Connection
      */
     private function prepare(Query $query): \PDOStatement
     {
-        $statement = $this->pdo->prepare($query->sql($this->driver));
+        $statement = $this->guard(
+            $query,
+            fn() => $this->pdo->prepare($query->sql($this->driver)),
+        );
 
         $_ = $query->parameters()->reduce(
             0,
@@ -200,6 +203,41 @@ final class PDO implements Connection
         $this->attempt($query, static fn(): bool => $statement->execute());
 
         return $statement;
+    }
+
+    /**
+     * @param callable(): (\PDOStatement|false) $try
+     *
+     * @throws QueryFailed
+     */
+    private function guard(Query $query, callable $try): \PDOStatement
+    {
+        try {
+            $statement = $try();
+
+            if ($statement === false) {
+                throw new \Exception;
+            }
+
+            return $statement;
+        } catch (\PDOException $e) {
+            /** @var array{0: string, 1: ?int, 2: ?string} */
+            $errorInfo = $e->errorInfo ?? $this->pdo->errorInfo();
+            $previous = $e;
+        } catch (\Throwable $e) {
+            /** @var array{0: string, 1: ?int, 2: ?string} */
+            $errorInfo = $this->pdo->errorInfo();
+            $previous = null;
+        }
+
+        throw new QueryFailed(
+            $this->driver,
+            $query,
+            $errorInfo[0],
+            $errorInfo[1],
+            $errorInfo[2],
+            $previous,
+        );
     }
 
     /**
