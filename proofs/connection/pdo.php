@@ -375,7 +375,10 @@ $proofs = static function(Url $dsn, Driver $driver) {
             $parent = Table\Name::of('parent_table');
 
             $assert->same(
-                'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
+                match ($driver) {
+                    Driver::mysql => 'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
+                    Driver::sqlite => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
+                },
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))
                     ->named('foo')
                     ->sql($driver),
