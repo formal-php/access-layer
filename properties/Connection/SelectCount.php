@@ -37,12 +37,9 @@ final class SelectCount implements Property
 
     public static function any(): Set
     {
-        // The alias is a maximum of 42 characters due to postgres truncating
-        // any alias above 42. Other drivers have the same limit as of column
-        // names length.
         return Set\Composite::immutable(
             static fn(...$args) => new self(...$args),
-            FName::any(42),
+            FName::any(),
             Set\Uuid::any(),
             Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
             Set\Integers::any(),
