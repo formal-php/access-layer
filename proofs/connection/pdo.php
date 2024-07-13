@@ -8,7 +8,7 @@ use Formal\AccessLayer\{
     Query\Constraint\ForeignKey,
     Query\Delete,
     Query\Insert,
-    Query\Update,
+    Query\MultipleInsert,
     Query\Select,
     Query\Select\Join,
     Query\DropTable,
@@ -27,6 +27,7 @@ use Innmind\Specification\{
     Composable,
     Sign,
 };
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\Set;
 
 $proofs = static function(Url $dsn, Driver $driver) {
@@ -173,11 +174,17 @@ $proofs = static function(Url $dsn, Driver $driver) {
                 ),
             ));
             $connection(Delete::from($table));
-            Insert::into(
+            $insert = MultipleInsert::into(
                 $table,
+                new Column\Name('id'),
+                new Column\Name('name'),
+                new Column\Name('parent'),
+            );
+            $connection($insert(Sequence::of(
                 Row::of([
                     'id' => 1,
                     'name' => 'value_1',
+                    'parent' => null,
                 ]),
                 Row::of([
                     'id' => 2,
@@ -192,8 +199,9 @@ $proofs = static function(Url $dsn, Driver $driver) {
                 Row::of([
                     'id' => 4,
                     'name' => 'value_4',
+                    'parent' => null,
                 ]),
-            )->foreach($connection);
+            )));
 
             $child = $table->as('child');
             $rows = $connection(
@@ -285,8 +293,12 @@ $proofs = static function(Url $dsn, Driver $driver) {
                     'id' => 1,
                 ]),
             )->foreach($connection);
-            Insert::into(
+            $insert = MultipleInsert::into(
                 $child,
+                new Column\Name('id'),
+                new Column\Name('parent'),
+            );
+            $connection($insert(Sequence::of(
                 Row::of([
                     'id' => 1,
                     'parent' => 1,
@@ -295,7 +307,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                     'id' => 2,
                     'parent' => 1,
                 ]),
-            )->foreach($connection);
+            )));
 
             $connection(Delete::from($parent));
             $rows = $connection(Select::from($child));
@@ -340,8 +352,12 @@ $proofs = static function(Url $dsn, Driver $driver) {
                     'id' => 1,
                 ]),
             )->foreach($connection);
-            Insert::into(
+            $insert = MultipleInsert::into(
                 $child,
+                new Column\Name('id'),
+                new Column\Name('parent'),
+            );
+            $connection($insert(Sequence::of(
                 Row::of([
                     'id' => 1,
                     'parent' => 1,
@@ -350,7 +366,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                     'id' => 2,
                     'parent' => 1,
                 ]),
-            )->foreach($connection);
+            )));
 
             $connection(Delete::from($parent));
             $rows = $connection(Select::from($child))

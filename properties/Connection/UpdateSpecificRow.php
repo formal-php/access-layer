@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query\SQL,
     Query,
     Table,
+    Table\Column,
     Row,
     Connection,
 };
@@ -15,6 +16,7 @@ use Innmind\Specification\{
     Composable,
     Sign,
 };
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -51,8 +53,13 @@ final class UpdateSpecificRow implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        Query\Insert::into(
+        $insert = Query\MultipleInsert::into(
             new Table\Name('test'),
+            new Column\Name('id'),
+            new Column\Name('username'),
+            new Column\Name('registerNumber'),
+        );
+        $connection($insert(Sequence::of(
             Row::of([
                 'id' => $this->uuid1,
                 'username' => 'foo',
@@ -63,7 +70,7 @@ final class UpdateSpecificRow implements Property
                 'username' => 'foo',
                 'registerNumber' => 42,
             ]),
-        )->foreach($connection);
+        )));
 
         $update = Query\Update::set(
             new Table\Name('test'),
