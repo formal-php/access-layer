@@ -48,9 +48,9 @@ use Innmind\Specification\{
 
 final class Username
 {
-    public static function of(string $username): Comparator\Property
+    public static function of(string $username): Property
     {
-        return Comparator\Property::of(
+        return Property::of(
             'username', // this is the name of the column,
             Sign::equality,
             $username,
