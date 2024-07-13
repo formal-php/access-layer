@@ -74,7 +74,7 @@ final class PDO implements Connection
 
         if ($this->driver === Driver::sqlite) {
             $this->pdo->query('PRAGMA foreign_keys = ON');
-        };
+        }
     }
 
     public function __invoke(Query $query): Sequence

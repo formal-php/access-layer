@@ -126,7 +126,7 @@ final class Where
             \in_array(
                 $specification->sign(),
                 [Sign::startsWith, Sign::endsWith, Sign::contains],
-                true
+                true,
             )
         ) {
             $comparator .= " ESCAPE '\\'";
