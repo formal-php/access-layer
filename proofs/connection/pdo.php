@@ -100,7 +100,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
     yield $lazy($connection);
     yield $lazy($persistent);
 
-    if ($driver !== Driver::sqlite) {
+    if ($driver === Driver::mysql) {
         yield test(
             "PDO charset({$driver->name})",
             static function($assert) use ($connection, $dsn) {
@@ -394,6 +394,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                 match ($driver) {
                     Driver::mysql => 'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
                     Driver::sqlite => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
+                    Driver::postgres => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
                 },
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))
                     ->named('foo')
@@ -490,5 +491,12 @@ return static function() use ($proofs) {
     yield from $proofs(
         Url::of("sqlite:$tmp/formal.sq3"),
         Driver::sqlite,
+    );
+
+    $port = \getenv('POSTGRES_DB_PORT') ?: '5432';
+
+    yield from $proofs(
+        Url::of("pgsql://root:root@127.0.0.1:$port/example"),
+        Driver::postgres,
     );
 };

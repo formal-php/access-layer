@@ -234,17 +234,39 @@ final class Type
     {
         /** @var non-empty-string */
         return \sprintf(
-            '%s%s %s %s %s',
-            $this->type,
-            $this->precision,
+            '%s %s %s %s',
+            $this->type($driver),
             $this->nullable ? '' : 'NOT NULL',
             $this->buildDefault(),
             match (true) {
                 $driver === Driver::sqlite => '',
+                $driver === Driver::postgres => '',
                 \is_null($this->comment) => '',
                 default => "COMMENT '{$this->escape($this->comment)}'",
             },
         );
+    }
+
+    private function type(Driver $driver): string
+    {
+        if ($driver === Driver::postgres) {
+            return match ($this->type) {
+                'longtext' => 'text',
+                'mediumtext' => 'text',
+                'blob' => 'bytea',
+                'binary' => 'bytea',
+                'bigint' => 'bigint',
+                'int' => 'int',
+                'mediumint' => 'int',
+                'smallint' => 'smallint',
+                'tinyint' => 'smallint',
+                'datetime' => 'timestamp',
+                'double' => 'double precision',
+                default => $this->type.$this->precision,
+            };
+        }
+
+        return $this->type.$this->precision;
     }
 
     private function buildDefault(): string

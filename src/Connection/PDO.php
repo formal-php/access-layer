@@ -41,19 +41,23 @@ final class PDO implements Connection
             $password = $dsnPassword->toString();
         }
 
+        $this->driver = match ($dsn->scheme()->toString()) {
+            'sqlite' => Driver::sqlite,
+            'mysql' => Driver::mysql,
+            'pgsql' => Driver::postgres,
+        };
+
         if (!$dsn->query()->equals(UrlQuery::none())) {
             \parse_str($dsn->query()->toString(), $query);
 
             if (\array_key_exists('charset', $query)) {
                 /** @psalm-suppress MixedOperand */
-                $charset = ';charset='.$query['charset'];
+                $charset = match ($this->driver) {
+                    Driver::postgres => ";options='--client_encoding={$query['charset']}'",
+                    default => ';charset='.$query['charset'],
+                };
             }
         }
-
-        $this->driver = match ($dsn->scheme()->toString()) {
-            'sqlite' => Driver::sqlite,
-            'mysql' => Driver::mysql,
-        };
 
         $pdoDsn = match ($this->driver) {
             Driver::sqlite => \sprintf(

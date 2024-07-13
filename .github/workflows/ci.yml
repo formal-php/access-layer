@@ -19,6 +19,14 @@ jobs:
           MYSQL_DATABASE: example
         ports:
             - 3306
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: example
+        ports:
+            - 5432
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -36,6 +44,7 @@ jobs:
         run: php blackbox.php
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+          POSTGRES_DB_PORT: ${{ job.services.postgres.ports[5432] }}
   coverage:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -52,6 +61,14 @@ jobs:
           MYSQL_DATABASE: example
         ports:
             - 3306
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: example
+        ports:
+            - 5432
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -70,6 +87,7 @@ jobs:
         env:
           ENABLE_COVERAGE: 'true'
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+          POSTGRES_DB_PORT: ${{ job.services.postgres.ports[5432] }}
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
@@ -89,6 +107,14 @@ jobs:
           MYSQL_DATABASE: example
         ports:
             - 3306
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: example
+        ports:
+            - 5432
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -106,6 +132,7 @@ jobs:
         run: vendor/bin/phpunit
         env:
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+          POSTGRES_DB_PORT: ${{ job.services.postgres.ports[5432] }}
   coverage_phpunit:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -122,6 +149,14 @@ jobs:
           MYSQL_DATABASE: example
         ports:
             - 3306
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: example
+        ports:
+            - 5432
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -140,6 +175,7 @@ jobs:
         env:
           BLACKBOX_SET_SIZE: 1
           DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+          POSTGRES_DB_PORT: ${{ job.services.postgres.ports[5432] }}
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
