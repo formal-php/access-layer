@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Table\Column;
 
-use Formal\AccessLayer\Table;
+use Formal\AccessLayer\{
+    Table,
+    Driver,
+};
 
 /**
  * @psalm-immutable
@@ -55,8 +58,8 @@ final class Name
     /**
      * @return non-empty-string
      */
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
-        return "`{$this->value}`";
+        return $driver->escapeName($this->value);
     }
 }

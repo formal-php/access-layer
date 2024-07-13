@@ -49,7 +49,7 @@ final class MustThrowWhenValueDoesntFitTheSchema implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
-            $query = SQL::of('INSERT INTO `test` VALUES (:uuid, :username, :registerNumber);');
+            $query = SQL::of('INSERT INTO test VALUES (:uuid, :username, :registerNumber);');
             $query = $query
                 ->with(Parameter::named('uuid', $this->uuid.$this->uuid)) // too long
                 ->with(Parameter::named('username', $this->username))

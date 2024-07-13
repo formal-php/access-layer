@@ -6,6 +6,7 @@ namespace Formal\AccessLayer\Row;
 use Formal\AccessLayer\{
     Table\Column\Name,
     Query\Parameter\Type,
+    Driver,
 };
 
 /**
@@ -35,9 +36,9 @@ final class Value
     /**
      * @return non-empty-string
      */
-    public function columnSql(): string
+    public function columnSql(Driver $driver): string
     {
-        return $this->column->sql();
+        return $this->column->sql($driver);
     }
 
     public function value(): mixed

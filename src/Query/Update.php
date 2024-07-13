@@ -5,15 +5,14 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
-    Query\Select\Join,
     Table\Name,
     Row,
+    Driver,
 };
 use Innmind\Specification\Specification;
 use Innmind\Immutable\{
     Sequence,
     Str,
-    Monoid\Concat,
 };
 
 /**
@@ -23,22 +22,15 @@ final class Update implements Query
 {
     private Name|Name\Aliased $table;
     private Row $row;
-    /** @var Sequence<Join> */
-    private Sequence $joins;
     private Where $where;
 
-    /**
-     * @param Sequence<Join> $joins
-     */
     private function __construct(
         Name|Name\Aliased $table,
         Row $row,
-        Sequence $joins,
         Where $where,
     ) {
         $this->table = $table;
         $this->row = $row;
-        $this->joins = $joins;
         $this->where = $where;
     }
 
@@ -47,17 +39,7 @@ final class Update implements Query
      */
     public static function set(Name|Name\Aliased $table, Row $row): self
     {
-        return new self($table, $row, Sequence::of(), Where::everything());
-    }
-
-    public function join(Join $join): self
-    {
-        return new self(
-            $this->table,
-            $this->row,
-            ($this->joins)($join),
-            $this->where,
-        );
+        return new self($table, $row, Where::everything());
     }
 
     public function where(Specification $specification): self
@@ -65,7 +47,6 @@ final class Update implements Query
         return new self(
             $this->table,
             $this->row,
-            $this->joins,
             Where::of($specification),
         );
     }
@@ -79,26 +60,20 @@ final class Update implements Query
             ->append($this->where->parameters());
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         /** @var Sequence<string> */
         $columns = $this
             ->row
             ->values()
-            ->map(static fn($value) => "{$value->columnSql()} = ?");
+            ->map(static fn($value) => "{$value->columnSql($driver)} = ?");
 
         /** @var non-empty-string */
         return \sprintf(
-            'UPDATE %s%s SET %s %s',
-            $this->table->sql(),
-            $this
-                ->joins
-                ->map(static fn($join) => $join->sql())
-                ->map(Str::of(...))
-                ->fold(new Concat)
-                ->toString(),
+            'UPDATE %s SET %s %s',
+            $this->table->sql($driver),
             Str::of(', ')->join($columns)->toString(),
-            $this->where->sql(),
+            $this->where->sql($driver),
         );
     }
 

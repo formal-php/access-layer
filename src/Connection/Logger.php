@@ -6,6 +6,7 @@ namespace Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Connection,
     Query,
+    Driver,
 };
 use Innmind\Immutable\Sequence;
 use Psr\Log\LoggerInterface;
@@ -23,11 +24,15 @@ final class Logger implements Connection
 
     public function __invoke(Query $query): Sequence
     {
+        // For the sake of simplicity the queries SQL is logged with the MySQL
+        // format. As otherwise it would require this decorator to retrieve the
+        // driver from the underlying connection.
+
         try {
             $this->logger->debug(
                 'Query {sql} is about to be executed',
                 [
-                    'sql' => $query->sql(),
+                    'sql' => $query->sql(Driver::mysql),
                     'parameters' => $query->parameters()->reduce(
                         [],
                         static fn(array $parameters, $parameter) => \array_merge(
@@ -46,7 +51,7 @@ final class Logger implements Connection
             $this->logger->error(
                 'Query {sql} failed with {kind}({message})',
                 [
-                    'sql' => $query->sql(),
+                    'sql' => $query->sql(Driver::mysql),
                     'kind' => \get_class($e),
                     'message' => $e->getMessage(),
                 ],

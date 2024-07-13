@@ -9,6 +9,7 @@ use Formal\AccessLayer\{
     Query\Parameter,
     Query\Parameter\Type,
     Row,
+    Driver,
     Exception\QueryFailed,
 };
 use Innmind\Url\{
@@ -22,6 +23,7 @@ use Innmind\Immutable\Sequence;
 final class PDO implements Connection
 {
     private \PDO $pdo;
+    private Driver $driver;
 
     private function __construct(Url $dsn, array $options = [])
     {
@@ -39,23 +41,44 @@ final class PDO implements Connection
             $password = $dsnPassword->toString();
         }
 
+        $this->driver = match ($dsn->scheme()->toString()) {
+            'sqlite' => Driver::sqlite,
+            'mysql' => Driver::mysql,
+            'pgsql' => Driver::postgres,
+        };
+
         if (!$dsn->query()->equals(UrlQuery::none())) {
             \parse_str($dsn->query()->toString(), $query);
 
             if (\array_key_exists('charset', $query)) {
                 /** @psalm-suppress MixedOperand */
-                $charset = ';charset='.$query['charset'];
+                $charset = match ($this->driver) {
+                    Driver::postgres => ";options='--client_encoding={$query['charset']}'",
+                    default => ';charset='.$query['charset'],
+                };
             }
         }
 
-        $this->pdo = new \PDO(\sprintf(
-            '%s:host=%s;port=%s;dbname=%s%s',
-            $dsn->scheme()->toString(),
-            $dsn->authority()->host()->toString(),
-            $dsn->authority()->port()->toString(),
-            \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
-            $charset,
-        ), $user, $password, $options);
+        $pdoDsn = match ($this->driver) {
+            Driver::sqlite => \sprintf(
+                'sqlite:%s',
+                $dsn->path()->toString(),
+            ),
+            default => \sprintf(
+                '%s:host=%s;port=%s;dbname=%s%s',
+                $dsn->scheme()->toString(),
+                $dsn->authority()->host()->toString(),
+                $dsn->authority()->port()->toString(),
+                \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
+                $charset,
+            ),
+        };
+
+        $this->pdo = new \PDO($pdoDsn, $user, $password, $options);
+
+        if ($this->driver === Driver::sqlite) {
+            $this->pdo->query('PRAGMA foreign_keys = ON');
+        }
     }
 
     public function __invoke(Query $query): Sequence
@@ -156,7 +179,10 @@ final class PDO implements Connection
      */
     private function prepare(Query $query): \PDOStatement
     {
-        $statement = $this->pdo->prepare($query->sql());
+        $statement = $this->guard(
+            $query,
+            fn() => $this->pdo->prepare($query->sql($this->driver)),
+        );
 
         $_ = $query->parameters()->reduce(
             0,
@@ -184,6 +210,41 @@ final class PDO implements Connection
     }
 
     /**
+     * @param callable(): (\PDOStatement|false) $try
+     *
+     * @throws QueryFailed
+     */
+    private function guard(Query $query, callable $try): \PDOStatement
+    {
+        try {
+            $statement = $try();
+
+            if ($statement === false) {
+                throw new \Exception;
+            }
+
+            return $statement;
+        } catch (\PDOException $e) {
+            /** @var array{0: string, 1: ?int, 2: ?string} */
+            $errorInfo = $e->errorInfo ?? $this->pdo->errorInfo();
+            $previous = $e;
+        } catch (\Throwable $e) {
+            /** @var array{0: string, 1: ?int, 2: ?string} */
+            $errorInfo = $this->pdo->errorInfo();
+            $previous = null;
+        }
+
+        throw new QueryFailed(
+            $this->driver,
+            $query,
+            $errorInfo[0],
+            $errorInfo[1],
+            $errorInfo[2],
+            $previous,
+        );
+    }
+
+    /**
      * @param callable(): bool $attempt
      *
      * @throws QueryFailed
@@ -204,6 +265,7 @@ final class PDO implements Connection
         }
 
         throw new QueryFailed(
+            $this->driver,
             $query,
             $errorInfo[0],
             $errorInfo[1],

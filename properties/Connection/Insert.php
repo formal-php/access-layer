@@ -40,7 +40,7 @@ final class Insert implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $select = SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'");
+        $select = SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'");
         $rows = $connection($select);
 
         $assert->count(0, $rows);
