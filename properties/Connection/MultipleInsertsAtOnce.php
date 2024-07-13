@@ -65,7 +65,7 @@ final class MultipleInsertsAtOnce implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $select = SQL::of("SELECT * FROM `test` WHERE `id` IN ('{$this->uuid1}', '{$this->uuid2}')");
+        $select = SQL::of("SELECT * FROM test WHERE id IN ('{$this->uuid1}', '{$this->uuid2}')");
         $rows = $connection($select);
 
         $assert->count(0, $rows);

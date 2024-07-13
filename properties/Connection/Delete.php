@@ -40,7 +40,7 @@ final class Delete implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $select = SQL::of('SELECT * FROM `test`');
+        $select = SQL::of('SELECT * FROM test');
         Query\Insert::into(
             new Table\Name('test'),
             Row::of([

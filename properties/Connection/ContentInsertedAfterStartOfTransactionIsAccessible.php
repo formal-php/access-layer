@@ -5,9 +5,11 @@ namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
     Query\SQL,
-    Query\Parameter,
+    Query\Insert,
     Query\StartTransaction,
     Query\Commit,
+    Table\Name,
+    Row,
     Connection,
 };
 use Innmind\BlackBox\{
@@ -51,13 +53,16 @@ final class ContentInsertedAfterStartOfTransactionIsAccessible implements Proper
     {
         $connection(new StartTransaction);
 
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid))
-            ->with(Parameter::of($this->username))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
+        Insert::into(
+            new Name('test'),
+            Row::of([
+                'id' => $this->uuid,
+                'username' => $this->username,
+                'registerNumber' => $this->number,
+            ]),
+        )->foreach($connection);
 
-        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
+        $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 
         $assert->count(1, $rows);
         $assert->same(

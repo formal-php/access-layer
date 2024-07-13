@@ -70,7 +70,7 @@ final class SelectWhereInQuery implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?), (?, ?, ?);')
+        $insert = SQL::of('INSERT INTO test VALUES (?, ?, ?), (?, ?, ?);')
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number))
@@ -78,7 +78,7 @@ final class SelectWhereInQuery implements Property
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
         $connection($insert);
-        $insert = SQL::of('INSERT INTO `test_values` VALUES (?, ?), (?, ?);')
+        $insert = SQL::of('INSERT INTO test_values VALUES (?, ?), (?, ?);')
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->value1))
             ->with(Parameter::of($this->uuid1))

@@ -4,12 +4,12 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\SQL,
-    Query\Parameter,
+    Query\Insert,
     Query\Select,
     Query\Select\Direction,
     Table\Name,
     Table\Column,
+    Row,
     Connection,
 };
 use Innmind\Specification\{
@@ -63,16 +63,19 @@ final class SelectOrder implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid1))
-            ->with(Parameter::of('a'.$this->username))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid2))
-            ->with(Parameter::of('b'.$this->username))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
+        Insert::into(
+            new Name('test'),
+            Row::of([
+                'id' => $this->uuid1,
+                'username' => 'a'.$this->username,
+                'registerNumber' => $this->number,
+            ]),
+            Row::of([
+                'id' => $this->uuid2,
+                'username' => 'b'.$this->username,
+                'registerNumber' => $this->number,
+            ]),
+        )->foreach($connection);
 
         $table = Name::of('test');
         $select = Select::from($table)
