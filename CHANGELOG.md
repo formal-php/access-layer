@@ -5,11 +5,13 @@
 ### Added
 
 - `Formal\AccessLayer\Driver`
+- `Formal\AccessLayer\Query\MultipleInsert`
 
 ### Changed
 
 - Requires `innmind/specification:~4.0`
 - `Formal\AccessLayer\Query::sql()` now has a `Driver` argument
+- `Formal\AccessLayer\Query\Insert::into` only accepts 1 `Row`, for multiple rows use `MultipleInsert` instead
 
 ### Removed
 
