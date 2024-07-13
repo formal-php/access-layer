@@ -99,34 +99,47 @@ $proofs = static function(Url $dsn, Driver $driver) {
     yield $lazy($connection);
     yield $lazy($persistent);
 
-    yield test(
-        "PDO charset({$driver->name})",
-        static function($assert) use ($connection, $dsn) {
-            $table = Table\Name::of('test_charset');
+    if ($driver !== Driver::sqlite) {
+        yield test(
+            "PDO charset({$driver->name})",
+            static function($assert) use ($connection, $dsn) {
+                $table = Table\Name::of('test_charset');
 
-            $connection(CreateTable::ifNotExists(
-                $table,
-                Column::of(
-                    Column\Name::of('str'),
-                    Column\Type::longtext(),
-                ),
-            ));
+                $connection(CreateTable::ifNotExists(
+                    $table,
+                    Column::of(
+                        Column\Name::of('str'),
+                        Column\Type::longtext(),
+                    ),
+                ));
 
-            Insert::into(
-                $table,
-                Row::of([
-                    'str' => 'gelé',
-                ]),
-            )->foreach($connection);
+                Insert::into(
+                    $table,
+                    Row::of([
+                        'str' => 'gelé',
+                    ]),
+                )->foreach($connection);
 
-            $select = Select::from($table);
+                $select = Select::from($table);
 
-            $ascii = PDO::of($dsn->withQuery(Query::of('charset=ascii')));
-            $assert
-                ->expected('gelé')
-                ->not()
-                ->same(
-                    $ascii($select)
+                $ascii = PDO::of($dsn->withQuery(Query::of('charset=ascii')));
+                $assert
+                    ->expected('gelé')
+                    ->not()
+                    ->same(
+                        $ascii($select)
+                            ->first()
+                            ->flatMap(static fn($row) => $row->column('str'))
+                            ->match(
+                                static fn($str) => $str,
+                                static fn() => null,
+                            ),
+                    );
+
+                $utf8 = PDO::of($dsn->withQuery(Query::of('charset=utf8mb4')));
+                $assert->same(
+                    'gelé',
+                    $utf8($select)
                         ->first()
                         ->flatMap(static fn($row) => $row->column('str'))
                         ->match(
@@ -135,21 +148,10 @@ $proofs = static function(Url $dsn, Driver $driver) {
                         ),
                 );
 
-            $utf8 = PDO::of($dsn->withQuery(Query::of('charset=utf8mb4')));
-            $assert->same(
-                'gelé',
-                $utf8($select)
-                    ->first()
-                    ->flatMap(static fn($row) => $row->column('str'))
-                    ->match(
-                        static fn($str) => $str,
-                        static fn() => null,
-                    ),
-            );
-
-            $connection(DropTable::named($table));
-        },
-    );
+                $connection(DropTable::named($table));
+            },
+        );
+    }
 
     yield test(
         "Select join({$driver->name})",
