@@ -41,16 +41,16 @@ final class MultipleInsert implements Query
     }
 
     /**
-     * The number of values for each row must be the same as the columns and in 
+     * The number of values for each row must be the same as the columns and in
      * the same order otherwise the query will fail.
-     * 
+     *
      * @no-named-arguments
      * @psalm-pure
      *
      * @return callable(Sequence<Row>): self
      */
     public static function into(
-        Name $table, 
+        Name $table,
         Column\Name $first,
         Column\Name ...$rest,
     ): callable {
