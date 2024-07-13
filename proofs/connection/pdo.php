@@ -430,13 +430,30 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
+    $filter = match ($driver) {
+        Driver::sqlite => static fn($ensure) => \count(
+            \array_filter(
+                $ensure->properties(),
+                static fn($property) => $property instanceof Properties\MustThrowWhenValueDoesntFitTheSchema,
+            )
+        ) === 0,
+        default => static fn() => true,
+    };
+
     yield properties(
         "PDO properties({$driver->name})",
-        Properties::any(),
+        Properties::any()->filter($filter),
         $connections,
     );
 
     foreach (Properties::list() as $property) {
+        if (
+            $driver === Driver::sqlite &&
+            $property === Properties\MustThrowWhenValueDoesntFitTheSchema::class
+        ) {
+            continue;
+        }
+
         yield property(
             $property,
             $connections,

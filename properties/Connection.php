@@ -13,12 +13,13 @@ use Formal\AccessLayer\{
 use Innmind\BlackBox\{
     Set,
     Property,
+    Properties,
 };
 
 final class Connection
 {
     /**
-     * @return Set<Property>
+     * @return Set<Properties>
      */
     public static function any(): Set
     {
