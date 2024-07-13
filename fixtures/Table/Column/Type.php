@@ -28,6 +28,7 @@ final class Type
             self::nullable(),
             self::comment(),
             self::nullable(self::comment()),
+            Set\Elements::of(Model::uuid(), Model::bool()),
         );
     }
 
@@ -47,6 +48,7 @@ final class Type
             self::smallint(),
             self::tinyint(),
             self::varchar(),
+            Set\Elements::of(Model::uuid(), Model::bool()),
         );
     }
 

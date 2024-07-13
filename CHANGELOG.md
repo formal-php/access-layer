@@ -6,6 +6,8 @@
 
 - `Formal\AccessLayer\Driver`
 - `Formal\AccessLayer\Query\MultipleInsert`
+- `Formal\AccessLayer\Table\Column\Type::uuid()`
+- `Formal\AccessLayer\Table\Column\Type::bool()`
 
 ### Changed
 

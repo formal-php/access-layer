@@ -37,6 +37,22 @@ final class Type
     /**
      * @psalm-pure
      */
+    public static function uuid(): self
+    {
+        return new self('uuid', '');
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function bool(): self
+    {
+        return new self('bool', '');
+    }
+
+    /**
+     * @psalm-pure
+     */
     public static function bigint(int $size = null): self
     {
         return new self('bigint', \is_int($size) ? "($size)" : '');
@@ -266,7 +282,11 @@ final class Type
             };
         }
 
-        return $this->type.$this->precision;
+        return match ($this->type) {
+            'uuid' => 'char(36)',
+            'bool' => 'tinyint(1)',
+            default => $this->type.$this->precision,
+        };
     }
 
     private function buildDefault(): string
