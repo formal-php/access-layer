@@ -45,17 +45,14 @@ final class Insert implements Property
 
         $assert->count(0, $rows);
 
-        $sequence = Query\Insert::into(
+        $sequence = $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => 'foo',
                 'registerNumber' => 42,
             ]),
-        )->match(
-            $connection,
-            static fn() => null,
-        );
+        ));
 
         $assert->not()->null($sequence);
         $assert->count(0, $sequence);

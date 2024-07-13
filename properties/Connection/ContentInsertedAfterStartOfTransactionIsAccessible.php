@@ -53,14 +53,14 @@ final class ContentInsertedAfterStartOfTransactionIsAccessible implements Proper
     {
         $connection(new StartTransaction);
 
-        Insert::into(
+        $connection(Insert::into(
             new Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,
                 'registerNumber' => $this->number,
             ]),
-        )->foreach($connection);
+        ));
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 

@@ -61,14 +61,14 @@ final class SelectWhereEndsWith implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        Insert::into(
+        $connection(Insert::into(
             new Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username.$this->suffix,
                 'registerNumber' => $this->number,
             ]),
-        )->foreach($connection);
+        ));
 
         $select = Select::from(new Name('test'));
         $select = $select->where(new class($this->suffix) implements Comparator {

@@ -50,14 +50,14 @@ final class SelectColumns implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        Insert::into(
+        $connection(Insert::into(
             new Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,
                 'registerNumber' => $this->number,
             ]),
-        )->foreach($connection);
+        ));
 
         $select = Select::from(new Name('test'))->columns(new Column\Name('id'));
         $rows = $connection($select);

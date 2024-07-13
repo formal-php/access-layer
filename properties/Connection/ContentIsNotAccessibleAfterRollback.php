@@ -53,14 +53,14 @@ final class ContentIsNotAccessibleAfterRollback implements Property
     {
         $connection(new StartTransaction);
 
-        Insert::into(
+        $connection(Insert::into(
             new Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,
                 'registerNumber' => $this->number,
             ]),
-        )->foreach($connection);
+        ));
 
         $connection(new Rollback);
 

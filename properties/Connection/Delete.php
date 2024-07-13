@@ -41,14 +41,14 @@ final class Delete implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $select = SQL::of('SELECT * FROM test');
-        Query\Insert::into(
+        $connection(Query\Insert::into(
             new Table\Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => 'foo',
                 'registerNumber' => 42,
             ]),
-        )->foreach($connection);
+        ));
 
         $sequence = $connection(Query\Delete::from(new Table\Name('test')));
 

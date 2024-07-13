@@ -49,14 +49,14 @@ final class SelectEverything implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        Insert::into(
+        $connection(Insert::into(
             new Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,
                 'registerNumber' => $this->number,
             ]),
-        )->foreach($connection);
+        ));
 
         $rows = $connection(Select::from(new Name('test')));
 

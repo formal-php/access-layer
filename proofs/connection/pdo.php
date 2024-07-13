@@ -69,12 +69,12 @@ $proofs = static function(Url $dsn, Driver $driver) {
             ));
 
             for ($i = 0; $i < 100_000; $i++) {
-                Insert::into(
+                $connection(Insert::into(
                     $table,
                     Row::of([
                         'i' => $i,
                     ]),
-                )->foreach($connection);
+                ));
             }
 
             $select = Select::onDemand($table);
@@ -114,12 +114,12 @@ $proofs = static function(Url $dsn, Driver $driver) {
                     ),
                 ));
 
-                Insert::into(
+                $connection(Insert::into(
                     $table,
                     Row::of([
                         'str' => 'gelé',
                     ]),
-                )->foreach($connection);
+                ));
 
                 $select = Select::from($table);
 
@@ -287,12 +287,12 @@ $proofs = static function(Url $dsn, Driver $driver) {
             ));
             $connection(Delete::from($child));
             $connection(Delete::from($parent));
-            Insert::into(
+            $connection(Insert::into(
                 $parent,
                 Row::of([
                     'id' => 1,
                 ]),
-            )->foreach($connection);
+            ));
             $insert = MultipleInsert::into(
                 $child,
                 new Column\Name('id'),
@@ -346,12 +346,12 @@ $proofs = static function(Url $dsn, Driver $driver) {
             ));
             $connection(Delete::from($child));
             $connection(Delete::from($parent));
-            Insert::into(
+            $connection(Insert::into(
                 $parent,
                 Row::of([
                     'id' => 1,
                 ]),
-            )->foreach($connection);
+            ));
             $insert = MultipleInsert::into(
                 $child,
                 new Column\Name('id'),
@@ -419,28 +419,28 @@ $proofs = static function(Url $dsn, Driver $driver) {
                 ),
             )->unique(Column\Name::of('id'), Column\Name::of('other')));
 
-            Insert::into(
+            $connection(Insert::into(
                 $table,
                 Row::of([
                     'id' => $int,
                     'other' => 'foo',
                 ]),
-            )->foreach($connection);
-            Insert::into(
+            ));
+            $connection(Insert::into(
                 $table,
                 Row::of([
                     'id' => $int,
                     'other' => 'bar',
                 ]),
-            )->foreach($connection);
+            ));
 
-            $assert->throws(fn() => Insert::into(
+            $assert->throws(fn() => $connection(Insert::into(
                 $table,
                 Row::of([
                     'id' => $int,
                     'other' => 'foo',
                 ]),
-            )->foreach($connection));
+            )));
 
             $connection(DropTable::named($table));
         },

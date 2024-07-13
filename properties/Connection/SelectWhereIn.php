@@ -54,14 +54,14 @@ final class SelectWhereIn implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        Insert::into(
+        $connection(Insert::into(
             new Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,
                 'registerNumber' => $this->number,
             ]),
-        )->foreach($connection);
+        ));
 
         $select = Select::from(new Name('test'));
         $select = $select->where(new class($this->uuid) implements Comparator {

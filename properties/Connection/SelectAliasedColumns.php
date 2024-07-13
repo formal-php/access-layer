@@ -50,14 +50,14 @@ final class SelectAliasedColumns implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        Insert::into(
+        $connection(Insert::into(
             new Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,
                 'registerNumber' => $this->number,
             ]),
-        )->foreach($connection);
+        ));
 
         $select = Select::from($table = Name::of('test')->as('_test'))->columns(
             Column\Name::of('id')->in($table)->as('test_id'),

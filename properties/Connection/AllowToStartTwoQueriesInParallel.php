@@ -51,14 +51,14 @@ final class AllowToStartTwoQueriesInParallel implements Property
     {
         // Insert at least one value to make sure the any() call will always
         // return true
-        Insert::into(
+        $connection(Insert::into(
             new Name('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->name,
                 'registerNumber' => $this->number,
             ]),
-        )->foreach($connection);
+        ));
         $result1 = $connection(SQL::of('SELECT * FROM test'));
         $result2 = $connection(SQL::of('SELECT * FROM test'));
 

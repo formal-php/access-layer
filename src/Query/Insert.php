@@ -22,9 +22,6 @@ final class Insert implements Query
     private Name $table;
     private Row $row;
 
-    /**
-     * @no-named-arguments
-     */
     private function __construct(Name $table, Row $row)
     {
         $this->table = $table;
@@ -32,17 +29,11 @@ final class Insert implements Query
     }
 
     /**
-     * @no-named-arguments
      * @psalm-pure
-     *
-     * @return Sequence<self>
      */
-    public static function into(Name $table, Row $first, Row ...$rest): Sequence
+    public static function into(Name $table, Row $row): self
     {
-        return Sequence::of($first, ...$rest)->map(static fn($row) => new self(
-            $table,
-            $row,
-        ));
+        return new self($table, $row);
     }
 
     public function parameters(): Sequence
