@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Table\Column\Name;
 
-use Formal\AccessLayer\Table\Column\Name;
+use Formal\AccessLayer\{
+    Table\Column\Name,
+    Driver,
+};
 
 /**
  * @psalm-immutable
@@ -49,8 +52,10 @@ final class Aliased
     /**
      * @return non-empty-string
      */
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
-        return "{$this->name->sql()} AS `{$this->alias}`";
+        $alias = $driver->escapeName($this->alias);
+
+        return "{$this->name->sql($driver)} AS $alias";
     }
 }

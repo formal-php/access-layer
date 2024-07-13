@@ -48,13 +48,13 @@ final class ParameterTypesCanBeSpecified implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
+        $insert = SQL::of('INSERT INTO test VALUES (?, ?, ?);')
             ->with(Parameter::of($this->uuid, Type::string))
             ->with(Parameter::of($this->username, Type::string))
             ->with(Parameter::of($this->number, Type::int));
         $connection($insert);
 
-        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid}'"));
+        $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 
         $assert->count(1, $rows);
         $assert->same(

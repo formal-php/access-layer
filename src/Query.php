@@ -19,6 +19,6 @@ interface Query
     /**
      * @return non-empty-string
      */
-    public function sql(): string;
+    public function sql(Driver $driver): string;
     public function lazy(): bool;
 }

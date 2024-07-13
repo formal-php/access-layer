@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query\SQL,
     Query,
     Table,
+    Table\Column,
     Row,
     Connection,
 };
@@ -15,6 +16,7 @@ use Innmind\Specification\{
     Composable,
     Sign,
 };
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -51,8 +53,13 @@ final class DeleteSpecificRow implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(Query\Insert::into(
+        $insert = Query\MultipleInsert::into(
             new Table\Name('test'),
+            new Column\Name('id'),
+            new Column\Name('username'),
+            new Column\Name('registerNumber'),
+        );
+        $connection($insert(Sequence::of(
             Row::of([
                 'id' => $this->uuid1,
                 'username' => 'foo',
@@ -63,7 +70,7 @@ final class DeleteSpecificRow implements Property
                 'username' => 'foo',
                 'registerNumber' => 42,
             ]),
-        ));
+        )));
 
         $delete = Query\Delete::from(new Table\Name('test'))->where(
             new class($this->uuid1) implements Comparator {
@@ -96,11 +103,11 @@ final class DeleteSpecificRow implements Property
 
         $assert->count(0, $sequence);
 
-        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
+        $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid1}'"));
 
         $assert->count(0, $rows);
 
-        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
+        $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid2}'"));
 
         $assert->count(1, $rows);
 

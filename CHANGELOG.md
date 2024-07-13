@@ -2,9 +2,23 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Formal\AccessLayer\Driver`
+- `Formal\AccessLayer\Query\MultipleInsert`
+- `Formal\AccessLayer\Table\Column\Type::uuid()`
+- `Formal\AccessLayer\Table\Column\Type::bool()`
+
 ### Changed
 
 - Requires `innmind/specification:~4.0`
+- `Formal\AccessLayer\Query::sql()` now has a `Driver` argument
+- `Formal\AccessLayer\Query\Insert::into()` only accepts 1 `Row`, for multiple rows use `MultipleInsert` instead
+
+### Removed
+
+- `Formal\AccessLayer\Query\Delete::join()`
+- `Formal\AccessLayer\Query\Update::join()`
 
 ## 2.17.0 - 2024-05-29
 

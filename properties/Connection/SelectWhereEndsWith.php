@@ -4,10 +4,10 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\SQL,
-    Query\Parameter,
+    Query\Insert,
     Query\Select,
     Table\Name,
+    Row,
     Connection,
 };
 use Innmind\Specification\{
@@ -61,11 +61,14 @@ final class SelectWhereEndsWith implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid))
-            ->with(Parameter::of($this->username.$this->suffix))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
+        $connection(Insert::into(
+            new Name('test'),
+            Row::of([
+                'id' => $this->uuid,
+                'username' => $this->username.$this->suffix,
+                'registerNumber' => $this->number,
+            ]),
+        ));
 
         $select = Select::from(new Name('test'));
         $select = $select->where(new class($this->suffix) implements Comparator {

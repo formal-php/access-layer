@@ -5,19 +5,21 @@ namespace Properties\Formal\AccessLayer;
 
 use Formal\AccessLayer\{
     Connection as Concrete,
-    Query\SQL,
+    Query\CreateTable,
     Query\DropTable,
     Table\Name,
+    Table\Column,
 };
 use Innmind\BlackBox\{
     Set,
     Property,
+    Properties,
 };
 
 final class Connection
 {
     /**
-     * @return Set<Property>
+     * @return Set<Properties>
      */
     public static function any(): Set
     {
@@ -80,7 +82,16 @@ final class Connection
     {
         $connection(DropTable::ifExists(new Name('test')));
         $connection(DropTable::ifExists(new Name('test_values')));
-        $connection(SQL::of('CREATE TABLE `test` (`id` varchar(36) NOT NULL,`username` varchar(255) NOT NULL, `registerNumber` bigint NOT NULL, PRIMARY KEY (id));'));
-        $connection(SQL::of('CREATE TABLE `test_values` (`id` varchar(36) NOT NULL, `value` varchar(255) NOT NULL);'));
+        $connection(CreateTable::named(
+            new Name('test'),
+            new Column(new Column\Name('id'), Column\Type::char(36)),
+            new Column(new Column\Name('username'), Column\Type::varchar(255)),
+            new Column(new Column\Name('registerNumber'), Column\Type::bigint()),
+        )->primaryKey(new Column\Name('id')));
+        $connection(CreateTable::named(
+            new Name('test_values'),
+            new Column(new Column\Name('id'), Column\Type::char(36)),
+            new Column(new Column\Name('value'), Column\Type::varchar(255)),
+        ));
     }
 }

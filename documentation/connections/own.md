@@ -14,14 +14,10 @@ use Sentry\ClientInterface;
 
 final class Sentry implements Connection
 {
-    private Connection $connection;
-    private ClientInterface $sentry;
-
-    public function __construct(Connection $connection, ClientInterface $sentry)
-    {
-        $this->connection = $connection;
-        $this->sentry = $sentry;
-    }
+    public function __construct(
+        private Connection $connection,
+        private ClientInterface $sentry,
+    ) {}
 
     public function __invoke(Query $query): Sequence
     {

@@ -7,9 +7,11 @@ use Formal\AccessLayer\{
     Query\SQL,
     Query,
     Table,
+    Table\Column,
     Row,
     Connection,
 };
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -64,13 +66,18 @@ final class MultipleInsertsAtOnce implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $select = SQL::of("SELECT * FROM `test` WHERE `id` IN ('{$this->uuid1}', '{$this->uuid2}')");
+        $select = SQL::of("SELECT * FROM test WHERE id IN ('{$this->uuid1}', '{$this->uuid2}')");
         $rows = $connection($select);
 
         $assert->count(0, $rows);
 
-        $sequence = $connection(Query\Insert::into(
+        $insert = Query\MultipleInsert::into(
             new Table\Name('test'),
+            new Column\Name('id'),
+            new Column\Name('username'),
+            new Column\Name('registerNumber'),
+        );
+        $sequence = $connection($insert(Sequence::of(
             Row::of([
                 'id' => $this->uuid1,
                 'username' => $this->username1,
@@ -81,7 +88,7 @@ final class MultipleInsertsAtOnce implements Property
                 'username' => $this->username2,
                 'registerNumber' => $this->number2,
             ]),
-        ));
+        )));
 
         $assert->count(0, $sequence);
 

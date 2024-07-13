@@ -3,9 +3,10 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Table;
 
-use Formal\AccessLayer\Table\Column\{
-    Name,
-    Type,
+use Formal\AccessLayer\{
+    Table\Column\Name,
+    Table\Column\Type,
+    Driver,
 };
 
 /**
@@ -43,8 +44,8 @@ final class Column
     /**
      * @return non-empty-string
      */
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
-        return "{$this->name->sql()} {$this->type->sql()}";
+        return "{$this->name->sql($driver)} {$this->type->sql($driver)}";
     }
 }

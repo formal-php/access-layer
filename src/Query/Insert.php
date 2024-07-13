@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Query,
     Table\Name,
     Row,
+    Driver,
 };
 use Innmind\Immutable\{
     Sequence,
@@ -19,42 +20,32 @@ use Innmind\Immutable\{
 final class Insert implements Query
 {
     private Name $table;
-    /** @var Sequence<Row> */
-    private Sequence $rows;
+    private Row $row;
 
-    /**
-     * @no-named-arguments
-     */
-    private function __construct(Name $table, Row $first, Row ...$rest)
+    private function __construct(Name $table, Row $row)
     {
         $this->table = $table;
-        $this->rows = Sequence::of($first, ...$rest);
+        $this->row = $row;
     }
 
     /**
-     * @no-named-arguments
      * @psalm-pure
      */
-    public static function into(Name $table, Row $first, Row ...$rest): self
+    public static function into(Name $table, Row $row): self
     {
-        return new self($table, $first, ...$rest);
+        return new self($table, $row);
     }
 
     public function parameters(): Sequence
     {
-        return $this->rows->flatMap(static fn($row) => $row->values()->map(
+        return $this->row->values()->map(
             static fn($value) => Parameter::of($value->value(), $value->type()),
-        ));
+        );
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
-        $inserts = $this->rows->map(
-            fn($row) => $this->buildInsert($row),
-        );
-
-        /** @var non-empty-string Because there's at least one row */
-        return Str::of('; ')->join($inserts)->toString();
+        return $this->buildInsert($driver);
     }
 
     public function lazy(): bool
@@ -62,16 +53,19 @@ final class Insert implements Query
         return false;
     }
 
-    private function buildInsert(Row $row): string
+    /**
+     * @return non-empty-string
+     */
+    private function buildInsert(Driver $driver): string
     {
         /** @var Sequence<string> */
-        $keys = $row->values()->map(static fn($value) => $value->columnSql());
+        $keys = $this->row->values()->map(static fn($value) => $value->columnSql($driver));
         /** @var Sequence<string> */
-        $values = $row->values()->map(static fn() => '?');
+        $values = $this->row->values()->map(static fn() => '?');
 
         return \sprintf(
             'INSERT INTO %s (%s) VALUES (%s)',
-            $this->table->sql(),
+            $this->table->sql($driver),
             Str::of(', ')->join($keys)->toString(),
             Str::of(', ')->join($values)->toString(),
         );
