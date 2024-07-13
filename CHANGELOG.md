@@ -2,9 +2,14 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Formal\AccessLayer\Driver`
+
 ### Changed
 
 - Requires `innmind/specification:~4.0`
+- `Formal\AccessLayer\Query::sql()` now has a `Driver` argument
 
 ### Removed
 
