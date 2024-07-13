@@ -9,11 +9,7 @@ use Formal\AccessLayer\{
     Row\Value,
 };
 use Innmind\Specification\{
-    Comparator,
-    Composite,
-    Not,
-    Operator,
-    OrSpecification,
+    Comparator\Property,
     Sign,
 };
 use PHPUnit\Framework\TestCase;
@@ -44,19 +40,11 @@ class WhereTest extends TestCase
         $this
             ->forAll(Column::any(), Set\Strings::any())
             ->then(function($column, $value) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    $value,
+                );
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -76,19 +64,11 @@ class WhereTest extends TestCase
         $this
             ->forAll(Column::any(), Set\Strings::any())
             ->then(function($column, $value) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::lessThan);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::lessThan,
+                    $value,
+                );
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -108,33 +88,17 @@ class WhereTest extends TestCase
         $this
             ->forAll(Column::any(), Set\Strings::any())
             ->then(function($column, $value) {
-                $lessThan = $this->createMock(Comparator::class);
-                $lessThan
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $lessThan
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::lessThan);
-                $lessThan
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
-                $equal = $this->createMock(Comparator::class);
-                $equal
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $equal
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $equal
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
-                $where = Where::of(new OrSpecification($lessThan, $equal));
+                $lessThan = Property::of(
+                    $column->name()->toString(),
+                    Sign::lessThan,
+                    $value,
+                );
+                $equal = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    $value,
+                );
+                $where = Where::of($lessThan->or($equal));
 
                 $this->assertSame(
                     "WHERE {$column->name()->sql()} <= ?",
@@ -153,19 +117,11 @@ class WhereTest extends TestCase
         $this
             ->forAll(Column::any(), Set\Strings::any())
             ->then(function($column, $value) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::moreThan);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::moreThan,
+                    $value,
+                );
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -185,33 +141,17 @@ class WhereTest extends TestCase
         $this
             ->forAll(Column::any(), Set\Strings::any())
             ->then(function($column, $value) {
-                $moreThan = $this->createMock(Comparator::class);
-                $moreThan
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $moreThan
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::moreThan);
-                $moreThan
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
-                $equal = $this->createMock(Comparator::class);
-                $equal
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $equal
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $equal
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
-                $where = Where::of(new OrSpecification($moreThan, $equal));
+                $moreThan = Property::of(
+                    $column->name()->toString(),
+                    Sign::moreThan,
+                    $value,
+                );
+                $equal = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    $value,
+                );
+                $where = Where::of($moreThan->or($equal));
 
                 $this->assertSame(
                     "WHERE {$column->name()->sql()} >= ?",
@@ -230,19 +170,11 @@ class WhereTest extends TestCase
         $this
             ->forAll(Column::any())
             ->then(function($column) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn(null);
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    null,
+                );
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -258,20 +190,12 @@ class WhereTest extends TestCase
         $this
             ->forAll(Column::any())
             ->then(function($column) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn(null);
-                $where = Where::of(new Not\Implementation($specification));
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    null,
+                );
+                $where = Where::of($specification->not());
 
                 $this->assertSame(
                     "WHERE {$column->name()->sql()} IS NOT NULL",
@@ -291,19 +215,11 @@ class WhereTest extends TestCase
                 Set\Strings::any(),
             )
             ->then(function($column, $value1, $value2, $value3) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::in);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn([$value1, $value2, $value3]);
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::in,
+                    [$value1, $value2, $value3],
+                );
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -333,19 +249,11 @@ class WhereTest extends TestCase
                 ),
             )
             ->then(function($column, $values) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::in);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($values);
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::in,
+                    $values,
+                );
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -361,25 +269,12 @@ class WhereTest extends TestCase
         $this
             ->forAll(Column::any(), Set\Strings::any())
             ->then(function($column, $value) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
-                $not = $this->createMock(Not::class);
-                $not
-                    ->expects($this->any())
-                    ->method('specification')
-                    ->willReturn($specification);
-                $where = Where::of($not);
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    $value,
+                );
+                $where = Where::of($specification->not());
 
                 $this->assertSame(
                     "WHERE {$column->name()->sql()} <> ?",
@@ -398,34 +293,18 @@ class WhereTest extends TestCase
                 Set\Strings::any(),
             )
             ->then(function($column, $leftValue, $rightValue) {
-                $left = $this->createMock(Comparator::class);
-                $left
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $left
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $left
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($leftValue);
-                $right = $this->createMock(Comparator::class);
-                $right
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $right
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $right
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($rightValue);
-                $specification = new OrSpecification($left, $right);
-                $where = Where::of(new Not\Implementation($specification));
+                $left = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    $leftValue,
+                );
+                $right = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    $rightValue,
+                );
+                $specification = $left->or($right);
+                $where = Where::of($specification->not());
 
                 $this->assertSame(
                     "WHERE NOT(({$column->name()->sql()} = ? OR {$column->name()->sql()} = ?))",
@@ -453,45 +332,17 @@ class WhereTest extends TestCase
                 Set\Strings::any(),
             )
             ->then(function($column1, $column2, $value1, $value2) {
-                $left = $this->createMock(Comparator::class);
-                $left
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column1->name()->toString());
-                $left
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $left
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value1);
-                $right = $this->createMock(Comparator::class);
-                $right
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column2->name()->toString());
-                $right
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $right
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value2);
-                $specification = $this->createMock(Composite::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('left')
-                    ->willReturn($left);
-                $specification
-                    ->expects($this->any())
-                    ->method('right')
-                    ->willReturn(new Not\Implementation($right));
-                $specification
-                    ->expects($this->any())
-                    ->method('operator')
-                    ->willReturn(Operator::and);
+                $left = Property::of(
+                    $column1->name()->toString(),
+                    Sign::equality,
+                    $value1,
+                );
+                $right = Property::of(
+                    $column2->name()->toString(),
+                    Sign::equality,
+                    $value2,
+                );
+                $specification = $left->and($right->not());
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -516,45 +367,17 @@ class WhereTest extends TestCase
                 Set\Strings::any(),
             )
             ->then(function($column1, $column2, $value1, $value2) {
-                $left = $this->createMock(Comparator::class);
-                $left
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column1->name()->toString());
-                $left
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $left
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value1);
-                $right = $this->createMock(Comparator::class);
-                $right
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column2->name()->toString());
-                $right
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $right
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value2);
-                $specification = $this->createMock(Composite::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('left')
-                    ->willReturn(new Not\Implementation($left));
-                $specification
-                    ->expects($this->any())
-                    ->method('right')
-                    ->willReturn($right);
-                $specification
-                    ->expects($this->any())
-                    ->method('operator')
-                    ->willReturn(Operator::and);
+                $left = Property::of(
+                    $column1->name()->toString(),
+                    Sign::equality,
+                    $value1,
+                );
+                $right = Property::of(
+                    $column2->name()->toString(),
+                    Sign::equality,
+                    $value2,
+                );
+                $specification = $left->not()->and($right);
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -583,45 +406,17 @@ class WhereTest extends TestCase
                 Set\Strings::any(),
             )
             ->then(function($column1, $column2, $value1, $value2) {
-                $left = $this->createMock(Comparator::class);
-                $left
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column1->name()->toString());
-                $left
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $left
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value1);
-                $right = $this->createMock(Comparator::class);
-                $right
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column2->name()->toString());
-                $right
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $right
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value2);
-                $specification = $this->createMock(Composite::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('left')
-                    ->willReturn($left);
-                $specification
-                    ->expects($this->any())
-                    ->method('right')
-                    ->willReturn(new Not\Implementation($right));
-                $specification
-                    ->expects($this->any())
-                    ->method('operator')
-                    ->willReturn(Operator::or);
+                $left = Property::of(
+                    $column1->name()->toString(),
+                    Sign::equality,
+                    $value1,
+                );
+                $right = Property::of(
+                    $column2->name()->toString(),
+                    Sign::equality,
+                    $value2,
+                );
+                $specification = $left->or($right->not());
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -646,45 +441,17 @@ class WhereTest extends TestCase
                 Set\Strings::any(),
             )
             ->then(function($column1, $column2, $value1, $value2) {
-                $left = $this->createMock(Comparator::class);
-                $left
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column1->name()->toString());
-                $left
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $left
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value1);
-                $right = $this->createMock(Comparator::class);
-                $right
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column2->name()->toString());
-                $right
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $right
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value2);
-                $specification = $this->createMock(Composite::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('left')
-                    ->willReturn(new Not\Implementation($left));
-                $specification
-                    ->expects($this->any())
-                    ->method('right')
-                    ->willReturn($right);
-                $specification
-                    ->expects($this->any())
-                    ->method('operator')
-                    ->willReturn(Operator::or);
+                $left = Property::of(
+                    $column1->name()->toString(),
+                    Sign::equality,
+                    $value1,
+                );
+                $right = Property::of(
+                    $column2->name()->toString(),
+                    Sign::equality,
+                    $value2,
+                );
+                $specification = $left->not()->or($right);
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -713,19 +480,11 @@ class WhereTest extends TestCase
                 $this->type(),
             )
             ->then(function($column, $unused, $value, $type) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn(new Value($unused->name(), $value, $type));
+                $specification = Property::of(
+                    $column->name()->toString(),
+                    Sign::equality,
+                    new Value($unused->name(), $value, $type),
+                );
                 $where = Where::of($specification);
 
                 $this->assertSame(
@@ -753,19 +512,11 @@ class WhereTest extends TestCase
                 Set\Strings::any(),
             )
             ->then(function($table, $column, $value) {
-                $specification = $this->createMock(Comparator::class);
-                $specification
-                    ->expects($this->any())
-                    ->method('property')
-                    ->willReturn($table->toString().'.'.$column->name()->toString());
-                $specification
-                    ->expects($this->any())
-                    ->method('sign')
-                    ->willReturn(Sign::equality);
-                $specification
-                    ->expects($this->any())
-                    ->method('value')
-                    ->willReturn($value);
+                $specification = Property::of(
+                    $table->toString().'.'.$column->name()->toString(),
+                    Sign::equality,
+                    $value,
+                );
                 $where = Where::of($specification);
 
                 $this->assertSame(
