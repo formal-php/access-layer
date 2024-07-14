@@ -113,6 +113,42 @@ return static function() {
     );
 
     yield proof(
+        'Where less than or equal comparator on different columns',
+        given(
+            Column::any(),
+            Column::any(),
+            Set\Strings::any(),
+        ),
+        static function($assert, $column1, $column2, $value) {
+            $lessThan = Property::of(
+                $column1->name()->toString(),
+                Sign::lessThan,
+                $value,
+            );
+            $equal = Property::of(
+                $column2->name()->toString(),
+                Sign::equality,
+                $value,
+            );
+            $where = Where::of($lessThan->or($equal));
+
+            $assert->same(
+                "WHERE ({$column1->name()->sql(Driver::mysql)} < ? OR {{$column2->name()->sql(Driver::mysql)} = ?})",
+                $where->sql(Driver::mysql),
+            );
+            $assert->count(2, $where->parameters());
+            $assert->same($value, $where->parameters()->first()->match(
+                static fn($parameter) => $parameter->value(),
+                static fn() => null,
+            ));
+            $assert->same($value, $where->parameters()->last()->match(
+                static fn($parameter) => $parameter->value(),
+                static fn() => null,
+            ));
+        },
+    );
+
+    yield proof(
         'Where more than comparator',
         given(
             Column::any(),
@@ -163,6 +199,42 @@ return static function() {
             );
             $assert->count(1, $where->parameters());
             $assert->same($value, $where->parameters()->first()->match(
+                static fn($parameter) => $parameter->value(),
+                static fn() => null,
+            ));
+        },
+    );
+
+    yield proof(
+        'Where more than or equal comparator on different columns',
+        given(
+            Column::any(),
+            Column::any(),
+            Set\Strings::any(),
+        ),
+        static function($assert, $column1, $column2, $value) {
+            $moreThan = Property::of(
+                $column1->name()->toString(),
+                Sign::moreThan,
+                $value,
+            );
+            $equal = Property::of(
+                $column2->name()->toString(),
+                Sign::equality,
+                $value,
+            );
+            $where = Where::of($moreThan->or($equal));
+
+            $assert->same(
+                "WHERE ({$column1->name()->sql(Driver::mysql)} > ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
+                $where->sql(Driver::mysql),
+            );
+            $assert->count(2, $where->parameters());
+            $assert->same($value, $where->parameters()->first()->match(
+                static fn($parameter) => $parameter->value(),
+                static fn() => null,
+            ));
+            $assert->same($value, $where->parameters()->last()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
