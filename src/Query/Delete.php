@@ -52,7 +52,12 @@ final class Delete implements Query
     {
         /** @var non-empty-string */
         return \sprintf(
-            'DELETE FROM %s %s',
+            'DELETE %s FROM %s %s',
+            match (true) {
+                $driver === Driver::postgres => '',
+                $this->table instanceof Name\Aliased => $driver->escapeName($this->table->alias()),
+                default => $this->table->sql($driver),
+            },
             $this->table->sql($driver),
             $this->where->sql($driver),
         );
