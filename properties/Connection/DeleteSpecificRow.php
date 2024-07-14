@@ -75,7 +75,7 @@ final class DeleteSpecificRow implements Property
             Comparator\Property::of(
                 'id',
                 Sign::equality,
-                $this->uuid,
+                $this->uuid1,
             ),
         );
         $sequence = $connection($delete);
