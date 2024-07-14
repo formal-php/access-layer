@@ -87,7 +87,7 @@ final class Connection
             Column::of(Column\Name::of('id'), Column\Type::char(36)),
             Column::of(Column\Name::of('username'), Column\Type::varchar(255)),
             Column::of(Column\Name::of('registerNumber'), Column\Type::bigint()),
-        )->primaryKey(new Column\Name('id')));
+        )->primaryKey(Column\Name::of('id')));
         $connection(CreateTable::named(
             Name::of('test_values'),
             Column::of(Column\Name::of('id'), Column\Type::char(36)),
