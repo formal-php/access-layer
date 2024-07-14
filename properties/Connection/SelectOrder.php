@@ -14,7 +14,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\Immutable\Sequence;
@@ -89,29 +88,11 @@ final class SelectOrder implements Property
                 Column\Name::of('username')->in($table),
                 Direction::asc,
             )
-            ->where(new class([$this->uuid1, $this->uuid2]) implements Comparator {
-                use Composable;
-
-                public function __construct(
-                    private array $values,
-                ) {
-                }
-
-                public function property(): string
-                {
-                    return 'id';
-                }
-
-                public function sign(): Sign
-                {
-                    return Sign::in;
-                }
-
-                public function value(): array
-                {
-                    return $this->values;
-                }
-            });
+            ->where(Comparator\Property::of(
+                'id',
+                Sign::in,
+                [$this->uuid1, $this->uuid2],
+            ));
         $rows = $connection($select);
 
         $assert

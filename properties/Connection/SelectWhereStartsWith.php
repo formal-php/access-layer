@@ -12,7 +12,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\BlackBox\{
@@ -71,28 +70,11 @@ final class SelectWhereStartsWith implements Property
         ));
 
         $select = Select::from(Name::of('test'));
-        $select = $select->where(new class($this->prefix) implements Comparator {
-            use Composable;
-
-            public function __construct(private string $prefix)
-            {
-            }
-
-            public function property(): string
-            {
-                return 'username';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::startsWith;
-            }
-
-            public function value(): string
-            {
-                return $this->prefix;
-            }
-        });
+        $select = $select->where(Comparator\Property::of(
+            'username',
+            Sign::startsWith,
+            $this->prefix,
+        ));
         $rows = $connection($select);
 
         $assert->count(1, $rows);

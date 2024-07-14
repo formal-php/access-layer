@@ -13,7 +13,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\Immutable\Sequence;
@@ -76,31 +75,11 @@ final class UpdateSpecificRow implements Property
             Table\Name::of('test'),
             Row::of(['registerNumber' => 24]),
         );
-        $update = $update->where(new class($this->uuid1) implements Comparator {
-            use Composable;
-
-            private string $uuid;
-
-            public function __construct(string $uuid)
-            {
-                $this->uuid = $uuid;
-            }
-
-            public function property(): string
-            {
-                return 'id';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::equality;
-            }
-
-            public function value(): string
-            {
-                return $this->uuid;
-            }
-        });
+        $update = $update->where(Comparator\Property::of(
+            'id',
+            Sign::equality,
+            $this->uuid1,
+        ));
         $sequence = $connection($update);
 
         $assert->count(0, $sequence);

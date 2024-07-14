@@ -12,7 +12,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\BlackBox\{
@@ -64,28 +63,11 @@ final class SelectWhereIn implements Property
         ));
 
         $select = Select::from(Name::of('test'));
-        $select = $select->where(new class($this->uuid) implements Comparator {
-            use Composable;
-
-            public function __construct(private string $uuid)
-            {
-            }
-
-            public function property(): string
-            {
-                return 'test.id';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::in;
-            }
-
-            public function value(): array
-            {
-                return [$this->uuid];
-            }
-        });
+        $select = $select->where(Comparator\Property::of(
+            'test.id',
+            Sign::in,
+            [$this->uuid],
+        ));
         $rows = $connection($select);
 
         $assert->count(1, $rows);

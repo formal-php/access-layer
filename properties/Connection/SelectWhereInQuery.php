@@ -13,7 +13,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\BlackBox\{
@@ -86,53 +85,19 @@ final class SelectWhereInQuery implements Property
         $connection($insert);
 
         $select = Select::from(Name::of('test'));
-        $select = $select->where(new class($this->value1) implements Comparator {
-            use Composable;
-
-            public function __construct(private string $value)
-            {
-            }
-
-            public function property(): string
-            {
-                return 'test.id';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::in;
-            }
-
-            public function value(): Select
-            {
-                return Select::from(Name::of('test_values'))
-                    ->columns(Column\Name::of('id'))
-                    ->where(
-                        new class($this->value) implements Comparator {
-                            use Composable;
-
-                            public function __construct(private string $value)
-                            {
-                            }
-
-                            public function property(): string
-                            {
-                                return 'test_values.value';
-                            }
-
-                            public function sign(): Sign
-                            {
-                                return Sign::equality;
-                            }
-
-                            public function value(): string
-                            {
-                                return $this->value;
-                            }
-                        },
-                    );
-            }
-        });
+        $select = $select->where(Comparator\Property::of(
+            'test.id',
+            Sign::in,
+            Select::from(Name::of('test_values'))
+                ->columns(Column\Name::of('id'))
+                ->where(
+                    Comparator\Property::of(
+                        'test_values.value',
+                        Sign::equality,
+                        $this->value1,
+                    ),
+                ),
+        ));
         $rows = $connection($select);
 
         $assert->count(1, $rows);

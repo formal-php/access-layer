@@ -12,7 +12,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\BlackBox\{
@@ -75,28 +74,11 @@ final class SelectWhereContains implements Property
         ));
 
         $select = Select::from(Name::of('test'));
-        $select = $select->where(new class($this->username) implements Comparator {
-            use Composable;
-
-            public function __construct(private string $username)
-            {
-            }
-
-            public function property(): string
-            {
-                return 'username';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::contains;
-            }
-
-            public function value(): string
-            {
-                return $this->username;
-            }
-        });
+        $select = $select->where(Comparator\Property::of(
+            'username',
+            Sign::contains,
+            $this->username,
+        ));
         $rows = $connection($select);
 
         $assert->count(1, $rows);
