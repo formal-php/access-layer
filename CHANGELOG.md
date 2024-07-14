@@ -1,5 +1,19 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Formal\AccessLayer\Query\Delete::join()`
+
+### Removed
+
+- `Formal\AccessLayer\Driver::sqlite`
+
+### Fixed
+
+- Support for aliased table names when using `Formal\AccessLayer\Query\Delete`
+
 ## 3.0.0 - 2024-07-14
 
 ### Added

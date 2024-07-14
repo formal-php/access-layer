@@ -71,9 +71,9 @@ final class DeleteSpecificRow implements Property
             ]),
         )));
 
-        $delete = Query\Delete::from(Table\Name::of('test'))->where(
+        $delete = Query\Delete::from(Table\Name::of('test')->as('alias'))->where(
             Comparator\Property::of(
-                'id',
+                'alias.id',
                 Sign::equality,
                 $this->uuid1,
             ),
