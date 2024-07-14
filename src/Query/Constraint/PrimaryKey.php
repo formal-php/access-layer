@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Query\Constraint;
 
-use Formal\AccessLayer\Table\Column;
+use Formal\AccessLayer\{
+    Table\Column,
+    Driver,
+};
 
 /**
  * @psalm-immutable
@@ -28,8 +31,8 @@ final class PrimaryKey
     /**
      * @return non-empty-string
      */
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
-        return "PRIMARY KEY ({$this->column->sql()})";
+        return "PRIMARY KEY ({$this->column->sql($driver)})";
     }
 }

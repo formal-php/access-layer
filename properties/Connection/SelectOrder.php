@@ -4,19 +4,19 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\SQL,
-    Query\Parameter,
+    Query\MultipleInsert,
     Query\Select,
     Query\Select\Direction,
     Table\Name,
     Table\Column,
+    Row,
     Connection,
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -63,16 +63,24 @@ final class SelectOrder implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid1))
-            ->with(Parameter::of('a'.$this->username))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid2))
-            ->with(Parameter::of('b'.$this->username))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
+        $insert = MultipleInsert::into(
+            Name::of('test'),
+            Column\Name::of('id'),
+            Column\Name::of('username'),
+            Column\Name::of('registerNumber'),
+        );
+        $connection($insert(Sequence::of(
+            Row::of([
+                'id' => $this->uuid1,
+                'username' => 'a'.$this->username,
+                'registerNumber' => $this->number,
+            ]),
+            Row::of([
+                'id' => $this->uuid2,
+                'username' => 'b'.$this->username,
+                'registerNumber' => $this->number,
+            ]),
+        )));
 
         $table = Name::of('test');
         $select = Select::from($table)
@@ -80,29 +88,11 @@ final class SelectOrder implements Property
                 Column\Name::of('username')->in($table),
                 Direction::asc,
             )
-            ->where(new class([$this->uuid1, $this->uuid2]) implements Comparator {
-                use Composable;
-
-                public function __construct(
-                    private array $values,
-                ) {
-                }
-
-                public function property(): string
-                {
-                    return 'id';
-                }
-
-                public function sign(): Sign
-                {
-                    return Sign::in;
-                }
-
-                public function value(): array
-                {
-                    return $this->values;
-                }
-            });
+            ->where(Comparator\Property::of(
+                'id',
+                Sign::in,
+                [$this->uuid1, $this->uuid2],
+            ));
         $rows = $connection($select);
 
         $assert

@@ -6,6 +6,7 @@ namespace Formal\AccessLayer\Query;
 use Formal\AccessLayer\{
     Query,
     Table\Name,
+    Driver,
 };
 use Innmind\Immutable\Sequence;
 
@@ -45,13 +46,13 @@ final class DropTable implements Query
         return Sequence::of();
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
         return \sprintf(
             'DROP TABLE %s %s',
             $this->ifExists ? 'IF EXISTS' : '',
-            $this->name->sql(),
+            $this->name->sql($driver),
         );
     }
 

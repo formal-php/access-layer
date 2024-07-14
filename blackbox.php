@@ -3,8 +3,6 @@ declare(strict_types = 1);
 
 require 'vendor/autoload.php';
 
-\ini_set('memory_limit', '-1');
-
 use Innmind\BlackBox\{
     Application,
     Runner\Load,
@@ -12,6 +10,7 @@ use Innmind\BlackBox\{
 };
 
 Application::new($argv)
+    ->disableMemoryLimit()
     ->codeCoverage(
         CodeCoverage::of(
             __DIR__.'/src/',

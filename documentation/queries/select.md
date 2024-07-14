@@ -6,7 +6,7 @@ use Formal\AccesLayer\{
     Table\Name,
 };
 
-$select = Select::from(new Name('users'));
+$select = Select::from(Name::of('users'));
 $users = $connection($select);
 ```
 
@@ -24,9 +24,9 @@ use Formal\AccesLayer\{
     Table\Column,
 };
 
-$select = Select::from(new Name('users'))->columns(
-    new Column\Name('username'),
-    new Column\Name('name'),
+$select = Select::from(Name::of('users'))->columns(
+    Column\Name::of('username'),
+    Column\Name::of('name'),
 );
 $users = $connection($select);
 ```
@@ -42,40 +42,24 @@ use Formal\AccesLayer\{
     Table\Column,
 };
 use Innmind\Specification\{
-    Comparator,
-    Composable,
+    Comparator\Property,
     Sign,
 };
 
-final class Username implements Comparator
+final class Username
 {
-    use Composable;
-
-    private string $value;
-
-    public function __construct(string $value)
+    public static function of(string $username): Property
     {
-        $this->value = $value;
-    }
-
-    public function property(): string
-    {
-        return 'username'; // this is the name of the column
-    }
-
-    public function sign(): Sign
-    {
-        return Sign::equality;
-    }
-
-    public function value(): mixed
-    {
-        return $this->value;
+        return Property::of(
+            'username', // this is the name of the column,
+            Sign::equality,
+            $username,
+        );
     }
 }
 
-$select = Select::from(new Name('users'))->where(
-    (new Username('some username'))->or(new Username('other username')),
+$select = Select::from(Name::of('users'))->where(
+    Username::of('some username')->or(Username::of('other username')),
 );
 $users = $connection($select);
 ```

@@ -14,7 +14,7 @@ final class Name
     public static function any(): Set
     {
         return Set\Composite::immutable(
-            static fn(string $firstChar, string $name): Model => new Model($firstChar.$name),
+            static fn(string $firstChar, string $name): Model => Model::of($firstChar.$name),
             Set\Either::any( // table name can't start with a number
                 Set\Chars::lowercaseLetter(),
                 Set\Chars::uppercaseLetter(),

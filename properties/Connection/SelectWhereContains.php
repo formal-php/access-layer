@@ -4,15 +4,14 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\SQL,
-    Query\Parameter,
+    Query\Insert,
     Query\Select,
     Table\Name,
+    Row,
     Connection,
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\BlackBox\{
@@ -65,35 +64,21 @@ final class SelectWhereContains implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid))
-            ->with(Parameter::of($this->prefix.$this->username.$this->suffix))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
+        $connection(Insert::into(
+            Name::of('test'),
+            Row::of([
+                'id' => $this->uuid,
+                'username' => $this->prefix.$this->username.$this->suffix,
+                'registerNumber' => $this->number,
+            ]),
+        ));
 
-        $select = Select::from(new Name('test'));
-        $select = $select->where(new class($this->username) implements Comparator {
-            use Composable;
-
-            public function __construct(private string $username)
-            {
-            }
-
-            public function property(): string
-            {
-                return 'username';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::contains;
-            }
-
-            public function value(): string
-            {
-                return $this->username;
-            }
-        });
+        $select = Select::from(Name::of('test'));
+        $select = $select->where(Comparator\Property::of(
+            'username',
+            Sign::contains,
+            $this->username,
+        ));
         $rows = $connection($select);
 
         $assert->count(1, $rows);

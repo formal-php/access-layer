@@ -6,7 +6,7 @@ use Formal\AccessLayer\{
     Table\Name,
 };
 
-$delete = Delete::from(new Name('users'));
+$delete = Delete::from(Name::of('users'));
 $connection($delete);
 ```
 
@@ -22,40 +22,24 @@ use Formal\AccesLayer\{
     Table\Name,
 };
 use Innmind\Specification\{
-    Comparator,
-    Composable,
+    Comparator\Property,
     Sign,
 };
 
-final class Username implements Comparator
+final class Username
 {
-    use Composable;
-
-    private string $value;
-
-    public function __construct(string $value)
+    public static function of(string $value): Property
     {
-        $this->value = $value;
-    }
-
-    public function property(): string
-    {
-        return 'username'; // this is the name of the column
-    }
-
-    public function sign(): Sign
-    {
-        return Sign::equality;
-    }
-
-    public function value(): mixed
-    {
-        return $this->value;
+        return Property::of(
+            'username', // this is the name of the column
+            Sign::equality,
+            $value,
+        );
     }
 }
 
-$delete = Delete::from(new Name('users'))->where(
-    (new Username('some username'))->or(new Username('other username')),
+$delete = Delete::from(Name::of('users'))->where(
+    Username::of('some username')->or(Username::of('other username')),
 );
 $connection($delete);
 ```

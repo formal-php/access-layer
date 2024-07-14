@@ -4,10 +4,10 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\SQL,
-    Query\Parameter,
+    Query\Insert,
     Query\Select,
     Table\Name,
+    Row,
     Connection,
 };
 use Innmind\BlackBox\{
@@ -49,13 +49,16 @@ final class SelectEverything implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid))
-            ->with(Parameter::of($this->username))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
+        $connection(Insert::into(
+            Name::of('test'),
+            Row::of([
+                'id' => $this->uuid,
+                'username' => $this->username,
+                'registerNumber' => $this->number,
+            ]),
+        ));
 
-        $rows = $connection(Select::from(new Name('test')));
+        $rows = $connection(Select::from(Name::of('test')));
 
         $assert
             ->number($rows->size())

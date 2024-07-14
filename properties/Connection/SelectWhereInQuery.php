@@ -13,7 +13,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\BlackBox\{
@@ -70,7 +69,7 @@ final class SelectWhereInQuery implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?), (?, ?, ?);')
+        $insert = SQL::of('INSERT INTO test VALUES (?, ?, ?), (?, ?, ?);')
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number))
@@ -78,61 +77,27 @@ final class SelectWhereInQuery implements Property
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
         $connection($insert);
-        $insert = SQL::of('INSERT INTO `test_values` VALUES (?, ?), (?, ?);')
+        $insert = SQL::of('INSERT INTO test_values VALUES (?, ?), (?, ?);')
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->value1))
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->value2));
         $connection($insert);
 
-        $select = Select::from(new Name('test'));
-        $select = $select->where(new class($this->value1) implements Comparator {
-            use Composable;
-
-            public function __construct(private string $value)
-            {
-            }
-
-            public function property(): string
-            {
-                return 'test.id';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::in;
-            }
-
-            public function value(): Select
-            {
-                return Select::from(new Name('test_values'))
-                    ->columns(new Column\Name('id'))
-                    ->where(
-                        new class($this->value) implements Comparator {
-                            use Composable;
-
-                            public function __construct(private string $value)
-                            {
-                            }
-
-                            public function property(): string
-                            {
-                                return 'test_values.value';
-                            }
-
-                            public function sign(): Sign
-                            {
-                                return Sign::equality;
-                            }
-
-                            public function value(): string
-                            {
-                                return $this->value;
-                            }
-                        },
-                    );
-            }
-        });
+        $select = Select::from(Name::of('test'));
+        $select = $select->where(Comparator\Property::of(
+            'test.id',
+            Sign::in,
+            Select::from(Name::of('test_values'))
+                ->columns(Column\Name::of('id'))
+                ->where(
+                    Comparator\Property::of(
+                        'test_values.value',
+                        Sign::equality,
+                        $this->value1,
+                    ),
+                ),
+        ));
         $rows = $connection($select);
 
         $assert->count(1, $rows);

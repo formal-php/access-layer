@@ -7,14 +7,15 @@ use Formal\AccessLayer\{
     Query\SQL,
     Query,
     Table,
+    Table\Column,
     Row,
     Connection,
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\{
     Property,
     Set,
@@ -51,8 +52,13 @@ final class DeleteSpecificRow implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(Query\Insert::into(
-            new Table\Name('test'),
+        $insert = Query\MultipleInsert::into(
+            Table\Name::of('test'),
+            Column\Name::of('id'),
+            Column\Name::of('username'),
+            Column\Name::of('registerNumber'),
+        );
+        $connection($insert(Sequence::of(
             Row::of([
                 'id' => $this->uuid1,
                 'username' => 'foo',
@@ -63,44 +69,24 @@ final class DeleteSpecificRow implements Property
                 'username' => 'foo',
                 'registerNumber' => 42,
             ]),
-        ));
+        )));
 
-        $delete = Query\Delete::from(new Table\Name('test'))->where(
-            new class($this->uuid1) implements Comparator {
-                use Composable;
-
-                private string $uuid;
-
-                public function __construct(string $uuid)
-                {
-                    $this->uuid = $uuid;
-                }
-
-                public function property(): string
-                {
-                    return 'id';
-                }
-
-                public function sign(): Sign
-                {
-                    return Sign::equality;
-                }
-
-                public function value(): string
-                {
-                    return $this->uuid;
-                }
-            },
+        $delete = Query\Delete::from(Table\Name::of('test'))->where(
+            Comparator\Property::of(
+                'id',
+                Sign::equality,
+                $this->uuid1,
+            ),
         );
         $sequence = $connection($delete);
 
         $assert->count(0, $sequence);
 
-        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid1}'"));
+        $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid1}'"));
 
         $assert->count(0, $rows);
 
-        $rows = $connection(SQL::of("SELECT * FROM `test` WHERE `id` = '{$this->uuid2}'"));
+        $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid2}'"));
 
         $assert->count(1, $rows);
 

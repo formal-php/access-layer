@@ -5,15 +5,11 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
-    Query\Select\Join,
     Table\Name,
+    Driver,
 };
 use Innmind\Specification\Specification;
-use Innmind\Immutable\{
-    Sequence,
-    Str,
-    Monoid\Concat,
-};
+use Innmind\Immutable\Sequence;
 
 /**
  * @psalm-immutable
@@ -21,20 +17,13 @@ use Innmind\Immutable\{
 final class Delete implements Query
 {
     private Name|Name\Aliased $table;
-    /** @var Sequence<Join> */
-    private Sequence $joins;
     private Where $where;
 
-    /**
-     * @param Sequence<Join> $joins
-     */
     private function __construct(
         Name|Name\Aliased $table,
-        Sequence $joins,
         Where $where,
     ) {
         $this->table = $table;
-        $this->joins = $joins;
         $this->where = $where;
     }
 
@@ -43,23 +32,13 @@ final class Delete implements Query
      */
     public static function from(Name|Name\Aliased $table): self
     {
-        return new self($table, Sequence::of(), Where::everything());
-    }
-
-    public function join(Join $join): self
-    {
-        return new self(
-            $this->table,
-            ($this->joins)($join),
-            $this->where,
-        );
+        return new self($table, Where::everything());
     }
 
     public function where(Specification $specification): self
     {
         return new self(
             $this->table,
-            $this->joins,
             Where::of($specification),
         );
     }
@@ -69,23 +48,13 @@ final class Delete implements Query
         return $this->where->parameters();
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
         return \sprintf(
-            'DELETE %s FROM %s%s %s',
-            match (true) {
-                $this->table instanceof Name\Aliased => "`{$this->table->alias()}`",
-                default => $this->table->sql(),
-            },
-            $this->table->sql(),
-            $this
-                ->joins
-                ->map(static fn($join) => $join->sql())
-                ->map(Str::of(...))
-                ->fold(new Concat)
-                ->toString(),
-            $this->where->sql(),
+            'DELETE FROM %s %s',
+            $this->table->sql($driver),
+            $this->where->sql($driver),
         );
     }
 

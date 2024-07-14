@@ -35,7 +35,9 @@ This is useful when you use the same parameter multiple times in your query.
 ```php
 use Formal\AccessLayer\Query\Parameter;
 
-$insert = SQL::of('INSERT INTO `users` (`username`, `name`) VALUES (:username, :username)');
+$insert = SQL::of(
+    'INSERT INTO `users` (`username`, `name`) VALUES (:username, :username)',
+);
 $insert = $insert->with(Parameter::named('username', 'some username value'));
 $connection($insert);
 ```

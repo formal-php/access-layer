@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+declare(ticks = 1);
 
 use Formal\AccessLayer\{
     Connection,
@@ -8,27 +9,31 @@ use Formal\AccessLayer\{
     Query\Constraint\ForeignKey,
     Query\Delete,
     Query\Insert,
-    Query\Update,
+    Query\MultipleInsert,
     Query\Select,
     Query\Select\Join,
     Query\DropTable,
     Row,
     Table,
     Table\Column,
+    Driver,
 };
 use Properties\Formal\AccessLayer\Connection as Properties;
-use Innmind\Url\Url;
+use Innmind\Url\{
+    Url,
+    Query,
+};
 use Innmind\Specification\{
     Comparator,
     Composable,
     Sign,
 };
+use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\Set;
 
-return static function() {
-    $port = \getenv('DB_PORT') ?: '3306';
-    $connection = PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example"));
-    $persistent = PDO::persistent(Url::of("mysql://root:root@127.0.0.1:$port/example"));
+$proofs = static function(Url $dsn, Driver $driver) {
+    $connection = PDO::of($dsn);
+    $persistent = PDO::persistent($dsn);
     Properties::seed($connection);
     $connections = Set\Either::any(
         Set\Call::of(static function() use ($connection) {
@@ -44,17 +49,18 @@ return static function() {
     );
 
     yield test(
-        'PDO interface',
+        "PDO interface({$driver->name})",
         static fn($assert) => $assert
             ->object($connection)
             ->instance(Connection::class),
     );
 
     $lazy = static fn($connection) => test(
-        'PDO lazy select doesnt load everything in memory',
+        "PDO lazy select doesnt load everything in memory({$driver->name})",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_lazy_load');
 
+            $connection(DropTable::ifExists($table));
             $connection(CreateTable::named(
                 $table,
                 Column::of(
@@ -64,30 +70,30 @@ return static function() {
             ));
 
             for ($i = 0; $i < 100_000; $i++) {
-                $insert = Insert::into(
+                $connection(Insert::into(
                     $table,
                     Row::of([
                         'i' => $i,
                     ]),
-                );
-                $connection($insert);
+                ));
             }
 
             $select = Select::onDemand($table);
             $rows = $connection($select);
-            $memory = \memory_get_peak_usage();
 
-            $count = $rows->reduce(
-                0,
-                static fn($count) => $count + 1,
-            );
-
-            $assert->same(100_000, $count);
             // when lazy this takes a little less than 3Mo of memory
             // when deferred this would take about 80Mo
             $assert
-                ->number(\memory_get_peak_usage() - $memory)
-                ->lessThan(3_000_000);
+                ->memory(static function() use ($assert, $rows) {
+                    $count = $rows->reduce(
+                        0,
+                        static fn($count) => $count + 1,
+                    );
+
+                    $assert->same(100_000, $count);
+                })
+                ->inLessThan()
+                ->megaBytes(3);
 
             $connection(DropTable::named($table));
         },
@@ -96,35 +102,47 @@ return static function() {
     yield $lazy($connection);
     yield $lazy($persistent);
 
-    yield test(
-        'PDO charset',
-        static function($assert) use ($connection, $port) {
-            $table = Table\Name::of('test_charset');
+    if ($driver === Driver::mysql) {
+        yield test(
+            "PDO charset({$driver->name})",
+            static function($assert) use ($connection, $dsn) {
+                $table = Table\Name::of('test_charset');
 
-            $connection(CreateTable::ifNotExists(
-                $table,
-                Column::of(
-                    Column\Name::of('str'),
-                    Column\Type::longtext(),
-                ),
-            ));
+                $connection(CreateTable::ifNotExists(
+                    $table,
+                    Column::of(
+                        Column\Name::of('str'),
+                        Column\Type::longtext(),
+                    ),
+                ));
 
-            $insert = Insert::into(
-                $table,
-                Row::of([
-                    'str' => 'gelé',
-                ]),
-            );
-            $connection($insert);
+                $connection(Insert::into(
+                    $table,
+                    Row::of([
+                        'str' => 'gelé',
+                    ]),
+                ));
 
-            $select = Select::from($table);
+                $select = Select::from($table);
 
-            $ascii = PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example?charset=ascii"));
-            $assert
-                ->expected('gelé')
-                ->not()
-                ->same(
-                    $ascii($select)
+                $ascii = PDO::of($dsn->withQuery(Query::of('charset=ascii')));
+                $assert
+                    ->expected('gelé')
+                    ->not()
+                    ->same(
+                        $ascii($select)
+                            ->first()
+                            ->flatMap(static fn($row) => $row->column('str'))
+                            ->match(
+                                static fn($str) => $str,
+                                static fn() => null,
+                            ),
+                    );
+
+                $utf8 = PDO::of($dsn->withQuery(Query::of('charset=utf8mb4')));
+                $assert->same(
+                    'gelé',
+                    $utf8($select)
                         ->first()
                         ->flatMap(static fn($row) => $row->column('str'))
                         ->match(
@@ -133,24 +151,13 @@ return static function() {
                         ),
                 );
 
-            $utf8 = PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example?charset=utf8mb4"));
-            $assert->same(
-                'gelé',
-                $utf8($select)
-                    ->first()
-                    ->flatMap(static fn($row) => $row->column('str'))
-                    ->match(
-                        static fn($str) => $str,
-                        static fn() => null,
-                    ),
-            );
-
-            $connection(DropTable::named($table));
-        },
-    );
+                $connection(DropTable::named($table));
+            },
+        );
+    }
 
     yield test(
-        'Select join',
+        "Select join({$driver->name})",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_left_join');
             $connection(CreateTable::ifNotExists(
@@ -169,11 +176,17 @@ return static function() {
                 ),
             ));
             $connection(Delete::from($table));
-            $connection(Insert::into(
+            $insert = MultipleInsert::into(
                 $table,
+                Column\Name::of('id'),
+                Column\Name::of('name'),
+                Column\Name::of('parent'),
+            );
+            $connection($insert(Sequence::of(
                 Row::of([
                     'id' => 1,
                     'name' => 'value_1',
+                    'parent' => null,
                 ]),
                 Row::of([
                     'id' => 2,
@@ -188,8 +201,9 @@ return static function() {
                 Row::of([
                     'id' => 4,
                     'name' => 'value_4',
+                    'parent' => null,
                 ]),
-            ));
+            )));
 
             $child = $table->as('child');
             $rows = $connection(
@@ -249,7 +263,7 @@ return static function() {
     );
 
     yield test(
-        'Delete cascade',
+        "Delete cascade({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_cascade_delete_parent');
             $child = Table\Name::of('test_cascade_delete_child');
@@ -273,14 +287,20 @@ return static function() {
             )->constraint(
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))->onDeleteCascade(),
             ));
+            $connection(Delete::from($child));
+            $connection(Delete::from($parent));
             $connection(Insert::into(
                 $parent,
                 Row::of([
                     'id' => 1,
                 ]),
             ));
-            $connection(Insert::into(
+            $insert = MultipleInsert::into(
                 $child,
+                Column\Name::of('id'),
+                Column\Name::of('parent'),
+            );
+            $connection($insert(Sequence::of(
                 Row::of([
                     'id' => 1,
                     'parent' => 1,
@@ -289,7 +309,7 @@ return static function() {
                     'id' => 2,
                     'parent' => 1,
                 ]),
-            ));
+            )));
 
             $connection(Delete::from($parent));
             $rows = $connection(Select::from($child));
@@ -302,7 +322,7 @@ return static function() {
     );
 
     yield test(
-        'Delete set null',
+        "Delete set null({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_set_null_delete_parent');
             $child = Table\Name::of('test_set_null_delete_child');
@@ -326,14 +346,20 @@ return static function() {
             )->constraint(
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))->onDeleteSetNull(),
             ));
+            $connection(Delete::from($child));
+            $connection(Delete::from($parent));
             $connection(Insert::into(
                 $parent,
                 Row::of([
                     'id' => 1,
                 ]),
             ));
-            $connection(Insert::into(
+            $insert = MultipleInsert::into(
                 $child,
+                Column\Name::of('id'),
+                Column\Name::of('parent'),
+            );
+            $connection($insert(Sequence::of(
                 Row::of([
                     'id' => 1,
                     'parent' => 1,
@@ -342,7 +368,7 @@ return static function() {
                     'id' => 2,
                     'parent' => 1,
                 ]),
-            ));
+            )));
 
             $connection(Delete::from($parent));
             $rows = $connection(Select::from($child))
@@ -362,182 +388,25 @@ return static function() {
     );
 
     yield test(
-        'Foreign key name',
-        static function($assert) use ($connection) {
+        "Foreign key name({$driver->name})",
+        static function($assert) use ($driver) {
             $parent = Table\Name::of('parent_table');
 
             $assert->same(
-                'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
+                match ($driver) {
+                    Driver::mysql => 'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
+                    Driver::sqlite => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
+                    Driver::postgres => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
+                },
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))
                     ->named('foo')
-                    ->sql(),
+                    ->sql($driver),
             );
-        },
-    );
-
-    yield test(
-        'Delete join',
-        static function($assert) use ($connection) {
-            $parent = Table\Name::of('test_join_delete_parent')->as('parent');
-            $child = Table\Name::of('test_join_delete_child')->as('child');
-            $connection(CreateTable::ifNotExists(
-                $child->name(),
-                Column::of(
-                    Column\Name::of('id'),
-                    Column\Type::int(),
-                ),
-            )->primaryKey(Column\Name::of('id')));
-            $connection(
-                CreateTable::ifNotExists(
-                    $parent->name(),
-                    Column::of(
-                        Column\Name::of('id'),
-                        Column\Type::int(),
-                    ),
-                    Column::of(
-                        Column\Name::of('child'),
-                        Column\Type::int(),
-                    ),
-                )
-                    ->primaryKey(Column\Name::of('id'))
-                    ->foreignKey(
-                        Column\Name::of('child'),
-                        $child->name(),
-                        Column\Name::of('id'),
-                    ),
-            );
-            $connection(Insert::into(
-                $child->name(),
-                Row::of([
-                    'id' => 2,
-                ]),
-            ));
-            $connection(Insert::into(
-                $parent->name(),
-                Row::of([
-                    'id' => 1,
-                    'child' => 2,
-                ]),
-            ));
-
-            $connection(
-                Delete::from($parent)
-                    ->join(
-                        Join::left($child)->on(
-                            Column\Name::of('child')->in($parent),
-                            Column\Name::of('id')->in($child),
-                        ),
-                    )
-                    ->where(new class implements Comparator {
-                        use Composable;
-
-                        public function property(): string
-                        {
-                            return 'child.id';
-                        }
-
-                        public function sign(): Sign
-                        {
-                            return Sign::equality;
-                        }
-
-                        public function value(): int
-                        {
-                            return 2;
-                        }
-                    }),
-            );
-
-            $rows = $connection(Select::from($child));
-            $assert->count(1, $rows);
-
-            $rows = $connection(Select::from($parent));
-            $assert->count(0, $rows);
-
-            $connection(DropTable::named($parent->name()));
-            $connection(DropTable::named($child->name()));
-        },
-    );
-
-    yield test(
-        'Update join',
-        static function($assert) use ($connection) {
-            $parent = Table\Name::of('test_join_update_parent')->as('parent');
-            $child = Table\Name::of('test_join_update_child')->as('child');
-            $connection(CreateTable::ifNotExists(
-                $child->name(),
-                Column::of(
-                    Column\Name::of('id'),
-                    Column\Type::int(),
-                ),
-                Column::of(
-                    Column\Name::of('name'),
-                    Column\Type::varchar(),
-                ),
-            )->primaryKey(Column\Name::of('id')));
-            $connection(
-                CreateTable::ifNotExists(
-                    $parent->name(),
-                    Column::of(
-                        Column\Name::of('id'),
-                        Column\Type::int(),
-                    ),
-                    Column::of(
-                        Column\Name::of('child'),
-                        Column\Type::int(),
-                    ),
-                )
-                    ->primaryKey(Column\Name::of('id'))
-                    ->foreignKey(
-                        Column\Name::of('child'),
-                        $child->name(),
-                        Column\Name::of('id'),
-                    ),
-            );
-            $connection(Insert::into(
-                $child->name(),
-                Row::of([
-                    'id' => 1,
-                    'name' => 'a',
-                ]),
-            ));
-            $connection(Insert::into(
-                $parent->name(),
-                Row::of([
-                    'id' => 1,
-                    'child' => 1,
-                ]),
-            ));
-
-            $connection(
-                Update::set(
-                    $child,
-                    new Row(new Row\Value(
-                        Column\Name::of('name'),
-                        'b',
-                    )),
-                )->join(
-                    Join::left($parent)->on(
-                        Column\Name::of('child')->in($parent),
-                        Column\Name::of('id')->in($child),
-                    ),
-                ),
-            );
-
-            $rows = $connection(Select::from($child))
-                ->map(static fn($row) => $row->toArray())
-                ->toList();
-            $assert
-                ->expected([['id' => 1, 'name' => 'b']])
-                ->same($rows);
-
-            $connection(DropTable::named($parent->name()));
-            $connection(DropTable::named($child->name()));
         },
     );
 
     yield proof(
-        'Unique constraint',
+        "Unique constraint({$driver->name})",
         given(Set\Integers::between(0, 1_000_000)),
         static function($assert, $int) use ($connection) {
             $table = Table\Name::of('test_unique');
@@ -580,16 +449,56 @@ return static function() {
         },
     );
 
+    $filter = match ($driver) {
+        Driver::sqlite => static fn($ensure) => \count(
+            \array_filter(
+                $ensure->properties(),
+                static fn($property) => $property instanceof Properties\MustThrowWhenValueDoesntFitTheSchema,
+            )
+        ) === 0,
+        default => static fn() => true,
+    };
+
     yield properties(
-        'PDO properties',
-        Properties::any(),
+        "PDO properties({$driver->name})",
+        Properties::any()->filter($filter),
         $connections,
     );
 
     foreach (Properties::list() as $property) {
+        if (
+            $driver === Driver::sqlite &&
+            $property === Properties\MustThrowWhenValueDoesntFitTheSchema::class
+        ) {
+            continue;
+        }
+
         yield property(
             $property,
             $connections,
-        )->named('PDO');
+        )->named("PDO({$driver->name})");
     }
+};
+
+return static function() use ($proofs) {
+    $port = \getenv('DB_PORT') ?: '3306';
+
+    yield from $proofs(
+        Url::of("mysql://root:root@127.0.0.1:$port/example"),
+        Driver::mysql,
+    );
+
+    $tmp = \getcwd().'/tmp';
+
+    yield from $proofs(
+        Url::of("sqlite:$tmp/formal.sq3"),
+        Driver::sqlite,
+    );
+
+    $port = \getenv('POSTGRES_DB_PORT') ?: '5432';
+
+    yield from $proofs(
+        Url::of("pgsql://root:root@127.0.0.1:$port/example"),
+        Driver::postgres,
+    );
 };

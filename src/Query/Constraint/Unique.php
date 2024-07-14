@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Query\Constraint;
 
-use Formal\AccessLayer\Table\Column;
+use Formal\AccessLayer\{
+    Table\Column,
+    Driver,
+};
 use Innmind\Immutable\{
     Maybe,
     Sequence,
@@ -65,11 +68,11 @@ final class Unique
     /**
      * @return non-empty-string
      */
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         $columns = $this
             ->columns
-            ->map(static fn($column) => ', '.$column->sql())
+            ->map(static fn($column) => ', '.$column->sql($driver))
             ->map(Str::of(...))
             ->fold(new Concat)
             ->toString();
@@ -78,12 +81,12 @@ final class Unique
             fn($name) => \sprintf(
                 'CONSTRAINT UC_%s UNIQUE (%s%s)',
                 $name,
-                $this->column->sql(),
+                $this->column->sql($driver),
                 $columns,
             ),
             fn() => \sprintf(
                 'UNIQUE (%s%s)',
-                $this->column->sql(),
+                $this->column->sql($driver),
                 $columns,
             ),
         );

@@ -11,11 +11,11 @@ use Formal\AccessLayer\{
 };
 use Innmind\Url\Url;
 
-$connection = new Lazy(
+$connection = Lazy::of(
     static fn() => PDO::of(
         Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'),
     ),
 );
 ```
 
-By passing a callable to the constructor allows you to use [whatever implementation](own.md) of a `Connection` you wish to lazy load.
+By passing a callable to the constructor it allows you to use [whatever implementation](own.md) of a `Connection` you wish to lazy load.

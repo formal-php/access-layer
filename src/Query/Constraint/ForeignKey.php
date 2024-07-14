@@ -3,9 +3,10 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Query\Constraint;
 
-use Formal\AccessLayer\Table\{
-    Name,
-    Column,
+use Formal\AccessLayer\{
+    Table\Name,
+    Table\Column,
+    Driver,
 };
 use Innmind\Immutable\Maybe;
 
@@ -96,21 +97,22 @@ final class ForeignKey
     /**
      * @return non-empty-string
      */
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
-        $sql = \sprintf(
-            'CONSTRAINT `FK_%s` FOREIGN KEY (%s) REFERENCES %s(%s)',
-            $this->name->match(
-                static fn($name) => $name,
-                fn() => \sprintf(
-                    '%s_%s',
-                    $this->column->toString(),
-                    $this->reference->toString(),
-                ),
+        $name = $this->name->match(
+            static fn($name) => $name,
+            fn() => \sprintf(
+                '%s_%s',
+                $this->column->toString(),
+                $this->reference->toString(),
             ),
-            $this->column->sql(),
-            $this->target->sql(),
-            $this->reference->sql(),
+        );
+        $sql = \sprintf(
+            'CONSTRAINT %s FOREIGN KEY (%s) REFERENCES %s(%s)',
+            $driver->escapeName('FK_'.$name),
+            $this->column->sql($driver),
+            $this->target->sql($driver),
+            $this->reference->sql($driver),
         );
 
         return $sql.$this->onDelete->match(

@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Query;
 
-use Formal\AccessLayer\Query;
+use Formal\AccessLayer\{
+    Query,
+    Driver,
+};
 use Innmind\Immutable\Sequence;
 
 /**
@@ -62,7 +65,7 @@ final class SQL implements Query
         return $this->parameters;
     }
 
-    public function sql(): string
+    public function sql(Driver $driver): string
     {
         return $this->sql;
     }

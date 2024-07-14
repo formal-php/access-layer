@@ -4,15 +4,14 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\SQL,
-    Query\Parameter,
+    Query\Insert,
     Query\Select,
     Table\Name,
     Connection,
+    Row,
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\BlackBox\{
@@ -61,35 +60,21 @@ final class SelectWhereStartsWith implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $insert = SQL::of('INSERT INTO `test` VALUES (?, ?, ?);')
-            ->with(Parameter::of($this->uuid))
-            ->with(Parameter::of($this->prefix.$this->username))
-            ->with(Parameter::of($this->number));
-        $connection($insert);
+        $connection(Insert::into(
+            Name::of('test'),
+            Row::of([
+                'id' => $this->uuid,
+                'username' => $this->prefix.$this->username,
+                'registerNumber' => $this->number,
+            ]),
+        ));
 
-        $select = Select::from(new Name('test'));
-        $select = $select->where(new class($this->prefix) implements Comparator {
-            use Composable;
-
-            public function __construct(private string $prefix)
-            {
-            }
-
-            public function property(): string
-            {
-                return 'username';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::startsWith;
-            }
-
-            public function value(): string
-            {
-                return $this->prefix;
-            }
-        });
+        $select = Select::from(Name::of('test'));
+        $select = $select->where(Comparator\Property::of(
+            'username',
+            Sign::startsWith,
+            $this->prefix,
+        ));
         $rows = $connection($select);
 
         $assert->count(1, $rows);

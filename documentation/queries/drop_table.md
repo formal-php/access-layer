@@ -6,7 +6,7 @@ use Formal\AccessLayer\{
     Table\Name,
 };
 
-$drop = DropTable::named(new Name('users'));
+$drop = DropTable::named(Name::of('users'));
 $connection($drop);
 ```
 
@@ -18,6 +18,6 @@ use Formal\AccessLayer\{
     Table\Name,
 };
 
-$drop = DropTable::ifExists(new Name('users'));
+$drop = DropTable::ifExists(Name::of('users'));
 $connection($drop);
 ```

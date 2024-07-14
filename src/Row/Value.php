@@ -6,6 +6,7 @@ namespace Formal\AccessLayer\Row;
 use Formal\AccessLayer\{
     Table\Column\Name,
     Query\Parameter\Type,
+    Driver,
 };
 
 /**
@@ -17,11 +18,22 @@ final class Value
     private mixed $value;
     private Type $type;
 
-    public function __construct(Name|Name\Namespaced $column, mixed $value, Type $type = null)
+    private function __construct(Name|Name\Namespaced $column, mixed $value, Type $type = null)
     {
         $this->column = $column;
         $this->value = $value;
         $this->type = $type ?? Type::for($value);
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function of(
+        Name|Name\Namespaced $column,
+        mixed $value,
+        Type $type = null,
+    ): self {
+        return new self($column, $value, $type);
     }
 
     public function column(): Name
@@ -35,9 +47,9 @@ final class Value
     /**
      * @return non-empty-string
      */
-    public function columnSql(): string
+    public function columnSql(Driver $driver): string
     {
-        return $this->column->sql();
+        return $this->column->sql($driver);
     }
 
     public function value(): mixed
