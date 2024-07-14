@@ -404,6 +404,79 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
+    yield test(
+        "Delete join({$driver->name})",
+        static function($assert) use ($connection) {
+            $parent = Table\Name::of('test_join_delete_parent')->as('parent');
+            $child = Table\Name::of('test_join_delete_child')->as('child');
+            $connection(CreateTable::ifNotExists(
+                $child->name(),
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+            )->primaryKey(Column\Name::of('id')));
+            $connection(
+                CreateTable::ifNotExists(
+                    $parent->name(),
+                    Column::of(
+                        Column\Name::of('id'),
+                        Column\Type::int(),
+                    ),
+                    Column::of(
+                        Column\Name::of('child'),
+                        Column\Type::int(),
+                    ),
+                )
+                    ->primaryKey(Column\Name::of('id'))
+                    ->foreignKey(
+                        Column\Name::of('child'),
+                        $child->name(),
+                        Column\Name::of('id'),
+                    ),
+            );
+            $connection(Delete::from($parent->name()));
+            $connection(Delete::from($child->name()));
+            $connection(Insert::into(
+                $child->name(),
+                Row::of([
+                    'id' => 2,
+                ]),
+            ));
+            $connection(Insert::into(
+                $parent->name(),
+                Row::of([
+                    'id' => 1,
+                    'child' => 2,
+                ]),
+            ));
+
+            $connection(
+                Delete::from($parent)
+                    ->join(
+                        Join::left($child)->on(
+                            Column\Name::of('child')->in($parent),
+                            Column\Name::of('id')->in($child),
+                        ),
+                    )
+                    ->where(Comparator\Property::of(
+                        'child.id',
+                        Sign::equality,
+                        2,
+                    )),
+            );
+
+            $rows = $connection(Select::from($child));
+            $assert->count(1, $rows);
+
+            $rows = $connection(Select::from($parent));
+            $assert->count(0, $rows);
+
+            $connection(DropTable::named($parent->name()));
+            $connection(DropTable::named($child->name()));
+        },
+    );
+
     yield proof(
         "Unique constraint({$driver->name})",
         given(Set\Integers::between(0, 1_000_000)),

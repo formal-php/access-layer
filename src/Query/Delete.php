@@ -5,11 +5,19 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
+    Query\Select\Join,
     Table\Name,
     Driver,
 };
-use Innmind\Specification\Specification;
-use Innmind\Immutable\Sequence;
+use Innmind\Specification\{
+    Specification,
+    Comparator\Property,
+};
+use Innmind\Immutable\{
+    Sequence,
+    Str,
+    Monoid\Concat,
+};
 
 /**
  * @psalm-immutable
@@ -17,13 +25,20 @@ use Innmind\Immutable\Sequence;
 final class Delete implements Query
 {
     private Name|Name\Aliased $table;
+    /** @var Sequence<Join> */
+    private Sequence $joins;
     private Where $where;
 
+    /**
+     * @param Sequence<Join> $joins
+     */
     private function __construct(
         Name|Name\Aliased $table,
+        Sequence $joins,
         Where $where,
     ) {
         $this->table = $table;
+        $this->joins = $joins;
         $this->where = $where;
     }
 
@@ -32,13 +47,23 @@ final class Delete implements Query
      */
     public static function from(Name|Name\Aliased $table): self
     {
-        return new self($table, Where::everything());
+        return new self($table, Sequence::of(), Where::everything());
+    }
+
+    public function join(Join $join): self
+    {
+        return new self(
+            $this->table,
+            ($this->joins)($join),
+            $this->where,
+        );
     }
 
     public function where(Specification $specification): self
     {
         return new self(
             $this->table,
+            $this->joins,
             Where::of($specification),
         );
     }
@@ -50,21 +75,101 @@ final class Delete implements Query
 
     public function sql(Driver $driver): string
     {
-        /** @var non-empty-string */
-        return \sprintf(
-            'DELETE %s FROM %s %s',
-            match (true) {
-                $driver === Driver::postgres => '',
-                $this->table instanceof Name\Aliased => $driver->escapeName($this->table->alias()),
-                default => $this->table->sql($driver),
-            },
-            $this->table->sql($driver),
-            $this->where->sql($driver),
-        );
+        return match ($driver) {
+            Driver::mysql => $this->mysqlSql($driver),
+            Driver::postgres => $this->postgresSql($driver),
+        };
     }
 
     public function lazy(): bool
     {
         return false;
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    private function mysqlSql(Driver $driver): string
+    {
+        /** @var non-empty-string */
+        return \sprintf(
+            'DELETE %s FROM %s%s %s',
+            match (true) {
+                $this->table instanceof Name\Aliased => $driver->escapeName($this->table->alias()),
+                default => $this->table->sql($driver),
+            },
+            $this->table->sql($driver),
+            $this
+                ->joins
+                ->map(static fn($join) => $join->sql($driver))
+                ->map(Str::of(...))
+                ->fold(new Concat)
+                ->toString(),
+            $this->where->sql($driver),
+        );
+    }
+
+    /**
+     * @return non-empty-string
+     */
+    private function postgresSql(Driver $driver): string
+    {
+        $joins = '';
+        $where = $this->where->sql($driver);
+
+        if (!$this->joins->empty()) {
+            $joins = Str::of(', ')
+                ->join($this->joins->map(
+                    static fn($join) => $join->table()->sql($driver),
+                ))
+                ->prepend(' USING ')
+                ->toString();
+            $where = match ($where) {
+                '' => $this
+                    ->joins
+                    ->flatMap(static fn($join) => $join->condition()->toSequence())
+                    ->map(static function($condition) use ($driver) {
+                        [$left, $right] = $condition;
+
+                        return \sprintf(
+                            '%s = %s AND',
+                            $left->sql($driver),
+                            $right->sql($driver),
+                        );
+                    })
+                    ->map(Str::of(...))
+                    ->fold(new Concat)
+                    ->dropEnd(4)
+                    ->prepend('WHERE ')
+                    ->toString(),
+                default => $this
+                    ->joins
+                    ->flatMap(static fn($join) => $join->condition()->toSequence())
+                    ->map(static function($condition) use ($driver) {
+                        [$left, $right] = $condition;
+
+                        return \sprintf(
+                            'AND %s = %s',
+                            $left->sql($driver),
+                            $right->sql($driver),
+                        );
+                    })
+                    ->map(Str::of(...))
+                    ->fold(new Concat)
+                    ->drop(4)
+                    ->prepend(' AND (')
+                    ->append(')')
+                    ->prepend($where)
+                    ->toString(),
+            };
+        }
+
+        /** @var non-empty-string */
+        return \sprintf(
+            'DELETE FROM %s%s %s',
+            $this->table->sql($driver),
+            $joins,
+            $where,
+        );
     }
 }

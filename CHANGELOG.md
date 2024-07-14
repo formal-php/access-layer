@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Formal\AccessLayer\Query\Delete::join()`
+
 ### Removed
 
 - `Formal\AccessLayer\Driver::sqlite`

@@ -5,6 +5,7 @@ namespace Formal\AccessLayer\Query;
 
 use Formal\AccessLayer\{
     Query,
+    Query\Select\Join,
     Table\Name,
     Row,
     Driver,
@@ -13,6 +14,7 @@ use Innmind\Specification\Specification;
 use Innmind\Immutable\{
     Sequence,
     Str,
+    Monoid\Concat,
 };
 
 /**
