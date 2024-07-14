@@ -1,5 +1,6 @@
 <?php
 declare(strict_types = 1);
+declare(ticks = 1);
 
 use Formal\AccessLayer\{
     Connection,
@@ -79,19 +80,20 @@ $proofs = static function(Url $dsn, Driver $driver) {
 
             $select = Select::onDemand($table);
             $rows = $connection($select);
-            $memory = \memory_get_peak_usage();
 
-            $count = $rows->reduce(
-                0,
-                static fn($count) => $count + 1,
-            );
-
-            $assert->same(100_000, $count);
             // when lazy this takes a little less than 3Mo of memory
             // when deferred this would take about 80Mo
             $assert
-                ->number(\memory_get_peak_usage() - $memory)
-                ->lessThan(3_000_000);
+                ->memory(static function() use ($assert, $rows) {
+                    $count = $rows->reduce(
+                        0,
+                        static fn($count) => $count + 1,
+                    );
+
+                    $assert->same(100_000, $count);
+                })
+                ->inLessThan()
+                ->megaBytes(3);
 
             $connection(DropTable::named($table));
         },
