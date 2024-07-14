@@ -9,10 +9,7 @@ use Formal\AccessLayer\{
     Table\Name,
     Driver,
 };
-use Innmind\Specification\{
-    Specification,
-    Comparator\Property,
-};
+use Innmind\Specification\Specification;
 use Innmind\Immutable\{
     Sequence,
     Str,
