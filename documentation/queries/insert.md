@@ -9,7 +9,7 @@ use Formal\AccessLayer\{
 };
 
 $insert = Insert::into(
-    new Name('users'),
+    Name::of('users'),
     Row::of([
         'username' => 'some username',
         'name' => 'some name',
@@ -31,15 +31,15 @@ use Formal\AccessLayer\{
 };
 
 $insert = Insert::into(
-    new Name('users'),
-    new Row(
-        new Row\Value(
-            new Column\Name('username'),
+    Name::of('users'),
+    Row::new(
+        Row\Value::of(
+            Column\Name::of('username'),
             'some username',
             Type::string,
         ),
-        new Row\Value(
-            new Column\Name('name'),
+        Row\Value::of(
+            Column\Name::of('name'),
             'some name',
             Type::string,
         ),
@@ -64,9 +64,9 @@ use Formal\AccessLayer\{
 use Innmind\Immutable\Sequence;
 
 $insert = MultipleInsert::into(
-    new Name('users'),
-    new Column\Name('username'),
-    new Column\Name('name'),
+    Name::of('users'),
+    Column\Name::of('username'),
+    Column\Name::of('name'),
 );
 $connection($insert(Sequence::of(
     Row::of([

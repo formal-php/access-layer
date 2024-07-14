@@ -85,7 +85,7 @@ final class SelectWhereInQuery implements Property
             ->with(Parameter::of($this->value2));
         $connection($insert);
 
-        $select = Select::from(new Name('test'));
+        $select = Select::from(Name::of('test'));
         $select = $select->where(new class($this->value1) implements Comparator {
             use Composable;
 
@@ -105,8 +105,8 @@ final class SelectWhereInQuery implements Property
 
             public function value(): Select
             {
-                return Select::from(new Name('test_values'))
-                    ->columns(new Column\Name('id'))
+                return Select::from(Name::of('test_values'))
+                    ->columns(Column\Name::of('id'))
                     ->where(
                         new class($this->value) implements Comparator {
                             use Composable;

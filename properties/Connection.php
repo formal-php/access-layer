@@ -80,18 +80,18 @@ final class Connection
 
     public static function seed(Concrete $connection): void
     {
-        $connection(DropTable::ifExists(new Name('test')));
-        $connection(DropTable::ifExists(new Name('test_values')));
+        $connection(DropTable::ifExists(Name::of('test')));
+        $connection(DropTable::ifExists(Name::of('test_values')));
         $connection(CreateTable::named(
-            new Name('test'),
-            new Column(new Column\Name('id'), Column\Type::char(36)),
-            new Column(new Column\Name('username'), Column\Type::varchar(255)),
-            new Column(new Column\Name('registerNumber'), Column\Type::bigint()),
-        )->primaryKey(new Column\Name('id')));
+            Name::of('test'),
+            Column::of(Column\Name::of('id'), Column\Type::char(36)),
+            Column::of(Column\Name::of('username'), Column\Type::varchar(255)),
+            Column::of(Column\Name::of('registerNumber'), Column\Type::bigint()),
+        )->primaryKey(Column\Name::of('id')));
         $connection(CreateTable::named(
-            new Name('test_values'),
-            new Column(new Column\Name('id'), Column\Type::char(36)),
-            new Column(new Column\Name('value'), Column\Type::varchar(255)),
+            Name::of('test_values'),
+            Column::of(Column\Name::of('id'), Column\Type::char(36)),
+            Column::of(Column\Name::of('value'), Column\Type::varchar(255)),
         ));
     }
 }

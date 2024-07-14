@@ -15,7 +15,7 @@ final class Column
     {
         return Set\Randomize::of( // randomize to prevent same name used twice
             Set\Composite::immutable(
-                static fn($name, $type): Model => new Model($name, $type),
+                Model::of(...),
                 Column\Name::any($max),
                 $type ?? Column\Type::any(),
             ),

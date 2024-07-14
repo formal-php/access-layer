@@ -8,13 +8,13 @@ use Formal\AccessLayer\{
 };
 
 $create = CreateTable::named(
-    new Name('users'),
-    new Column(
-        new Column\Name('username'),
+    Name::of('users'),
+    Column::of(
+        Column\Name::of('username'),
         Column\Type::varchar(),
     ),
-    new Column(
-        new Column\Name('name'),
+    Column::of(
+        Column\Name::of('name'),
         Column\Type::varchar(),
     ),
 );
@@ -31,13 +31,13 @@ use Formal\AccessLayer\{
 };
 
 $create = CreateTable::ifNotExists(
-    new Name('users'),
-    new Column(
-        new Column\Name('username'),
+    Name::of('users'),
+    Column::of(
+        Column\Name::of('username'),
         Column\Type::varchar(),
     ),
-    new Column(
-        new Column\Name('name'),
+    Column::of(
+        Column\Name::of('name'),
         Column\Type::varchar(),
     ),
 );
@@ -52,13 +52,13 @@ You can specify the primary key of the table like so:
 
 ```php
 $create = CreateTable::named(
-    new Name('users'),
-    new Column(
-        new Column\Name('id'),
+    Name::of('users'),
+    Column::of(
+        Column\Name::of('id'),
         Column\Type::int(),
     ),
 );
-$create = $create->primaryKey(new Column\Name('id'));
+$create = $create->primaryKey(Column\Name::of('id'));
 $connection($create);
 ```
 
@@ -66,20 +66,20 @@ $connection($create);
 
 ```php
 $create = CreateTable::named(
-    new Name('address'),
-    new Column(
-        new Column\Name('user'),
+    Name::of('address'),
+    Column::of(
+        Column\Name::of('user'),
         Column\Type::int(),
     ),
-    new Column(
-        new Column\Name('address'),
+    Column::of(
+        Column\Name::of('address'),
         Column\Type::text(),
     ),
 );
 $create = $create->foreignKey(
-    new Column\Name('user'),
-    new Name('users'),
-    new Column\Name('id'),
+    Column\Name::of('user'),
+    Name::of('users'),
+    Column\Name::of('id'),
 );
 $connection($create);
 ```

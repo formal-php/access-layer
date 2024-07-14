@@ -54,7 +54,7 @@ final class ContentInsertedAfterStartOfTransactionIsAccessible implements Proper
         $connection(new StartTransaction);
 
         $connection(Insert::into(
-            new Name('test'),
+            Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,

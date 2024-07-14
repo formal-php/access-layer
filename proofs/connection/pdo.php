@@ -176,9 +176,9 @@ $proofs = static function(Url $dsn, Driver $driver) {
             $connection(Delete::from($table));
             $insert = MultipleInsert::into(
                 $table,
-                new Column\Name('id'),
-                new Column\Name('name'),
-                new Column\Name('parent'),
+                Column\Name::of('id'),
+                Column\Name::of('name'),
+                Column\Name::of('parent'),
             );
             $connection($insert(Sequence::of(
                 Row::of([
@@ -295,8 +295,8 @@ $proofs = static function(Url $dsn, Driver $driver) {
             ));
             $insert = MultipleInsert::into(
                 $child,
-                new Column\Name('id'),
-                new Column\Name('parent'),
+                Column\Name::of('id'),
+                Column\Name::of('parent'),
             );
             $connection($insert(Sequence::of(
                 Row::of([
@@ -354,8 +354,8 @@ $proofs = static function(Url $dsn, Driver $driver) {
             ));
             $insert = MultipleInsert::into(
                 $child,
-                new Column\Name('id'),
-                new Column\Name('parent'),
+                Column\Name::of('id'),
+                Column\Name::of('parent'),
             );
             $connection($insert(Sequence::of(
                 Row::of([

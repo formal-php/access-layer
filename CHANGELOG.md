@@ -8,12 +8,21 @@
 - `Formal\AccessLayer\Query\MultipleInsert`
 - `Formal\AccessLayer\Table\Column\Type::uuid()`
 - `Formal\AccessLayer\Table\Column\Type::bool()`
+- `Formal\AccessLayer\Connection\Lazy::of()`
+- `Formal\AccessLayer\Row::new()`
+- `Formal\AccessLayer\Row\Value::of()`
 
 ### Changed
 
 - Requires `innmind/specification:~4.1`
 - `Formal\AccessLayer\Query::sql()` now has a `Driver` argument
 - `Formal\AccessLayer\Query\Insert::into()` only accepts 1 `Row`, for multiple rows use `MultipleInsert` instead
+- `Formal\AccessLayer\Connection\Lazy` constructor is now private, use `::of()` instead
+- `Formal\AccessLayer\Row` constructor is now private, use `::new()` instead
+- `Formal\AccessLayer\Row\Value` constructor is now private, use `::of()` instead
+- `Formal\AccessLayer\Table\Column` constructor is now private, use `::of()` instead
+- `Formal\AccessLayer\Table\Column\Name` constructor is now private, use `::of()` instead
+- `Formal\AccessLayer\Table\Name` constructor is now private, use `::of()` instead
 
 ### Removed
 

@@ -21,11 +21,20 @@ final class Row
     private Sequence $values;
 
     /**
-     * @no-named-arguments
+     * @param Sequence<Value> $values
      */
-    public function __construct(Value ...$values)
+    private function __construct(Sequence $values)
     {
-        $this->values = Sequence::of(...$values);
+        $this->values = $values;
+    }
+
+    /**
+     * @no-named-arguments
+     * @psalm-pure
+     */
+    public static function new(Value ...$values): self
+    {
+        return new self(Sequence::of(...$values));
     }
 
     /**
@@ -47,10 +56,10 @@ final class Row
             }
 
             /** @psalm-suppress RedundantCastGivenDocblockType Because PHP automatically cast a numeric string */
-            $values[] = new Value(new Column\Name((string) $key), $value);
+            $values[] = Value::of(Column\Name::of((string) $key), $value);
         }
 
-        return new self(...$values);
+        return self::new(...$values);
     }
 
     public function contains(string $name): bool

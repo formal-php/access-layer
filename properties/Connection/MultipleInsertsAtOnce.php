@@ -72,10 +72,10 @@ final class MultipleInsertsAtOnce implements Property
         $assert->count(0, $rows);
 
         $insert = Query\MultipleInsert::into(
-            new Table\Name('test'),
-            new Column\Name('id'),
-            new Column\Name('username'),
-            new Column\Name('registerNumber'),
+            Table\Name::of('test'),
+            Column\Name::of('id'),
+            Column\Name::of('username'),
+            Column\Name::of('registerNumber'),
         );
         $sequence = $connection($insert(Sequence::of(
             Row::of([

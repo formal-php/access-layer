@@ -390,19 +390,19 @@ final class Where
             ->first()
             ->filter(static fn($name) => !$name->empty())
             ->map(static fn($name) => $name->toString())
-            ->map(static fn($name) => new Name($name));
+            ->map(Name::of(...));
         /** @psalm-suppress ArgumentTypeCoercion */
         $column = $parts
             ->get(1)
             ->filter(static fn($name) => !$name->empty())
             ->map(static fn($name) => $name->toString())
-            ->map(static fn($name) => new Column\Name($name));
+            ->map(Column\Name::of(...));
 
         return Maybe::all($table, $column)
             ->map(static fn(Name $table, Column\Name $column) => "{$table->sql($driver)}.{$column->sql($driver)}")
             ->match(
                 static fn($withTable) => $withTable,
-                static fn() => (new Column\Name($specification->property()))->sql($driver),
+                static fn() => Column\Name::of($specification->property())->sql($driver),
             );
     }
 }
