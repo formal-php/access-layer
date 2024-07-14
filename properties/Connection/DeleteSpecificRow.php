@@ -53,10 +53,10 @@ final class DeleteSpecificRow implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $insert = Query\MultipleInsert::into(
-            new Table\Name('test'),
-            new Column\Name('id'),
-            new Column\Name('username'),
-            new Column\Name('registerNumber'),
+            Table\Name::of('test'),
+            Column\Name::of('id'),
+            Column\Name::of('username'),
+            Column\Name::of('registerNumber'),
         );
         $connection($insert(Sequence::of(
             Row::of([
@@ -71,7 +71,7 @@ final class DeleteSpecificRow implements Property
             ]),
         )));
 
-        $delete = Query\Delete::from(new Table\Name('test'))->where(
+        $delete = Query\Delete::from(Table\Name::of('test'))->where(
             Comparator\Property::of(
                 'id',
                 Sign::equality,

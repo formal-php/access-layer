@@ -6,7 +6,7 @@ use Formal\AccessLayer\{
     Table\Name,
 };
 
-$delete = Delete::from(new Name('users'));
+$delete = Delete::from(Name::of('users'));
 $connection($delete);
 ```
 
@@ -38,7 +38,7 @@ final class Username
     }
 }
 
-$delete = Delete::from(new Name('users'))->where(
+$delete = Delete::from(Name::of('users'))->where(
     Username::of('some username')->or(Username::of('other username')),
 );
 $connection($delete);

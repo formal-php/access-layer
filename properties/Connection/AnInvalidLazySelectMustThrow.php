@@ -32,7 +32,7 @@ final class AnInvalidLazySelectMustThrow implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $query = Select::onDemand(new Name('unknown'));
+        $query = Select::onDemand(Name::of('unknown'));
         $result = $connection($query);
 
         try {

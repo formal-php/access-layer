@@ -42,7 +42,7 @@ final class Update implements Property
     {
         $select = SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'");
         $connection(Query\Insert::into(
-            new Table\Name('test'),
+            Table\Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => 'foo',
@@ -51,7 +51,7 @@ final class Update implements Property
         ));
 
         $sequence = $connection(Query\Update::set(
-            new Table\Name('test'),
+            Table\Name::of('test'),
             Row::of(['registerNumber' => 24]),
         ));
 

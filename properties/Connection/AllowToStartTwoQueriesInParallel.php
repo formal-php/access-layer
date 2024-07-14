@@ -52,7 +52,7 @@ final class AllowToStartTwoQueriesInParallel implements Property
         // Insert at least one value to make sure the any() call will always
         // return true
         $connection(Insert::into(
-            new Name('test'),
+            Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->name,

@@ -19,7 +19,7 @@ final class Name
     /**
      * @param non-empty-string $value
      */
-    public function __construct(string $value)
+    private function __construct(string $value)
     {
         $this->value = $value;
     }

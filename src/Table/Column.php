@@ -17,7 +17,7 @@ final class Column
     private Name $name;
     private Type $type;
 
-    public function __construct(Name $name, Type $type)
+    private function __construct(Name $name, Type $type)
     {
         $this->name = $name;
         $this->type = $type;

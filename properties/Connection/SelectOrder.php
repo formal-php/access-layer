@@ -64,10 +64,10 @@ final class SelectOrder implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $insert = MultipleInsert::into(
-            new Name('test'),
-            new Column\Name('id'),
-            new Column\Name('username'),
-            new Column\Name('registerNumber'),
+            Name::of('test'),
+            Column\Name::of('id'),
+            Column\Name::of('username'),
+            Column\Name::of('registerNumber'),
         );
         $connection($insert(Sequence::of(
             Row::of([

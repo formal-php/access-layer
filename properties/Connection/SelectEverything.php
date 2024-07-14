@@ -50,7 +50,7 @@ final class SelectEverything implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $connection(Insert::into(
-            new Name('test'),
+            Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,
@@ -58,7 +58,7 @@ final class SelectEverything implements Property
             ]),
         ));
 
-        $rows = $connection(Select::from(new Name('test')));
+        $rows = $connection(Select::from(Name::of('test')));
 
         $assert
             ->number($rows->size())

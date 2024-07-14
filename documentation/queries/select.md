@@ -6,7 +6,7 @@ use Formal\AccesLayer\{
     Table\Name,
 };
 
-$select = Select::from(new Name('users'));
+$select = Select::from(Name::of('users'));
 $users = $connection($select);
 ```
 
@@ -24,9 +24,9 @@ use Formal\AccesLayer\{
     Table\Column,
 };
 
-$select = Select::from(new Name('users'))->columns(
-    new Column\Name('username'),
-    new Column\Name('name'),
+$select = Select::from(Name::of('users'))->columns(
+    Column\Name::of('username'),
+    Column\Name::of('name'),
 );
 $users = $connection($select);
 ```
@@ -58,7 +58,7 @@ final class Username
     }
 }
 
-$select = Select::from(new Name('users'))->where(
+$select = Select::from(Name::of('users'))->where(
     Username::of('some username')->or(Username::of('other username')),
 );
 $users = $connection($select);

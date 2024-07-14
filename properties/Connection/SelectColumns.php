@@ -51,7 +51,7 @@ final class SelectColumns implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $connection(Insert::into(
-            new Name('test'),
+            Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,
@@ -59,7 +59,7 @@ final class SelectColumns implements Property
             ]),
         ));
 
-        $select = Select::from(new Name('test'))->columns(new Column\Name('id'));
+        $select = Select::from(Name::of('test'))->columns(Column\Name::of('id'));
         $rows = $connection($select);
 
         $assert

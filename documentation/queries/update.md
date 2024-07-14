@@ -8,7 +8,7 @@ use Formal\AccessLayer\{
 };
 
 $update = Update::set(
-    new Name('users'),
+    Name::of('users'),
     Row::of([
         'name' => 'some value',
     ]),
@@ -46,7 +46,7 @@ final class Username
 }
 
 $update = Update::set(
-    new Name('users'),
+    Name::of('users'),
     Row::of([
         'name' => 'some value',
     ]),
