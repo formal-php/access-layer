@@ -24,14 +24,6 @@ To build an instance of it you only need the dsn to your database:
     );
     ```
 
-=== "SQLite"
-    ```php
-    use Formal\AccessLayer\Connection\PDO;
-    use Innmind\Url\Url;
-
-    $connection = PDO::of(Url::of('sqlite:///path/to/database/file.sq3'));
-    ```
-
 When executing a [query](../queries/sql.md) through this connection it will return a [deferred `Sequence`](http://innmind.github.io/Immutable/structures/sequence/#defer) of rows. This means that the rows returned from the database are only loaded once you iterate over the sequence. (Queries with the named constructor `::onDemand()` will return a lazy `Sequence`).
 
 !!! note ""

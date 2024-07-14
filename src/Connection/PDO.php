@@ -42,7 +42,6 @@ final class PDO implements Connection
         }
 
         $this->driver = match ($dsn->scheme()->toString()) {
-            'sqlite' => Driver::sqlite,
             'mysql' => Driver::mysql,
             'pgsql' => Driver::postgres,
         };
@@ -59,26 +58,16 @@ final class PDO implements Connection
             }
         }
 
-        $pdoDsn = match ($this->driver) {
-            Driver::sqlite => \sprintf(
-                'sqlite:%s',
-                $dsn->path()->toString(),
-            ),
-            default => \sprintf(
-                '%s:host=%s;port=%s;dbname=%s%s',
-                $dsn->scheme()->toString(),
-                $dsn->authority()->host()->toString(),
-                $dsn->authority()->port()->toString(),
-                \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
-                $charset,
-            ),
-        };
+        $pdoDsn = \sprintf(
+            '%s:host=%s;port=%s;dbname=%s%s',
+            $dsn->scheme()->toString(),
+            $dsn->authority()->host()->toString(),
+            $dsn->authority()->port()->toString(),
+            \substr($dsn->path()->toString(), 1), // substring to remove leading '/'
+            $charset,
+        );
 
         $this->pdo = new \PDO($pdoDsn, $user, $password, $options);
-
-        if ($this->driver === Driver::sqlite) {
-            $this->pdo->query('PRAGMA foreign_keys = ON');
-        }
     }
 
     public function __invoke(Query $query): Sequence

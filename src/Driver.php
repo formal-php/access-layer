@@ -9,7 +9,6 @@ namespace Formal\AccessLayer;
 enum Driver
 {
     case mysql;
-    case sqlite;
     case postgres;
 
     /**
@@ -21,7 +20,6 @@ enum Driver
     {
         return match ($this) {
             self::mysql => "`$name`",
-            self::sqlite => "\"$name\"",
             self::postgres => "\"$name\"",
         };
     }

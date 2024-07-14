@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Removed
+
+- `Formal\AccessLayer\Driver::sqlite`
+
 ## 3.0.0 - 2024-07-14
 
 ### Added

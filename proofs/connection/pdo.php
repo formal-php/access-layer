@@ -395,7 +395,6 @@ $proofs = static function(Url $dsn, Driver $driver) {
             $assert->same(
                 match ($driver) {
                     Driver::mysql => 'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
-                    Driver::sqlite => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
                     Driver::postgres => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
                 },
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))
@@ -449,30 +448,13 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
-    $filter = match ($driver) {
-        Driver::sqlite => static fn($ensure) => \count(
-            \array_filter(
-                $ensure->properties(),
-                static fn($property) => $property instanceof Properties\MustThrowWhenValueDoesntFitTheSchema,
-            )
-        ) === 0,
-        default => static fn() => true,
-    };
-
     yield properties(
         "PDO properties({$driver->name})",
-        Properties::any()->filter($filter),
+        Properties::any(),
         $connections,
     );
 
     foreach (Properties::list() as $property) {
-        if (
-            $driver === Driver::sqlite &&
-            $property === Properties\MustThrowWhenValueDoesntFitTheSchema::class
-        ) {
-            continue;
-        }
-
         yield property(
             $property,
             $connections,
@@ -486,13 +468,6 @@ return static function() use ($proofs) {
     yield from $proofs(
         Url::of("mysql://root:root@127.0.0.1:$port/example"),
         Driver::mysql,
-    );
-
-    $tmp = \getcwd().'/tmp';
-
-    yield from $proofs(
-        Url::of("sqlite:$tmp/formal.sq3"),
-        Driver::sqlite,
     );
 
     $port = \getenv('POSTGRES_DB_PORT') ?: '5432';
