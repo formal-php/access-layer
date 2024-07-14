@@ -12,7 +12,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\BlackBox\{
@@ -71,28 +70,11 @@ final class SelectWhereEndsWith implements Property
         ));
 
         $select = Select::from(new Name('test'));
-        $select = $select->where(new class($this->suffix) implements Comparator {
-            use Composable;
-
-            public function __construct(private string $suffix)
-            {
-            }
-
-            public function property(): string
-            {
-                return 'username';
-            }
-
-            public function sign(): Sign
-            {
-                return Sign::endsWith;
-            }
-
-            public function value(): string
-            {
-                return $this->suffix;
-            }
-        });
+        $select = $select->where(Comparator\Property::of(
+            'username',
+            Sign::endsWith,
+            $this->suffix,
+        ));
         $rows = $connection($select);
 
         $assert->count(1, $rows);

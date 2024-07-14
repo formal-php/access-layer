@@ -13,7 +13,6 @@ use Formal\AccessLayer\{
 };
 use Innmind\Specification\{
     Comparator,
-    Composable,
     Sign,
 };
 use Innmind\Immutable\Sequence;
@@ -73,31 +72,11 @@ final class DeleteSpecificRow implements Property
         )));
 
         $delete = Query\Delete::from(new Table\Name('test'))->where(
-            new class($this->uuid1) implements Comparator {
-                use Composable;
-
-                private string $uuid;
-
-                public function __construct(string $uuid)
-                {
-                    $this->uuid = $uuid;
-                }
-
-                public function property(): string
-                {
-                    return 'id';
-                }
-
-                public function sign(): Sign
-                {
-                    return Sign::equality;
-                }
-
-                public function value(): string
-                {
-                    return $this->uuid;
-                }
-            },
+            Comparator\Property::of(
+                'id',
+                Sign::equality,
+                $this->uuid,
+            ),
         );
         $sequence = $connection($delete);
 
