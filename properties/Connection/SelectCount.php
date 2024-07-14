@@ -54,7 +54,7 @@ final class SelectCount implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $connection(Insert::into(
-            new Name('test'),
+            Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => $this->username,

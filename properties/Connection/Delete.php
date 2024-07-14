@@ -42,7 +42,7 @@ final class Delete implements Property
     {
         $select = SQL::of('SELECT * FROM test');
         $connection(Query\Insert::into(
-            new Table\Name('test'),
+            Table\Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => 'foo',
@@ -50,7 +50,7 @@ final class Delete implements Property
             ]),
         ));
 
-        $sequence = $connection(Query\Delete::from(new Table\Name('test')));
+        $sequence = $connection(Query\Delete::from(Table\Name::of('test')));
 
         $assert->count(0, $sequence);
 

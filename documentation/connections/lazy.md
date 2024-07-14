@@ -11,7 +11,7 @@ use Formal\AccessLayer\{
 };
 use Innmind\Url\Url;
 
-$connection = new Lazy(
+$connection = Lazy::of(
     static fn() => PDO::of(
         Url::of('mysql://user:pwd@127.0.0.1:3306/database_name'),
     ),

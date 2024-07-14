@@ -46,7 +46,7 @@ final class Insert implements Property
         $assert->count(0, $rows);
 
         $sequence = $connection(Query\Insert::into(
-            new Table\Name('test'),
+            Table\Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
                 'username' => 'foo',

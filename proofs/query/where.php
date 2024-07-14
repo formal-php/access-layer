@@ -462,7 +462,7 @@ return static function() {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::equality,
-                new Value($unused->name(), $value, $type),
+                Value::of($unused->name(), $value, $type),
             );
             $where = Where::of($specification);
 

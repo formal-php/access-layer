@@ -18,7 +18,7 @@ final class Lazy implements Connection
     /**
      * @param callable(): Connection $load
      */
-    public function __construct(callable $load)
+    private function __construct(callable $load)
     {
         $this->load = $load;
     }
@@ -26,6 +26,14 @@ final class Lazy implements Connection
     public function __invoke(Query $query): Sequence
     {
         return ($this->connection())($query);
+    }
+
+    /**
+     * @param callable(): Connection $load
+     */
+    public static function of(callable $load): self
+    {
+        return new self($load);
     }
 
     private function connection(): Connection

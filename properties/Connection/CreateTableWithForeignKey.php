@@ -62,7 +62,7 @@ final class CreateTableWithForeignKey implements Property
 
             $assert->count(0, $rows);
 
-            $create = Query\CreateTable::named($this->name2, new ConcreteColumn(
+            $create = Query\CreateTable::named($this->name2, ConcreteColumn::of(
                 $this->foreignKey->name(),
                 $this->primaryKey->type(),
             ));
