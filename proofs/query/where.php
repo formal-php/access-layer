@@ -133,7 +133,7 @@ return static function() {
             $where = Where::of($lessThan->or($equal));
 
             $assert->same(
-                "WHERE ({$column1->name()->sql(Driver::mysql)} < ? OR {{$column2->name()->sql(Driver::mysql)} = ?})",
+                "WHERE ({$column1->name()->sql(Driver::mysql)} < ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
                 $where->sql(Driver::mysql),
             );
             $assert->count(2, $where->parameters());

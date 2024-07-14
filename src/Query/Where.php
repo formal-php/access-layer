@@ -250,6 +250,7 @@ final class Where
             $specification->left()->sign() === Sign::moreThan &&
             $specification->right() instanceof Comparator &&
             $specification->right()->sign() === Sign::equality &&
+            $specification->left()->property() === $specification->right()->property() &&
             $specification->left()->value() === $specification->right()->value()
         ) {
             return $this->findComparatorParameters(
@@ -265,6 +266,7 @@ final class Where
             $specification->left()->sign() === Sign::lessThan &&
             $specification->right() instanceof Comparator &&
             $specification->right()->sign() === Sign::equality &&
+            $specification->left()->property() === $specification->right()->property() &&
             $specification->left()->value() === $specification->right()->value()
         ) {
             return $this->findComparatorParameters(
