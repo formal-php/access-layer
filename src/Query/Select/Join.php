@@ -8,6 +8,7 @@ use Formal\AccessLayer\{
     Table\Column,
     Driver,
 };
+use Innmind\Immutable\Maybe;
 
 /**
  * @psalm-immutable
@@ -58,6 +59,17 @@ final class Join
     public function table(): Table\Name|Table\Name\Aliased
     {
         return $this->table;
+    }
+
+    /**
+     * @return Maybe<array{
+     *      Column\Name|Column\Name\Namespaced|Column\Name\Aliased,
+     *      Column\Name|Column\Name\Namespaced|Column\Name\Aliased,
+     * }>
+     */
+    public function condition(): Maybe
+    {
+        return Maybe::of($this->on);
     }
 
     /**

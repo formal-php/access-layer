@@ -74,6 +74,7 @@ final class Connection
             Connection\Update::class,
             Connection\UpdateSpecificRow::class,
             Connection\Delete::class,
+            Connection\DeleteWithAlias::class,
             Connection\DeleteSpecificRow::class,
         ];
     }

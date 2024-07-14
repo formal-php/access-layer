@@ -395,13 +395,85 @@ $proofs = static function(Url $dsn, Driver $driver) {
             $assert->same(
                 match ($driver) {
                     Driver::mysql => 'CONSTRAINT `FK_foo` FOREIGN KEY (`parent`) REFERENCES `parent_table`(`id`)',
-                    Driver::sqlite => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
                     Driver::postgres => 'CONSTRAINT "FK_foo" FOREIGN KEY ("parent") REFERENCES "parent_table"("id")',
                 },
                 ForeignKey::of(Column\Name::of('parent'), $parent, Column\Name::of('id'))
                     ->named('foo')
                     ->sql($driver),
             );
+        },
+    );
+
+    yield test(
+        "Delete join({$driver->name})",
+        static function($assert) use ($connection) {
+            $parent = Table\Name::of('test_join_delete_parent')->as('parent');
+            $child = Table\Name::of('test_join_delete_child')->as('child');
+            $connection(CreateTable::ifNotExists(
+                $child->name(),
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+            )->primaryKey(Column\Name::of('id')));
+            $connection(
+                CreateTable::ifNotExists(
+                    $parent->name(),
+                    Column::of(
+                        Column\Name::of('id'),
+                        Column\Type::int(),
+                    ),
+                    Column::of(
+                        Column\Name::of('child'),
+                        Column\Type::int(),
+                    ),
+                )
+                    ->primaryKey(Column\Name::of('id'))
+                    ->foreignKey(
+                        Column\Name::of('child'),
+                        $child->name(),
+                        Column\Name::of('id'),
+                    ),
+            );
+            $connection(Delete::from($parent->name()));
+            $connection(Delete::from($child->name()));
+            $connection(Insert::into(
+                $child->name(),
+                Row::of([
+                    'id' => 2,
+                ]),
+            ));
+            $connection(Insert::into(
+                $parent->name(),
+                Row::of([
+                    'id' => 1,
+                    'child' => 2,
+                ]),
+            ));
+
+            $connection(
+                Delete::from($parent)
+                    ->join(
+                        Join::left($child)->on(
+                            Column\Name::of('child')->in($parent),
+                            Column\Name::of('id')->in($child),
+                        ),
+                    )
+                    ->where(Comparator\Property::of(
+                        'child.id',
+                        Sign::equality,
+                        2,
+                    )),
+            );
+
+            $rows = $connection(Select::from($child));
+            $assert->count(1, $rows);
+
+            $rows = $connection(Select::from($parent));
+            $assert->count(0, $rows);
+
+            $connection(DropTable::named($parent->name()));
+            $connection(DropTable::named($child->name()));
         },
     );
 
@@ -449,30 +521,13 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
-    $filter = match ($driver) {
-        Driver::sqlite => static fn($ensure) => \count(
-            \array_filter(
-                $ensure->properties(),
-                static fn($property) => $property instanceof Properties\MustThrowWhenValueDoesntFitTheSchema,
-            )
-        ) === 0,
-        default => static fn() => true,
-    };
-
     yield properties(
         "PDO properties({$driver->name})",
-        Properties::any()->filter($filter),
+        Properties::any(),
         $connections,
     );
 
     foreach (Properties::list() as $property) {
-        if (
-            $driver === Driver::sqlite &&
-            $property === Properties\MustThrowWhenValueDoesntFitTheSchema::class
-        ) {
-            continue;
-        }
-
         yield property(
             $property,
             $connections,
@@ -486,13 +541,6 @@ return static function() use ($proofs) {
     yield from $proofs(
         Url::of("mysql://root:root@127.0.0.1:$port/example"),
         Driver::mysql,
-    );
-
-    $tmp = \getcwd().'/tmp';
-
-    yield from $proofs(
-        Url::of("sqlite:$tmp/formal.sq3"),
-        Driver::sqlite,
     );
 
     $port = \getenv('POSTGRES_DB_PORT') ?: '5432';

@@ -255,7 +255,6 @@ final class Type
             $this->nullable ? '' : 'NOT NULL',
             $this->buildDefault(),
             match (true) {
-                $driver === Driver::sqlite => '',
                 $driver === Driver::postgres => '',
                 \is_null($this->comment) => '',
                 default => "COMMENT '{$this->escape($this->comment)}'",
