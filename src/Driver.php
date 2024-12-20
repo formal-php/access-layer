@@ -10,6 +10,7 @@ enum Driver
 {
     case mysql;
     case postgres;
+    case sqlite;
 
     /**
      * @param non-empty-string $name
@@ -21,6 +22,7 @@ enum Driver
         return match ($this) {
             self::mysql => "`$name`",
             self::postgres => "\"$name\"",
+            self::sqlite => "\"$name\"",
         };
     }
 }

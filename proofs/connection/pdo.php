@@ -549,4 +549,9 @@ return static function() use ($proofs) {
         Url::of("pgsql://root:root@127.0.0.1:$port/example"),
         Driver::postgres,
     );
+
+    yield from $proofs(
+        Url::of("sqlite://:memory:"),
+        Driver::sqlite,
+    );
 };
