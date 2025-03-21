@@ -198,7 +198,7 @@ final class Select implements Query
      * @param positive-int $limit
      * @param positive-int $offset
      */
-    public function limit(int $limit, int $offset = null): self
+    public function limit(int $limit, ?int $offset = null): self
     {
         return new self(
             $this->table,

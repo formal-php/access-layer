@@ -11,7 +11,7 @@ final class Name
     /**
      * @return Set<Model>
      */
-    public static function any(int $max = null): Set
+    public static function any(?int $max = null): Set
     {
         $max ??= 64;
 

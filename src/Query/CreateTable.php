@@ -103,7 +103,7 @@ final class CreateTable implements Query
 
     public function parameters(): Sequence
     {
-        /** @var Sequence<Query\Parameter> */
+        /** @var Sequence<Parameter> */
         return Sequence::of();
     }
 

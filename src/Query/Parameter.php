@@ -29,7 +29,7 @@ final class Parameter
     /**
      * @psalm-pure
      */
-    public static function of(mixed $value, Type $type = null): self
+    public static function of(mixed $value, ?Type $type = null): self
     {
         return new self(null, $value, $type);
     }
@@ -39,7 +39,7 @@ final class Parameter
      *
      * @param non-empty-string $name
      */
-    public static function named(string $name, mixed $value, Type $type = null): self
+    public static function named(string $name, mixed $value, ?Type $type = null): self
     {
         return new self($name, $value, $type);
     }
