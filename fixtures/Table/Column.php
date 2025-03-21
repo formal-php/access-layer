@@ -11,7 +11,7 @@ final class Column
     /**
      * @return Set<Model>
      */
-    public static function any(Set $type = null, int $max = null): Set
+    public static function any(?Set $type = null, ?int $max = null): Set
     {
         return Set\Randomize::of( // randomize to prevent same name used twice
             Set\Composite::immutable(
@@ -23,7 +23,7 @@ final class Column
     }
 
     /**
-     * @return Set<Model>
+     * @return Set<list<Model>>
      */
     public static function list(): Set
     {

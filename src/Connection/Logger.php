@@ -22,6 +22,7 @@ final class Logger implements Connection
         $this->logger = $logger;
     }
 
+    #[\Override]
     public function __invoke(Query $query): Sequence
     {
         // For the sake of simplicity the queries SQL is logged with the MySQL

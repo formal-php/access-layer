@@ -70,6 +70,7 @@ final class PDO implements Connection
         $this->pdo = new \PDO($pdoDsn, $user, $password, $options);
     }
 
+    #[\Override]
     public function __invoke(Query $query): Sequence
     {
         return match (\get_class($query)) {
