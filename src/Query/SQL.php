@@ -60,16 +60,19 @@ final class SQL implements Query
         );
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
         return $this->parameters;
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         return $this->sql;
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return $this->lazy;
