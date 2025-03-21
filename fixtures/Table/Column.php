@@ -23,7 +23,7 @@ final class Column
     }
 
     /**
-     * @return Set<Model>
+     * @return Set<list<Model>>
      */
     public static function list(): Set
     {

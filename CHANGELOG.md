@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- Support for `innmind/black-box` `6`
+
 ### Fixed
 
 - Support for PHP `8.4`
