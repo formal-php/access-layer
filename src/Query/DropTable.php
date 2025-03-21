@@ -40,12 +40,14 @@ final class DropTable implements Query
         return new self(true, $name);
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
         /** @var Sequence<Parameter> */
         return Sequence::of();
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
@@ -56,6 +58,7 @@ final class DropTable implements Query
         );
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return false;

@@ -23,6 +23,7 @@ final class Lazy implements Connection
         $this->load = $load;
     }
 
+    #[\Override]
     public function __invoke(Query $query): Sequence
     {
         return ($this->connection())($query);

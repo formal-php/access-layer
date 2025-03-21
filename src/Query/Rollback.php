@@ -14,17 +14,20 @@ use Innmind\Immutable\Sequence;
  */
 final class Rollback implements Query
 {
+    #[\Override]
     public function parameters(): Sequence
     {
         /** @var Sequence<Parameter> */
         return Sequence::of();
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         return 'ROLLBACK';
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return false;

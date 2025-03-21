@@ -213,11 +213,13 @@ final class Select implements Query
         );
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
         return $this->where->parameters();
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
@@ -257,6 +259,7 @@ final class Select implements Query
         );
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return $this->lazy;
