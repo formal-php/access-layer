@@ -198,7 +198,7 @@ final class Select implements Query
      * @param positive-int $limit
      * @param positive-int $offset
      */
-    public function limit(int $limit, int $offset = null): self
+    public function limit(int $limit, ?int $offset = null): self
     {
         return new self(
             $this->table,
@@ -213,11 +213,13 @@ final class Select implements Query
         );
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
         return $this->where->parameters();
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
@@ -257,6 +259,7 @@ final class Select implements Query
         );
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return $this->lazy;

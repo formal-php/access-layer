@@ -6,6 +6,16 @@
 
 - `Formal\AccessLayer\Query\Update::join()`
 
+## 4.1.0 - 2025-03-21
+
+### Added
+
+- Support for `innmind/black-box` `6`
+
+### Fixed
+
+- Support for PHP `8.4`
+
 ## 4.0.0 - 2024-07-14
 
 ### Added

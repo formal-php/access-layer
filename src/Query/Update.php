@@ -71,6 +71,7 @@ final class Update implements Query
         );
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
         return $this
@@ -80,6 +81,7 @@ final class Update implements Query
             ->append($this->where->parameters());
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         /** @var Sequence<string> */
@@ -146,6 +148,7 @@ final class Update implements Query
         );
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return false;

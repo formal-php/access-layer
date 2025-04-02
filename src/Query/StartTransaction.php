@@ -14,17 +14,20 @@ use Innmind\Immutable\Sequence;
  */
 final class StartTransaction implements Query
 {
+    #[\Override]
     public function parameters(): Sequence
     {
         /** @var Sequence<Parameter> */
         return Sequence::of();
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         return 'START TRANSACTION';
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return false;

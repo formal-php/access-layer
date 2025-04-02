@@ -101,12 +101,14 @@ final class CreateTable implements Query
         );
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
-        /** @var Sequence<Query\Parameter> */
+        /** @var Sequence<Parameter> */
         return Sequence::of();
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
@@ -130,6 +132,7 @@ final class CreateTable implements Query
         );
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return false;

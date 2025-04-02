@@ -19,9 +19,9 @@ use Innmind\BlackBox\{
 final class Connection
 {
     /**
-     * @return Set<Properties>
+     * @return Set<Properties>|Set\Provider<Properties>
      */
-    public static function any(): Set
+    public static function any(): Set|Set\Provider
     {
         return Set\Properties::any(...\array_map(
             static fn($class) => [$class, 'any'](),
