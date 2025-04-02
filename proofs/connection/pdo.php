@@ -509,7 +509,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                 ]),
             ));
 
-            $assert->throws(fn() => $connection(Insert::into(
+            $assert->throws(static fn() => $connection(Insert::into(
                 $table,
                 Row::of([
                     'id' => $int,

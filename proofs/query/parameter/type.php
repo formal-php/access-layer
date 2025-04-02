@@ -55,8 +55,9 @@ return static function() {
         'Type::for() unsupported data',
         given(
             Set\Elements::of(
-                new \stdClass,
-                new class {},
+                new stdClass,
+                new class {
+                },
                 static fn() => null,
                 \tmpfile(),
             ),
