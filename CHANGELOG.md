@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Formal\AccessLayer\Query\Update::join()`
+
 ## 4.1.0 - 2025-03-21
 
 ### Added

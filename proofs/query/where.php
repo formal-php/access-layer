@@ -339,7 +339,7 @@ return static function() {
             Set\Strings::any(),
             Set\Strings::any(),
         ),
-        static function($assert, $column, $leftValue, $rightValue){
+        static function($assert, $column, $leftValue, $rightValue) {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::equality,
