@@ -13,6 +13,7 @@ use Formal\AccessLayer\{
     Query\Select,
     Query\Select\Join,
     Query\DropTable,
+    Query\Update,
     Row,
     Table,
     Table\Column,
@@ -471,6 +472,83 @@ $proofs = static function(Url $dsn, Driver $driver) {
 
             $rows = $connection(Select::from($parent));
             $assert->count(0, $rows);
+
+            $connection(DropTable::named($parent->name()));
+            $connection(DropTable::named($child->name()));
+        },
+    );
+
+    yield test(
+        "Update join({$driver->name})",
+        static function($assert) use ($connection) {
+            $parent = Table\Name::of('test_join_update_parent')->as('parent');
+            $child = Table\Name::of('test_join_update_child')->as('child');
+            $connection(CreateTable::ifNotExists(
+                $child->name(),
+                Column::of(
+                    Column\Name::of('id'),
+                    Column\Type::int(),
+                ),
+                Column::of(
+                    Column\Name::of('name'),
+                    Column\Type::varchar(),
+                ),
+            )->primaryKey(Column\Name::of('id')));
+            $connection(
+                CreateTable::ifNotExists(
+                    $parent->name(),
+                    Column::of(
+                        Column\Name::of('id'),
+                        Column\Type::int(),
+                    ),
+                    Column::of(
+                        Column\Name::of('child'),
+                        Column\Type::int(),
+                    ),
+                )
+                    ->primaryKey(Column\Name::of('id'))
+                    ->foreignKey(
+                        Column\Name::of('child'),
+                        $child->name(),
+                        Column\Name::of('id'),
+                    ),
+            );
+            $connection(Insert::into(
+                $child->name(),
+                Row::of([
+                    'id' => 1,
+                    'name' => 'a',
+                ]),
+            ));
+            $connection(Insert::into(
+                $parent->name(),
+                Row::of([
+                    'id' => 1,
+                    'child' => 1,
+                ]),
+            ));
+
+            $connection(
+                Update::set(
+                    $child,
+                    Row::new(Row\Value::of(
+                        Column\Name::of('name'),
+                        'b',
+                    )),
+                )->join(
+                    Join::left($parent)->on(
+                        Column\Name::of('child')->in($parent),
+                        Column\Name::of('id')->in($child),
+                    ),
+                ),
+            );
+
+            $rows = $connection(Select::from($child))
+                ->map(static fn($row) => $row->toArray())
+                ->toList();
+            $assert
+                ->expected([['id' => 1, 'name' => 'b']])
+                ->same($rows);
 
             $connection(DropTable::named($parent->name()));
             $connection(DropTable::named($child->name()));
