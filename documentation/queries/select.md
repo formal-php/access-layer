@@ -93,3 +93,8 @@ $select = Select::from(Name::of('users'))->columns(
 This will return as many rows as you have users and with a `0` in the `score` column.
 
 You could use this query to populate a new table `users_score`.
+
+??? warning
+    PostgreSQL is more strict than MySQL when specifying inline strings. It will fail when it deems strings to not be valid utf8 strings.
+
+    Initially this feature was tested against any [unicode string](https://innmind.org/BlackBox/sets/#__tabbed_2_3) but PostgreSQL would regularly fail on some of them. It may only be some character blocks that cause problems. But for the time being it's now only tested on alphanumerical characters.

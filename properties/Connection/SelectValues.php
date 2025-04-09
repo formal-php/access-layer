@@ -46,7 +46,7 @@ final class SelectValues implements Property
             FName::any(),
             Set\Either::any(
                 Set\Integers::any(),
-                Set\Strings::madeOf(Set\Unicode::any()),
+                Set\Strings::madeOf(Set\Chars::alphanumerical()),
                 Set\Elements::of(null, true, false),
             ),
         );
