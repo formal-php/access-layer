@@ -9,6 +9,7 @@ use Formal\AccessLayer\{
     Query\Select\Join,
     Table\Name,
     Table\Column,
+    Row,
     Driver,
 };
 use Innmind\Specification\Specification;
@@ -17,6 +18,7 @@ use Innmind\Immutable\{
     Str,
     Monoid\Concat,
     Maybe,
+    Predicate\Instance,
 };
 
 /**
@@ -24,50 +26,25 @@ use Innmind\Immutable\{
  */
 final class Select implements Query
 {
-    private Name|Name\Aliased $table;
-    private bool $lazy;
-    /** @var Sequence<Join> */
-    private Sequence $joins;
-    /** @var Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> */
-    private Sequence $columns;
-    /** @var Maybe<non-empty-string> */
-    private Maybe $count;
-    private Where $where;
-    /** @var ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} */
-    private ?array $orderBy;
-    /** @var ?positive-int */
-    private ?int $limit;
-    /** @var ?positive-int */
-    private ?int $offset;
-
     /**
      * @param Sequence<Join> $joins
-     * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> $columns
+     * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased|Row\Value> $columns
      * @param Maybe<non-empty-string> $count
      * @param ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} $orderBy
      * @param ?positive-int $limit
      * @param ?positive-int $offset
      */
     private function __construct(
-        Name|Name\Aliased $table,
-        bool $lazy,
-        Sequence $joins,
-        Sequence $columns,
-        Maybe $count,
-        Where $where,
-        ?array $orderBy = null,
-        ?int $limit = null,
-        ?int $offset = null,
+        private Name|Name\Aliased $table,
+        private bool $lazy,
+        private Sequence $joins,
+        private Sequence $columns,
+        private Maybe $count,
+        private Where $where,
+        private ?array $orderBy,
+        private ?int $limit,
+        private ?int $offset,
     ) {
-        $this->table = $table;
-        $this->lazy = $lazy;
-        $this->joins = $joins;
-        $this->columns = $columns;
-        $this->count = $count;
-        $this->where = $where;
-        $this->orderBy = $orderBy;
-        $this->limit = $limit;
-        $this->offset = $offset;
     }
 
     /**
@@ -85,6 +62,9 @@ final class Select implements Query
             Sequence::of(),
             $count,
             Where::everything(),
+            null,
+            null,
+            null,
         );
     }
 
@@ -103,6 +83,9 @@ final class Select implements Query
             Sequence::of(),
             $count,
             Where::everything(),
+            null,
+            null,
+            null,
         );
     }
 
@@ -125,8 +108,8 @@ final class Select implements Query
      * @no-named-arguments
      */
     public function columns(
-        Column\Name|Column\Name\Namespaced|Column\Name\Aliased $first,
-        Column\Name|Column\Name\Namespaced|Column\Name\Aliased ...$rest,
+        Column\Name|Column\Name\Namespaced|Column\Name\Aliased|Row\Value $first,
+        Column\Name|Column\Name\Namespaced|Column\Name\Aliased|Row\Value ...$rest,
     ): self {
         /** @var Maybe<non-empty-string> */
         $count = Maybe::nothing();
@@ -198,7 +181,7 @@ final class Select implements Query
      * @param positive-int $limit
      * @param positive-int $offset
      */
-    public function limit(int $limit, int $offset = null): self
+    public function limit(int $limit, ?int $offset = null): self
     {
         return new self(
             $this->table,
@@ -213,11 +196,20 @@ final class Select implements Query
         );
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
-        return $this->where->parameters();
+        return $this
+            ->columns
+            ->keep(Instance::of(Row\Value::class))
+            ->map(static fn($value) => Parameter::of(
+                $value->value(),
+                $value->type(),
+            ))
+            ->append($this->where->parameters());
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         /** @var non-empty-string */
@@ -257,16 +249,41 @@ final class Select implements Query
         );
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return $this->lazy;
     }
 
+    /**
+     * @internal
+     *
+     * @return Sequence<Column\Name>
+     */
+    public function names(): Sequence
+    {
+        return $this->count->match(
+            static fn($alias) => Sequence::of(Column\Name::of($alias)),
+            fn() => $this->columns->map(static fn($column) => match (true) {
+                $column instanceof Row\Value => $column->column(),
+                $column instanceof Column\Name\Aliased => Column\Name::of(
+                    $column->alias(),
+                ),
+                $column instanceof Column\Name\Namespaced => $column->column(),
+                default => $column,
+            }),
+        );
+    }
+
     private function buildColumns(Driver $driver): string
     {
-        $columns = $this->columns->map(
-            static fn($column) => $column->sql($driver),
-        );
+        $columns = $this->columns->map(static fn($column) => match (true) {
+            $column instanceof Row\Value => \sprintf(
+                '? as %s',
+                $column->column()->sql($driver),
+            ),
+            default => $column->sql($driver),
+        });
 
         /** @psalm-suppress InvalidArgument Because non-empty-string instead of string */
         return Str::of(', ')->join($columns)->toString();

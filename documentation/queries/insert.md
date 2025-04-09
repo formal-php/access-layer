@@ -81,3 +81,27 @@ $connection($insert(Sequence::of(
 ```
 !!! warning ""
     Each `Row` must specify the same amount of columns and in the same order, otherwise it will fail.
+
+## Select insert
+
+`Insert` allows you to insert multiple values at once coming from another table via a `Select` query.
+
+```php
+use Formal\AccessLayer\{
+    Query\Insert,
+    Query\Select,
+    Table\Name,
+    Table\Column,
+};
+$insert = Insert::into(
+    Name::of('users'),
+    Select::from('leads')->columns(
+        Column\Name::of('username'),
+        Column\Name::of('name'),
+    ),
+);
+
+$connection($insert);
+```
+
+This example copies all `leads` as new `users`.

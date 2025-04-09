@@ -19,9 +19,9 @@ use Innmind\BlackBox\{
 final class Connection
 {
     /**
-     * @return Set<Properties>
+     * @return Set<Properties>|Set\Provider<Properties>
      */
-    public static function any(): Set
+    public static function any(): Set|Set\Provider
     {
         return Set\Properties::any(...\array_map(
             static fn($class) => [$class, 'any'](),
@@ -42,6 +42,7 @@ final class Connection
             Connection\AQueryWithoutTheCorrectNumberOfParametersMustThrow::class,
             Connection\MustThrowWhenValueDoesntFitTheSchema::class,
             Connection\Insert::class,
+            Connection\InsertSelect::class,
             Connection\MultipleInsertsAtOnce::class,
             Connection\ParametersCanBeBoundByName::class,
             Connection\ParametersCanBeBoundByIndex::class,
@@ -71,6 +72,7 @@ final class Connection
             Connection\SelectOffset::class,
             Connection\SelectLimit::class,
             Connection\SelectOrder::class,
+            Connection\SelectValues::class,
             Connection\Update::class,
             Connection\UpdateSpecificRow::class,
             Connection\Delete::class,

@@ -65,11 +65,13 @@ final class Delete implements Query
         );
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
         return $this->where->parameters();
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         return match ($driver) {
@@ -78,6 +80,7 @@ final class Delete implements Query
         };
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return false;

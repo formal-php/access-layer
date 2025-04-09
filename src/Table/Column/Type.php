@@ -53,7 +53,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function bigint(int $size = null): self
+    public static function bigint(?int $size = null): self
     {
         return new self('bigint', \is_int($size) ? "($size)" : '');
     }
@@ -61,7 +61,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function binary(int $size = null): self
+    public static function binary(?int $size = null): self
     {
         return new self('binary', \is_int($size) ? "($size)" : '');
     }
@@ -69,7 +69,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function bit(int $size = null): self
+    public static function bit(?int $size = null): self
     {
         return new self('bit', \is_int($size) ? "($size)" : '');
     }
@@ -85,7 +85,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function char(int $size = null): self
+    public static function char(?int $size = null): self
     {
         return new self('char', \is_int($size) ? "($size)" : '');
     }
@@ -109,7 +109,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function decimal(int $precision = null, int $scale = null): self
+    public static function decimal(?int $precision = null, ?int $scale = null): self
     {
         if (\is_int($precision) && \is_int($scale)) {
             return new self('decimal', "($precision, $scale)");
@@ -141,7 +141,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function int(int $size = null): self
+    public static function int(?int $size = null): self
     {
         return new self('int', \is_int($size) ? "($size)" : '');
     }
@@ -165,7 +165,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function mediumint(int $size = null): self
+    public static function mediumint(?int $size = null): self
     {
         return new self('mediumint', \is_int($size) ? "($size)" : '');
     }
@@ -181,7 +181,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function smallint(int $size = null): self
+    public static function smallint(?int $size = null): self
     {
         return new self('smallint', \is_int($size) ? "($size)" : '');
     }
@@ -197,7 +197,7 @@ final class Type
     /**
      * @psalm-pure
      */
-    public static function tinyint(int $size = null): self
+    public static function tinyint(?int $size = null): self
     {
         return new self('tinyint', \is_int($size) ? "($size)" : '');
     }

@@ -34,12 +34,12 @@
         }
     },
     "require-dev": {
-        "vimeo/psalm": "~5.13",
-        "innmind/black-box": "^5.6.1",
+        "innmind/static-analysis": "^1.2.1",
+        "innmind/black-box": "^5.8|^6.0.2",
         "innmind/coding-standard": "~2.0"
     },
     "conflict": {
-        "innmind/black-box": "<5.0|~6.0"
+        "innmind/black-box": "<5.0|~7.0"
     },
     "suggest": {
         "innmind/black-box": "For property based testing"

@@ -175,7 +175,7 @@ final class Type
     /**
      * @return Set<Model>
      */
-    private static function nullable(Set $set = null): Set
+    private static function nullable(?Set $set = null): Set
     {
         return Set\Decorate::immutable(
             static fn(Model $type): Model => $type->nullable(),

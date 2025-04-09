@@ -18,7 +18,7 @@ final class Value
     private mixed $value;
     private Type $type;
 
-    private function __construct(Name|Name\Namespaced $column, mixed $value, Type $type = null)
+    private function __construct(Name|Name\Namespaced $column, mixed $value, ?Type $type = null)
     {
         $this->column = $column;
         $this->value = $value;
@@ -31,7 +31,7 @@ final class Value
     public static function of(
         Name|Name\Namespaced $column,
         mixed $value,
-        Type $type = null,
+        ?Type $type = null,
     ): self {
         return new self($column, $value, $type);
     }

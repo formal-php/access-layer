@@ -61,6 +61,7 @@ final class MultipleInsert implements Query
         );
     }
 
+    #[\Override]
     public function parameters(): Sequence
     {
         return $this->rows->flatMap(static fn($row) => $row->values()->map(
@@ -68,11 +69,13 @@ final class MultipleInsert implements Query
         ));
     }
 
+    #[\Override]
     public function sql(Driver $driver): string
     {
         return $this->buildInsert($driver);
     }
 
+    #[\Override]
     public function lazy(): bool
     {
         return false;
