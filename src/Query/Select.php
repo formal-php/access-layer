@@ -24,22 +24,6 @@ use Innmind\Immutable\{
  */
 final class Select implements Query
 {
-    private Name|Name\Aliased $table;
-    private bool $lazy;
-    /** @var Sequence<Join> */
-    private Sequence $joins;
-    /** @var Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> */
-    private Sequence $columns;
-    /** @var Maybe<non-empty-string> */
-    private Maybe $count;
-    private Where $where;
-    /** @var ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} */
-    private ?array $orderBy;
-    /** @var ?positive-int */
-    private ?int $limit;
-    /** @var ?positive-int */
-    private ?int $offset;
-
     /**
      * @param Sequence<Join> $joins
      * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> $columns
@@ -49,25 +33,16 @@ final class Select implements Query
      * @param ?positive-int $offset
      */
     private function __construct(
-        Name|Name\Aliased $table,
-        bool $lazy,
-        Sequence $joins,
-        Sequence $columns,
-        Maybe $count,
-        Where $where,
-        ?array $orderBy = null,
-        ?int $limit = null,
-        ?int $offset = null,
+        private Name|Name\Aliased $table,
+        private bool $lazy,
+        private Sequence $joins,
+        private Sequence $columns,
+        private Maybe $count,
+        private Where $where,
+        private ?array $orderBy,
+        private ?int $limit,
+        private ?int $offset,
     ) {
-        $this->table = $table;
-        $this->lazy = $lazy;
-        $this->joins = $joins;
-        $this->columns = $columns;
-        $this->count = $count;
-        $this->where = $where;
-        $this->orderBy = $orderBy;
-        $this->limit = $limit;
-        $this->offset = $offset;
     }
 
     /**
@@ -85,6 +60,9 @@ final class Select implements Query
             Sequence::of(),
             $count,
             Where::everything(),
+            null,
+            null,
+            null,
         );
     }
 
@@ -103,6 +81,9 @@ final class Select implements Query
             Sequence::of(),
             $count,
             Where::everything(),
+            null,
+            null,
+            null,
         );
     }
 
