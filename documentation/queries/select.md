@@ -68,3 +68,28 @@ $users = $connection($select);
     The property name can include the name of the table to match by using the format `'{table}.{column}'`.
 
     The value of the specification can also be a query (this will translated to a sub query).
+
+## Select inline values
+
+On top of specifying the columns to fetch from the table you can specify values as virtual columns. This is very useful when using a `Select` to [insert multiple values at once](insert.md#select-insert).
+
+```php
+use Formal\AccesLayer\{
+    Query\Select,
+    Table\Name,
+    Table\Column,
+    Row,
+};
+
+$select = Select::from(Name::of('users'))->columns(
+    Column\Name::of('id'),
+    Row\Value::of(
+        Column\Name::of('score'),
+        0,
+    ),
+);
+```
+
+This will return as many rows as you have users and with a `0` in the `score` column.
+
+You could use this query to populate a new table `users_score`.
