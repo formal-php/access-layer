@@ -42,6 +42,7 @@ final class Connection
             Connection\AQueryWithoutTheCorrectNumberOfParametersMustThrow::class,
             Connection\MustThrowWhenValueDoesntFitTheSchema::class,
             Connection\Insert::class,
+            Connection\InsertSelect::class,
             Connection\MultipleInsertsAtOnce::class,
             Connection\ParametersCanBeBoundByName::class,
             Connection\ParametersCanBeBoundByIndex::class,

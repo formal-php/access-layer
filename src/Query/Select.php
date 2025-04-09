@@ -255,6 +255,26 @@ final class Select implements Query
         return $this->lazy;
     }
 
+    /**
+     * @internal
+     *
+     * @return Sequence<Column\Name>
+     */
+    public function names(): Sequence
+    {
+        return $this->count->match(
+            static fn($alias) => Sequence::of(Column\Name::of($alias)),
+            fn() => $this->columns->map(static fn($column) => match (true) {
+                $column instanceof Row\Value => $column->column(),
+                $column instanceof Column\Name\Aliased => Column\Name::of(
+                    $column->alias(),
+                ),
+                $column instanceof Column\Name\Namespaced => $column->column(),
+                default => $column,
+            }),
+        );
+    }
+
     private function buildColumns(Driver $driver): string
     {
         $columns = $this->columns->map(static fn($column) => match (true) {
