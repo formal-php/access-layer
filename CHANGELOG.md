@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## 4.2.0 - 2025-04-09
 
 ### Added
 
