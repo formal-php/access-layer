@@ -9,6 +9,7 @@ use Formal\AccessLayer\{
     Query\Select\Join,
     Table\Name,
     Table\Column,
+    Row,
     Driver,
 };
 use Innmind\Specification\Specification;
@@ -17,6 +18,7 @@ use Innmind\Immutable\{
     Str,
     Monoid\Concat,
     Maybe,
+    Predicate\Instance,
 };
 
 /**
@@ -26,7 +28,7 @@ final class Select implements Query
 {
     /**
      * @param Sequence<Join> $joins
-     * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased> $columns
+     * @param Sequence<Column\Name|Column\Name\Namespaced|Column\Name\Aliased|Row\Value> $columns
      * @param Maybe<non-empty-string> $count
      * @param ?array{Column\Name|Column\Name\Namespaced|Column\Name\Aliased, Direction} $orderBy
      * @param ?positive-int $limit
@@ -106,8 +108,8 @@ final class Select implements Query
      * @no-named-arguments
      */
     public function columns(
-        Column\Name|Column\Name\Namespaced|Column\Name\Aliased $first,
-        Column\Name|Column\Name\Namespaced|Column\Name\Aliased ...$rest,
+        Column\Name|Column\Name\Namespaced|Column\Name\Aliased|Row\Value $first,
+        Column\Name|Column\Name\Namespaced|Column\Name\Aliased|Row\Value ...$rest,
     ): self {
         /** @var Maybe<non-empty-string> */
         $count = Maybe::nothing();
@@ -197,7 +199,14 @@ final class Select implements Query
     #[\Override]
     public function parameters(): Sequence
     {
-        return $this->where->parameters();
+        return $this
+            ->columns
+            ->keep(Instance::of(Row\Value::class))
+            ->map(static fn($value) => Parameter::of(
+                $value->value(),
+                $value->type(),
+            ))
+            ->append($this->where->parameters());
     }
 
     #[\Override]
@@ -248,9 +257,13 @@ final class Select implements Query
 
     private function buildColumns(Driver $driver): string
     {
-        $columns = $this->columns->map(
-            static fn($column) => $column->sql($driver),
-        );
+        $columns = $this->columns->map(static fn($column) => match (true) {
+            $column instanceof Row\Value => \sprintf(
+                '? as %s',
+                $column->column()->sql($driver),
+            ),
+            default => $column->sql($driver),
+        });
 
         /** @psalm-suppress InvalidArgument Because non-empty-string instead of string */
         return Str::of(', ')->join($columns)->toString();

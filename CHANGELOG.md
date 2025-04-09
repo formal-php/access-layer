@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Formal\Access\Layer\Query\Select::columns()` now accepts row values
+
 ## 4.1.0 - 2025-03-21
 
 ### Added
