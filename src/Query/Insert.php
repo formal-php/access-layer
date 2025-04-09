@@ -19,13 +19,10 @@ use Innmind\Immutable\{
  */
 final class Insert implements Query
 {
-    private Name $table;
-    private Row $row;
-
-    private function __construct(Name $table, Row $row)
-    {
-        $this->table = $table;
-        $this->row = $row;
+    private function __construct(
+        private Name $table,
+        private Row $row,
+    ) {
     }
 
     /**
