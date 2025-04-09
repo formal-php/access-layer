@@ -1,5 +1,12 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- `Formal\Access\Layer\Query\Select::columns()` now accepts row values
+- `Formal\Access\Layer\Query\Insert::into()` now accepts a `Select` query to specify the rows to insert
+
 ## 4.1.0 - 2025-03-21
 
 ### Added

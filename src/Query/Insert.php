@@ -19,19 +19,16 @@ use Innmind\Immutable\{
  */
 final class Insert implements Query
 {
-    private Name $table;
-    private Row $row;
-
-    private function __construct(Name $table, Row $row)
-    {
-        $this->table = $table;
-        $this->row = $row;
+    private function __construct(
+        private Name $table,
+        private Row|Select $row,
+    ) {
     }
 
     /**
      * @psalm-pure
      */
-    public static function into(Name $table, Row $row): self
+    public static function into(Name $table, Row|Select $row): self
     {
         return new self($table, $row);
     }
@@ -39,6 +36,10 @@ final class Insert implements Query
     #[\Override]
     public function parameters(): Sequence
     {
+        if ($this->row instanceof Select) {
+            return $this->row->parameters();
+        }
+
         return $this->row->values()->map(
             static fn($value) => Parameter::of($value->value(), $value->type()),
         );
@@ -61,6 +62,23 @@ final class Insert implements Query
      */
     private function buildInsert(Driver $driver): string
     {
+        if ($this->row instanceof Select) {
+            $columns = $this->row->names();
+
+            if ($columns->empty()) {
+                throw new \LogicException('You need to specify the columns to select when inserting');
+            }
+
+            $keys = $columns->map(static fn($column) => $column->sql($driver));
+
+            return \sprintf(
+                'INSERT INTO %s (%s) %s',
+                $this->table->sql($driver),
+                Str::of(', ')->join($keys)->toString(),
+                $this->row->sql($driver),
+            );
+        }
+
         /** @var Sequence<string> */
         $keys = $this->row->values()->map(static fn($value) => $value->columnSql($driver));
         /** @var Sequence<string> */
