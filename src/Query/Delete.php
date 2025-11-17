@@ -68,19 +68,21 @@ final class Delete implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
+        [$where, $parameters] = $this->where->normalize($driver);
+
         return Query::of(
             match ($driver) {
-                Driver::mysql => $this->mysqlSql($driver),
-                Driver::postgres => $this->postgresSql($driver),
+                Driver::mysql => $this->mysqlSql($driver, $where),
+                Driver::postgres => $this->postgresSql($driver, $where),
             },
-            $this->where->parameters($driver),
+            $parameters,
         );
     }
 
     /**
      * @return non-empty-string
      */
-    private function mysqlSql(Driver $driver): string
+    private function mysqlSql(Driver $driver, string $where): string
     {
         /** @var non-empty-string */
         return \sprintf(
@@ -96,17 +98,16 @@ final class Delete implements Builder
                 ->map(Str::of(...))
                 ->fold(new Concat)
                 ->toString(),
-            $this->where->sql($driver),
+            $where,
         );
     }
 
     /**
      * @return non-empty-string
      */
-    private function postgresSql(Driver $driver): string
+    private function postgresSql(Driver $driver, string $where): string
     {
         $joins = '';
-        $where = $this->where->sql($driver);
 
         if (!$this->joins->empty()) {
             $joins = Str::of(', ')

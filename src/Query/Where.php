@@ -53,34 +53,26 @@ final class Where
     }
 
     /**
-     * @return Sequence<Parameter>
+     * @return array{string, Sequence<Parameter>}
      */
-    public function parameters(Driver $driver): Sequence
-    {
-        /** @var Sequence<Parameter> */
-        $parameters = Sequence::of();
-
-        if (\is_null($this->specification)) {
-            return $parameters;
-        }
-
-        return $this->findParamaters(
-            $driver,
-            $parameters,
-            $this->specification,
-        );
-    }
-
-    public function sql(Driver $driver): string
+    public function normalize(Driver $driver): array
     {
         if (\is_null($this->specification)) {
-            return '';
+            return ['', Sequence::of()];
         }
 
-        return \sprintf(
-            'WHERE %s',
-            $this->buildSql($driver, $this->specification),
-        );
+        // todo optimize this process to avoid traversing everything twice
+        return [
+            \sprintf(
+                'WHERE %s',
+                $this->buildSql($driver, $this->specification),
+            ),
+            $this->findParamaters(
+                $driver,
+                Sequence::of(),
+                $this->specification,
+            ),
+        ];
     }
 
     private function buildSql(

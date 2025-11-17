@@ -208,6 +208,7 @@ final class Select implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
+        [$where, $parameters] = $this->where->normalize($driver);
         /** @var non-empty-string */
         $sql = \sprintf(
             'SELECT %s FROM %s%s %s%s%s%s',
@@ -225,7 +226,7 @@ final class Select implements Builder
                 ->map(Str::of(...))
                 ->fold(new Concat)
                 ->toString(),
-            $this->where->sql($driver),
+            $where,
             match ($this->orderBy) {
                 null => '',
                 default => \sprintf(
@@ -250,7 +251,7 @@ final class Select implements Builder
                 $value->value(),
                 $value->type(),
             ))
-            ->append($this->where->parameters($driver));
+            ->append($parameters);
 
         return match ($this->lazy) {
             true => Query::lazily($sql, $parameters),

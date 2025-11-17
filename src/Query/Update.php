@@ -54,6 +54,7 @@ final class Update implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
+        [$where, $parameters] = $this->where->normalize($driver);
         /** @var Sequence<string> */
         $columns = $this
             ->row
@@ -63,14 +64,14 @@ final class Update implements Builder
             ->row
             ->values()
             ->map(static fn($value) => Parameter::of($value->value(), $value->type()))
-            ->append($this->where->parameters($driver));
+            ->append($parameters);
 
         return Query::of(
             \sprintf(
                 'UPDATE %s SET %s %s',
                 $this->table->sql($driver),
                 Str::of(', ')->join($columns)->toString(),
-                $this->where->sql($driver),
+                $where,
             ),
             $parameters,
         );

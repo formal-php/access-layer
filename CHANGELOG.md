@@ -21,6 +21,7 @@
 ### Removed
 
 - `Formal\AccessLayer\Connection\PDO::persistent()`
+- `Formal\AccessLayer\Query\Where::sql()` and `::parameters()`, use `::normalize()` instead
 
 ## 4.2.0 - 2025-04-09
 
