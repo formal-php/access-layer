@@ -250,7 +250,7 @@ final class Select implements Builder
                 $value->value(),
                 $value->type(),
             ))
-            ->append($this->where->parameters());
+            ->append($this->where->parameters($driver));
 
         return match ($this->lazy) {
             true => Query::lazily($sql, $parameters),

@@ -172,7 +172,7 @@ final class PDO implements Implementation
     {
         $statement = $this->guard(
             $query,
-            fn() => $this->pdo->prepare($query->sql($this->driver)),
+            fn() => $this->pdo->prepare($query->sql()),
         );
 
         $_ = $query->parameters()->reduce(
@@ -226,7 +226,6 @@ final class PDO implements Implementation
         }
 
         throw new QueryFailed(
-            $this->driver,
             $query,
             $errorInfo[0],
             $errorInfo[1],
@@ -256,7 +255,6 @@ final class PDO implements Implementation
         }
 
         throw new QueryFailed(
-            $this->driver,
             $query,
             $errorInfo[0],
             $errorInfo[1],

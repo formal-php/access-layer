@@ -51,7 +51,7 @@ final class Insert implements Builder
                     'INSERT INTO %s (%s) %s',
                     $this->table->sql($driver),
                     Str::of(', ')->join($keys)->toString(),
-                    $query->sql($driver),
+                    $query->sql(),
                 ),
                 $query->parameters(),
             );

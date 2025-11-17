@@ -63,7 +63,7 @@ final class Update implements Builder
             ->row
             ->values()
             ->map(static fn($value) => Parameter::of($value->value(), $value->type()))
-            ->append($this->where->parameters());
+            ->append($this->where->parameters($driver));
 
         return Query::of(
             \sprintf(

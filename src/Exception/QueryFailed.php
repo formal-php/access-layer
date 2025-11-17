@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Exception;
 
-use Formal\AccessLayer\{
-    Query,
-    Driver,
-};
+use Formal\AccessLayer\Query;
 
 final class QueryFailed extends RuntimeException
 {
@@ -16,7 +13,6 @@ final class QueryFailed extends RuntimeException
     private ?string $driverSpecificMessage;
 
     public function __construct(
-        Driver $driver,
         Query $query,
         string $sqlstate,
         ?int $code,
@@ -29,7 +25,7 @@ final class QueryFailed extends RuntimeException
         $this->driverSpecificMessage = $message;
         parent::__construct(\sprintf(
             "Query '%s' failed with: [%s] [%s] %s",
-            $query->sql($driver),
+            $query->sql(),
             $sqlstate,
             (string) $code,
             (string) $message,

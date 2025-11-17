@@ -55,7 +55,7 @@ final class Where
     /**
      * @return Sequence<Parameter>
      */
-    public function parameters(): Sequence
+    public function parameters(Driver $driver): Sequence
     {
         /** @var Sequence<Parameter> */
         $parameters = Sequence::of();
@@ -65,6 +65,7 @@ final class Where
         }
 
         return $this->findParamaters(
+            $driver,
             $parameters,
             $this->specification,
         );
@@ -203,7 +204,15 @@ final class Where
             return \sprintf(
                 '%s IN (%s)',
                 $this->buildColumn($driver, $specification),
-                $specification->value()->sql($driver),
+                $specification->value()->sql(),
+            );
+        }
+
+        if ($specification->value() instanceof Builder) {
+            return \sprintf(
+                '%s IN (%s)',
+                $this->buildColumn($driver, $specification),
+                $specification->value()->normalize($driver)->sql(),
             );
         }
 
@@ -227,6 +236,7 @@ final class Where
      * @return Sequence<Parameter>
      */
     private function findParamaters(
+        Driver $driver,
         Sequence $parameters,
         Specification $specification,
     ): Sequence {
@@ -241,6 +251,7 @@ final class Where
             $specification->left()->value() === $specification->right()->value()
         ) {
             return $this->findComparatorParameters(
+                $driver,
                 $parameters,
                 $specification->left(),
             );
@@ -257,6 +268,7 @@ final class Where
             $specification->left()->value() === $specification->right()->value()
         ) {
             return $this->findComparatorParameters(
+                $driver,
                 $parameters,
                 $specification->left(),
             );
@@ -264,17 +276,21 @@ final class Where
 
         return match (true) {
             $specification instanceof Not => $this->findParamaters(
+                $driver,
                 $parameters,
                 $specification->specification(),
             ),
             $specification instanceof Composite => $this->findParamaters(
+                $driver,
                 $parameters,
                 $specification->left(),
             )->append($this->findParamaters(
+                $driver,
                 $parameters,
                 $specification->right(),
             )),
             $specification instanceof Comparator => $this->findComparatorParameters(
+                $driver,
                 $parameters,
                 $specification,
             ),
@@ -287,6 +303,7 @@ final class Where
      * @return Sequence<Parameter>
      */
     private function findComparatorParameters(
+        Driver $driver,
         Sequence $parameters,
         Comparator $specification,
     ): Sequence {
@@ -304,6 +321,15 @@ final class Where
         if ($specification->sign() === Sign::in) {
             if ($specification->value() instanceof Query) {
                 return $parameters->append($specification->value()->parameters());
+            }
+
+            if ($specification->value() instanceof Builder) {
+                return $parameters->append(
+                    $specification
+                        ->value()
+                        ->normalize($driver)
+                        ->parameters(),
+                );
             }
 
             /**

@@ -73,7 +73,7 @@ final class Delete implements Builder
                 Driver::mysql => $this->mysqlSql($driver),
                 Driver::postgres => $this->postgresSql($driver),
             },
-            $this->where->parameters(),
+            $this->where->parameters($driver),
         );
     }
 

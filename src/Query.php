@@ -70,7 +70,7 @@ final class Query
     /**
      * @return non-empty-string
      */
-    public function sql(Driver $driver): string
+    public function sql(): string
     {
         return $this->sql;
     }

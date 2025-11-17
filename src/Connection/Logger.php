@@ -42,7 +42,7 @@ final class Logger implements Implementation
             $this->logger->debug(
                 'Query {sql} is about to be executed',
                 [
-                    'sql' => $normalized->sql(Driver::mysql),
+                    'sql' => $normalized->sql(),
                     'parameters' => $normalized->parameters()->reduce(
                         [],
                         static fn(array $parameters, $parameter) => \array_merge(
@@ -61,7 +61,7 @@ final class Logger implements Implementation
             $this->logger->error(
                 'Query {sql} failed with {kind}({message})',
                 [
-                    'sql' => $normalized->sql(Driver::mysql),
+                    'sql' => $normalized->sql(),
                     'kind' => \get_class($e),
                     'message' => $e->getMessage(),
                 ],
