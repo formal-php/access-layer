@@ -54,11 +54,11 @@ final class DeleteWithAlias implements Property
             Table\Name::of('test')->as('alias'),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         return $connection;
     }

@@ -26,7 +26,7 @@ return static function() {
             [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->object($where)->instance(Where::class);
             $assert->same('', $sql);
-            $assert->count(0, $parameters);
+            $assert->same(0, $parameters->size());
         },
     );
 
@@ -49,7 +49,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} = ?",
                 $sql,
             );
-            $assert->count(1, $parameters);
+            $assert->same(1, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -76,7 +76,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} < ?",
                 $sql,
             );
-            $assert->count(1, $parameters);
+            $assert->same(1, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -108,7 +108,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} <= ?",
                 $sql,
             );
-            $assert->count(1, $parameters);
+            $assert->same(1, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -141,7 +141,7 @@ return static function() {
                 "WHERE ({$column1->name()->sql(Driver::mysql)} < ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
                 $sql,
             );
-            $assert->count(2, $parameters);
+            $assert->same(2, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -172,7 +172,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} > ?",
                 $sql,
             );
-            $assert->count(1, $parameters);
+            $assert->same(1, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -204,7 +204,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} >= ?",
                 $sql,
             );
-            $assert->count(1, $parameters);
+            $assert->same(1, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -237,7 +237,7 @@ return static function() {
                 "WHERE ({$column1->name()->sql(Driver::mysql)} > ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
                 $sql,
             );
-            $assert->count(2, $parameters);
+            $assert->same(2, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -265,7 +265,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} IS NULL",
                 $sql,
             );
-            $assert->count(0, $parameters);
+            $assert->same(0, $parameters->size());
         },
     );
 
@@ -285,7 +285,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} IS NOT NULL",
                 $sql,
             );
-            $assert->count(0, $parameters);
+            $assert->same(0, $parameters->size());
         },
     );
 
@@ -314,7 +314,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} IN (?, ?, ?)",
                 $sql,
             );
-            $assert->count(3, $parameters);
+            $assert->same(3, $parameters->size());
             $assert->same($value1, $parameters->get(0)->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -340,7 +340,7 @@ return static function() {
                 \count($values),
                 \count_chars($sql)[63], // looking for '?' placeholders
             );
-            $assert->count(\count($values), $parameters);
+            $assert->same(\count($values), $parameters->size());
         },
     );
 
@@ -364,7 +364,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} <> ?",
                 $sql,
             );
-            $assert->count(1, $parameters);
+            $assert->same(1, $parameters->size());
             $assert->same($leftValue, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -388,7 +388,7 @@ return static function() {
                 "WHERE NOT(({$column->name()->sql(Driver::mysql)} = ? OR {$column->name()->sql(Driver::mysql)} = ?))",
                 $sql,
             );
-            $assert->count(2, $parameters);
+            $assert->same(2, $parameters->size());
             $assert->same($leftValue, $parameters->get(0)->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -427,7 +427,7 @@ return static function() {
                 "WHERE ({$column1->name()->sql(Driver::mysql)} = ? AND {$column2->name()->sql(Driver::mysql)} <> ?)",
                 $sql,
             );
-            $assert->count(2, $parameters);
+            $assert->same(2, $parameters->size());
             $assert->same($value1, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -455,7 +455,7 @@ return static function() {
                 "WHERE ({$column1->name()->sql(Driver::mysql)} <> ? AND {$column2->name()->sql(Driver::mysql)} = ?)",
                 $sql,
             );
-            $assert->count(2, $parameters);
+            $assert->same(2, $parameters->size());
             $assert->same($value1, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -494,7 +494,7 @@ return static function() {
                 "WHERE ({$column1->name()->sql(Driver::mysql)} = ? OR {$column2->name()->sql(Driver::mysql)} <> ?)",
                 $sql,
             );
-            $assert->count(2, $parameters);
+            $assert->same(2, $parameters->size());
             $assert->same($value1, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -522,7 +522,7 @@ return static function() {
                 "WHERE ({$column1->name()->sql(Driver::mysql)} <> ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
                 $sql,
             );
-            $assert->count(2, $parameters);
+            $assert->same(2, $parameters->size());
             $assert->same($value1, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -561,7 +561,7 @@ return static function() {
                 "WHERE {$column->name()->sql(Driver::mysql)} = ?",
                 $sql,
             );
-            $assert->count(1, $parameters);
+            $assert->same(1, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
@@ -593,7 +593,7 @@ return static function() {
                 "WHERE {$table->sql(Driver::mysql)}.{$column->name()->sql(Driver::mysql)} = ?",
                 $sql,
             );
-            $assert->count(1, $parameters);
+            $assert->same(1, $parameters->size());
             $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,

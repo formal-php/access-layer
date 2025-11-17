@@ -52,11 +52,11 @@ final class Delete implements Property
 
         $sequence = $connection(Query\Delete::from(Table\Name::of('test')));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         return $connection;
     }

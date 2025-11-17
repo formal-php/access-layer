@@ -16,8 +16,8 @@
     },
     "require": {
         "php": "~8.4",
-        "innmind/immutable": "~4.0|~5.0",
-        "innmind/url": "~4.0",
+        "innmind/immutable": "dev-next",
+        "innmind/url": "dev-next",
         "innmind/specification": "~4.1",
         "psr/log": "~3.0"
     },

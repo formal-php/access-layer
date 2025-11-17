@@ -60,7 +60,7 @@ final class CreateTableWithForeignKey implements Property
             $create = $create->primaryKey($this->primaryKey->name());
             $rows = $connection($create);
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
 
             $create = Query\CreateTable::named($this->name2, ConcreteColumn::of(
                 $this->foreignKey->name(),
@@ -73,7 +73,7 @@ final class CreateTableWithForeignKey implements Property
             );
             $rows = $connection($create);
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
         } finally {
             $connection(Query\DropTable::ifExists($this->name2));
             $connection(Query\DropTable::ifExists($this->name1));

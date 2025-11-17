@@ -58,7 +58,7 @@ final class InsertSelect implements Property
         $select = SQL::of("SELECT * FROM test_values WHERE id = '{$this->uuid}'");
         $rows = $connection($select);
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         $sequence = $connection(Query\Insert::into(
             Table\Name::of('test'),
@@ -69,7 +69,7 @@ final class InsertSelect implements Property
             ]),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $sequence = $connection(Query\Insert::into(
             Table\Name::of('test_values'),
@@ -88,11 +88,11 @@ final class InsertSelect implements Property
                 )),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             $this->uuid,
             $rows

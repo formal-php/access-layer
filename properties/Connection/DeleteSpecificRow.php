@@ -80,15 +80,15 @@ final class DeleteSpecificRow implements Property
         );
         $sequence = $connection($delete);
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid1}'"));
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid2}'"));
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
 
         return $connection;
     }

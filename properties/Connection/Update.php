@@ -55,7 +55,7 @@ final class Update implements Property
             Row::of(['registerNumber' => 24]),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 

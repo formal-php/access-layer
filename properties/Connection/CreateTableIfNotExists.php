@@ -51,7 +51,7 @@ final class CreateTableIfNotExists implements Property
             $connection(Query\CreateTable::named($this->name, ...$this->columns));
             $rows = $connection(Query\CreateTable::ifNotExists($this->name, ...$this->columns));
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
         } finally {
             $connection(Query\DropTable::ifExists($this->name));
         }

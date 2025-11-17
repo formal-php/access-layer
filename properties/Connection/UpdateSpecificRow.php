@@ -82,11 +82,11 @@ final class UpdateSpecificRow implements Property
         ));
         $sequence = $connection($update);
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid1}'"));
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             24,
             $rows
@@ -100,7 +100,7 @@ final class UpdateSpecificRow implements Property
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid2}'"));
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             42,
             $rows

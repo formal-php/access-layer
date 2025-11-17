@@ -58,7 +58,7 @@ final class CreateTableWithPrimaryKey implements Property
             $create = $create->primaryKey($this->primaryKey->name());
             $rows = $connection($create);
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
         } finally {
             $connection(Query\DropTable::ifExists($this->name));
         }

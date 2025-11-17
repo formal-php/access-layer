@@ -73,7 +73,7 @@ final class MultipleInsertsAtOnce implements Property
         $select = SQL::of("SELECT * FROM test WHERE id IN ('{$this->uuid1}', '{$this->uuid2}')");
         $rows = $connection($select);
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         $insert = Query\MultipleInsert::into(
             Table\Name::of('test'),
@@ -94,11 +94,11 @@ final class MultipleInsertsAtOnce implements Property
             ]),
         )));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
-        $assert->count(2, $rows);
+        $assert->same(2, $rows->size());
         $assert
             ->expected(
                 $rows

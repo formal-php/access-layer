@@ -68,7 +68,7 @@ final class ContentIsNotAccessibleAfterRollback implements Property
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         return $connection;
     }

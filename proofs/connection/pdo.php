@@ -302,7 +302,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
             $connection(Delete::from($parent));
             $rows = $connection(Select::from($child));
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
 
             $connection(DropTable::named($child));
             $connection(DropTable::named($parent));
@@ -455,10 +455,10 @@ $proofs = static function(Url $dsn, Driver $driver) {
             );
 
             $rows = $connection(Select::from($child));
-            $assert->count(1, $rows);
+            $assert->same(1, $rows->size());
 
             $rows = $connection(Select::from($parent));
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
 
             $connection(DropTable::named($parent->name()));
             $connection(DropTable::named($child->name()));

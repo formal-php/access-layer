@@ -89,7 +89,7 @@ final class SelectValues implements Property
             ));
         $rows = $connection($select);
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             $this->uuid,
             $rows

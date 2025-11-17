@@ -43,7 +43,7 @@ final class Insert implements Property
         $select = SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'");
         $rows = $connection($select);
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         $sequence = $connection(Query\Insert::into(
             Table\Name::of('test'),
@@ -54,11 +54,11 @@ final class Insert implements Property
             ]),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             $this->uuid,
             $rows
