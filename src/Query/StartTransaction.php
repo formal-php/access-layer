@@ -7,29 +7,15 @@ use Formal\AccessLayer\{
     Query,
     Driver,
 };
-use Innmind\Immutable\Sequence;
 
 /**
  * @psalm-immutable
  */
-final class StartTransaction implements Query
+final class StartTransaction implements Builder
 {
     #[\Override]
-    public function parameters(): Sequence
+    public function normalize(Driver $driver): Query
     {
-        /** @var Sequence<Parameter> */
-        return Sequence::of();
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        return 'START TRANSACTION';
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
+        return SQL::of('START TRANSACTION');
     }
 }

@@ -77,15 +77,15 @@ final class PDO implements Implementation
     {
         return match (\get_class($query)) {
             Query\StartTransaction::class => $this->transaction(
-                $query,
+                $query->normalize($this->driver),
                 fn(): bool => $this->pdo->beginTransaction(),
             ),
             Query\Commit::class => $this->transaction(
-                $query,
+                $query->normalize($this->driver),
                 fn(): bool => $this->pdo->commit(),
             ),
             Query\Rollback::class => $this->transaction(
-                $query,
+                $query->normalize($this->driver),
                 fn(): bool => $this->pdo->rollBack(),
             ),
             default => $this->execute($query),

@@ -17,7 +17,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class Insert implements Query
+final class Insert implements Builder
 {
     private function __construct(
         private Name $table,
@@ -34,36 +34,11 @@ final class Insert implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
-    {
-        if ($this->row instanceof Select) {
-            return $this->row->parameters();
-        }
-
-        return $this->row->values()->map(
-            static fn($value) => Parameter::of($value->value(), $value->type()),
-        );
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        return $this->buildInsert($driver);
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
-    }
-
-    /**
-     * @return non-empty-string
-     */
-    private function buildInsert(Driver $driver): string
+    public function normalize(Driver $driver): Query
     {
         if ($this->row instanceof Select) {
             $columns = $this->row->names();
+            $query = $this->row->normalize($driver);
 
             if ($columns->empty()) {
                 throw new \LogicException('You need to specify the columns to select when inserting');
@@ -71,11 +46,14 @@ final class Insert implements Query
 
             $keys = $columns->map(static fn($column) => $column->sql($driver));
 
-            return \sprintf(
-                'INSERT INTO %s (%s) %s',
-                $this->table->sql($driver),
-                Str::of(', ')->join($keys)->toString(),
-                $this->row->sql($driver),
+            return SQL::of(
+                \sprintf(
+                    'INSERT INTO %s (%s) %s',
+                    $this->table->sql($driver),
+                    Str::of(', ')->join($keys)->toString(),
+                    $query->sql($driver),
+                ),
+                $query->parameters(),
             );
         }
 
@@ -84,11 +62,19 @@ final class Insert implements Query
         /** @var Sequence<string> */
         $values = $this->row->values()->map(static fn() => '?');
 
-        return \sprintf(
-            'INSERT INTO %s (%s) VALUES (%s)',
-            $this->table->sql($driver),
-            Str::of(', ')->join($keys)->toString(),
-            Str::of(', ')->join($values)->toString(),
+        return SQL::of(
+            \sprintf(
+                'INSERT INTO %s (%s) VALUES (%s)',
+                $this->table->sql($driver),
+                Str::of(', ')->join($keys)->toString(),
+                Str::of(', ')->join($values)->toString(),
+            ),
+            $this->row->values()->map(
+                static fn($value) => Parameter::of(
+                    $value->value(),
+                    $value->type(),
+                ),
+            ),
         );
     }
 }

@@ -18,7 +18,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class Update implements Query
+final class Update implements Builder
 {
     private Name|Name\Aliased $table;
     private Row $row;
@@ -52,36 +52,27 @@ final class Update implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
-    {
-        return $this
-            ->row
-            ->values()
-            ->map(static fn($value) => Parameter::of($value->value(), $value->type()))
-            ->append($this->where->parameters());
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
+    public function normalize(Driver $driver): Query
     {
         /** @var Sequence<string> */
         $columns = $this
             ->row
             ->values()
             ->map(static fn($value) => "{$value->columnSql($driver)} = ?");
+        $parameters = $this
+            ->row
+            ->values()
+            ->map(static fn($value) => Parameter::of($value->value(), $value->type()))
+            ->append($this->where->parameters());
 
-        /** @var non-empty-string */
-        return \sprintf(
-            'UPDATE %s SET %s %s',
-            $this->table->sql($driver),
-            Str::of(', ')->join($columns)->toString(),
-            $this->where->sql($driver),
+        return SQL::of(
+            \sprintf(
+                'UPDATE %s SET %s %s',
+                $this->table->sql($driver),
+                Str::of(', ')->join($columns)->toString(),
+                $this->where->sql($driver),
+            ),
+            $parameters,
         );
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
     }
 }

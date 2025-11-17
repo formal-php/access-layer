@@ -19,7 +19,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class Delete implements Query
+final class Delete implements Builder
 {
     private Name|Name\Aliased $table;
     /** @var Sequence<Join> */
@@ -66,24 +66,15 @@ final class Delete implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
+    public function normalize(Driver $driver): Query
     {
-        return $this->where->parameters();
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        return match ($driver) {
-            Driver::mysql => $this->mysqlSql($driver),
-            Driver::postgres => $this->postgresSql($driver),
-        };
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
+        return SQL::of(
+            match ($driver) {
+                Driver::mysql => $this->mysqlSql($driver),
+                Driver::postgres => $this->postgresSql($driver),
+            },
+            $this->where->parameters(),
+        );
     }
 
     /**

@@ -24,7 +24,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class Select implements Query
+final class Select implements Builder
 {
     /**
      * @param Sequence<Join> $joins
@@ -206,23 +206,10 @@ final class Select implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
-    {
-        return $this
-            ->columns
-            ->keep(Instance::of(Row\Value::class))
-            ->map(static fn($value) => Parameter::of(
-                $value->value(),
-                $value->type(),
-            ))
-            ->append($this->where->parameters());
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
+    public function normalize(Driver $driver): Query
     {
         /** @var non-empty-string */
-        return \sprintf(
+        $sql = \sprintf(
             'SELECT %s FROM %s%s %s%s%s%s',
             $this
                 ->count
@@ -256,12 +243,19 @@ final class Select implements Query
                 default => ' OFFSET '.$this->offset,
             },
         );
-    }
+        $parameters = $this
+            ->columns
+            ->keep(Instance::of(Row\Value::class))
+            ->map(static fn($value) => Parameter::of(
+                $value->value(),
+                $value->type(),
+            ))
+            ->append($this->where->parameters());
 
-    #[\Override]
-    public function lazy(): bool
-    {
-        return $this->lazy;
+        return match ($this->lazy) {
+            true => SQL::lazily($sql, $parameters),
+            false => SQL::of($sql, $parameters),
+        };
     }
 
     /**

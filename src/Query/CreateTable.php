@@ -20,7 +20,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class CreateTable implements Query
+final class CreateTable implements Builder
 {
     private Name $name;
     /** @var Sequence<Column> */
@@ -102,17 +102,9 @@ final class CreateTable implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
+    public function normalize(Driver $driver): Query
     {
-        /** @var Sequence<Parameter> */
-        return Sequence::of();
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        /** @var non-empty-string */
-        return \sprintf(
+        return SQL::of(\sprintf(
             'CREATE TABLE %s %s (%s%s)',
             $this->ifNotExists ? 'IF NOT EXISTS' : '',
             $this->name->sql($driver),
@@ -129,12 +121,6 @@ final class CreateTable implements Query
                     ->toString(),
                 static fn() => '',
             ),
-        );
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
+        ));
     }
 }

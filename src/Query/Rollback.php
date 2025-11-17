@@ -7,29 +7,15 @@ use Formal\AccessLayer\{
     Query,
     Driver,
 };
-use Innmind\Immutable\Sequence;
 
 /**
  * @psalm-immutable
  */
-final class Rollback implements Query
+final class Rollback implements Builder
 {
     #[\Override]
-    public function parameters(): Sequence
+    public function normalize(Driver $driver): Query
     {
-        /** @var Sequence<Parameter> */
-        return Sequence::of();
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        return 'ROLLBACK';
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
+        return SQL::of('ROLLBACK');
     }
 }

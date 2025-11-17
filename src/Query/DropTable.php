@@ -8,12 +8,11 @@ use Formal\AccessLayer\{
     Table\Name,
     Driver,
 };
-use Innmind\Immutable\Sequence;
 
 /**
  * @psalm-immutable
  */
-final class DropTable implements Query
+final class DropTable implements Builder
 {
     private Name $name;
     private bool $ifExists;
@@ -41,26 +40,12 @@ final class DropTable implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
+    public function normalize(Driver $driver): Query
     {
-        /** @var Sequence<Parameter> */
-        return Sequence::of();
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        /** @var non-empty-string */
-        return \sprintf(
+        return SQL::of(\sprintf(
             'DROP TABLE %s %s',
             $this->ifExists ? 'IF EXISTS' : '',
             $this->name->sql($driver),
-        );
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
+        ));
     }
 }
