@@ -26,18 +26,24 @@ final class Logger implements Implementation
     }
 
     #[\Override]
-    public function __invoke(Query $query): Sequence
+    public function __invoke(Query|Query\Builder $query): Sequence
     {
         // For the sake of simplicity the queries SQL is logged with the MySQL
         // format. As otherwise it would require this decorator to retrieve the
         // driver from the underlying connection.
 
+        if ($query instanceof Query\Builder) {
+            $normalized = $query->normalize(Driver::mysql);
+        } else {
+            $normalized = $query;
+        }
+
         try {
             $this->logger->debug(
                 'Query {sql} is about to be executed',
                 [
-                    'sql' => $query->sql(Driver::mysql),
-                    'parameters' => $query->parameters()->reduce(
+                    'sql' => $normalized->sql(Driver::mysql),
+                    'parameters' => $normalized->parameters()->reduce(
                         [],
                         static fn(array $parameters, $parameter) => \array_merge(
                             $parameters,
@@ -55,7 +61,7 @@ final class Logger implements Implementation
             $this->logger->error(
                 'Query {sql} failed with {kind}({message})',
                 [
-                    'sql' => $query->sql(Driver::mysql),
+                    'sql' => $normalized->sql(Driver::mysql),
                     'kind' => \get_class($e),
                     'message' => $e->getMessage(),
                 ],

@@ -73,8 +73,12 @@ final class PDO implements Implementation
     }
 
     #[\Override]
-    public function __invoke(Query $query): Sequence
+    public function __invoke(Query|Query\Builder $query): Sequence
     {
+        if ($query instanceof Query\Builder) {
+            $query = $query->normalize($this->driver);
+        }
+
         return match (\get_class($query)) {
             Query\StartTransaction::class => $this->transaction(
                 $query,

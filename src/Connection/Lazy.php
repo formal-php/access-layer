@@ -24,7 +24,7 @@ final class Lazy implements Implementation
     }
 
     #[\Override]
-    public function __invoke(Query $query): Sequence
+    public function __invoke(Query|Query\Builder $query): Sequence
     {
         return ($this->connection())($query);
     }

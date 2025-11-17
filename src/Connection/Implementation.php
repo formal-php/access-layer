@@ -17,5 +17,5 @@ interface Implementation
     /**
      * @return Sequence<Row>
      */
-    public function __invoke(Query $query): Sequence;
+    public function __invoke(Query|Query\Builder $query): Sequence;
 }
