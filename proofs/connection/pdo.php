@@ -4,7 +4,6 @@ declare(ticks = 1);
 
 use Formal\AccessLayer\{
     Connection,
-    Connection\PDO,
     Query\CreateTable,
     Query\Constraint\ForeignKey,
     Query\Delete,
@@ -32,21 +31,13 @@ use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\Set;
 
 $proofs = static function(Url $dsn, Driver $driver) {
-    $connection = PDO::of($dsn);
-    $persistent = PDO::persistent($dsn);
+    $connection = Connection::new($dsn);
     Properties::seed($connection);
-    $connections = Set\Either::any(
-        Set\Call::of(static function() use ($connection) {
-            Properties::seed($connection);
+    $connections = Set\Call::of(static function() use ($connection) {
+        Properties::seed($connection);
 
-            return $connection;
-        }),
-        Set\Call::of(static function() use ($persistent) {
-            Properties::seed($persistent);
-
-            return $persistent;
-        }),
-    );
+        return $connection;
+    });
 
     yield test(
         "PDO interface({$driver->name})",
@@ -55,7 +46,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
             ->instance(Connection::class),
     );
 
-    $lazy = static fn($connection) => test(
+    yield test(
         "PDO lazy select doesnt load everything in memory({$driver->name})",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_lazy_load');
@@ -99,9 +90,6 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
-    yield $lazy($connection);
-    yield $lazy($persistent);
-
     if ($driver === Driver::mysql) {
         yield test(
             "PDO charset({$driver->name})",
@@ -125,7 +113,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
 
                 $select = Select::from($table);
 
-                $ascii = PDO::of($dsn->withQuery(Query::of('charset=ascii')));
+                $ascii = Connection::new($dsn->withQuery(Query::of('charset=ascii')));
                 $assert
                     ->expected('gelé')
                     ->not()
@@ -139,7 +127,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                             ),
                     );
 
-                $utf8 = PDO::of($dsn->withQuery(Query::of('charset=utf8mb4')));
+                $utf8 = Connection::new($dsn->withQuery(Query::of('charset=utf8mb4')));
                 $assert->same(
                     'gelé',
                     $utf8($select)

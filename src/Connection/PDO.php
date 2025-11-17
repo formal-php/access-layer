@@ -77,15 +77,15 @@ final class PDO implements Implementation
     {
         return match (\get_class($query)) {
             Query\StartTransaction::class => $this->transaction(
-                $query->normalize($this->driver),
+                $query,
                 fn(): bool => $this->pdo->beginTransaction(),
             ),
             Query\Commit::class => $this->transaction(
-                $query->normalize($this->driver),
+                $query,
                 fn(): bool => $this->pdo->commit(),
             ),
             Query\Rollback::class => $this->transaction(
-                $query->normalize($this->driver),
+                $query,
                 fn(): bool => $this->pdo->rollBack(),
             ),
             default => $this->execute($query),
@@ -102,9 +102,13 @@ final class PDO implements Implementation
      *
      * @return Sequence<Row>
      */
-    private function transaction(Query $query, callable $action): Sequence
+    private function transaction(Query\Builder $query, callable $action): Sequence
     {
-        $this->attempt($query, $action);
+        $this->attempt(
+            $query,
+            $query->normalize($this->driver),
+            $action,
+        );
 
         /** @var Sequence<Row> */
         return Sequence::of();
@@ -116,23 +120,27 @@ final class PDO implements Implementation
     private function execute(Query|Query\Builder $query): Sequence
     {
         if ($query instanceof Query\Builder) {
-            $query = $query->normalize($this->driver);
+            $normalized = $query->normalize($this->driver);
+        } else {
+            $normalized = $query;
         }
 
-        return match ($query->lazy()) {
-            true => $this->lazy($query),
-            false => $this->defer($query),
+        return match ($normalized->lazy()) {
+            true => $this->lazy($query, $normalized),
+            false => $this->defer($query, $normalized),
         };
     }
 
     /**
      * @return Sequence<Row>
      */
-    private function lazy(Query $query): Sequence
-    {
+    private function lazy(
+        Query|Query\Builder $query,
+        Query $normalized,
+    ): Sequence {
         /** @var Sequence<Row> */
-        return Sequence::lazy(function() use ($query): \Generator {
-            $statement = $this->prepare($query);
+        return Sequence::lazy(function() use ($query, $normalized): \Generator {
+            $statement = $this->prepare($query, $normalized);
 
             /** @psalm-suppress MixedAssignment */
             while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
@@ -147,9 +155,11 @@ final class PDO implements Implementation
     /**
      * @return Sequence<Row>
      */
-    private function defer(Query $query): Sequence
-    {
-        $statement = $this->prepare($query);
+    private function defer(
+        Query|Query\Builder $query,
+        Query $normalized,
+    ): Sequence {
+        $statement = $this->prepare($query, $normalized);
 
         /** @var Sequence<Row> */
         return Sequence::defer(
@@ -168,19 +178,23 @@ final class PDO implements Implementation
     /**
      * @throws QueryFailed
      */
-    private function prepare(Query $query): \PDOStatement
-    {
+    private function prepare(
+        Query|Query\Builder $query,
+        Query $normalized,
+    ): \PDOStatement {
         $statement = $this->guard(
             $query,
-            fn() => $this->pdo->prepare($query->sql()),
+            $normalized,
+            fn() => $this->pdo->prepare($normalized->sql()),
         );
 
-        $_ = $query->parameters()->reduce(
+        $_ = $normalized->parameters()->reduce(
             0,
-            function(int $index, Parameter $parameter) use ($query, $statement): int {
+            function(int $index, Parameter $parameter) use ($query, $normalized, $statement): int {
                 ++$index;
                 $this->attempt(
                     $query,
+                    $normalized,
                     fn(): bool => $statement->bindValue(
                         $parameter->name()->match(
                             static fn($name) => $name,
@@ -195,7 +209,11 @@ final class PDO implements Implementation
             },
         );
 
-        $this->attempt($query, static fn(): bool => $statement->execute());
+        $this->attempt(
+            $query,
+            $normalized,
+            static fn(): bool => $statement->execute(),
+        );
 
         return $statement;
     }
@@ -205,8 +223,11 @@ final class PDO implements Implementation
      *
      * @throws QueryFailed
      */
-    private function guard(Query $query, callable $try): \PDOStatement
-    {
+    private function guard(
+        Query|Query\Builder $query,
+        Query $normalized,
+        callable $try,
+    ): \PDOStatement {
         try {
             $statement = $try();
 
@@ -227,6 +248,7 @@ final class PDO implements Implementation
 
         throw new QueryFailed(
             $query,
+            $normalized,
             $errorInfo[0],
             $errorInfo[1],
             $errorInfo[2],
@@ -239,8 +261,11 @@ final class PDO implements Implementation
      *
      * @throws QueryFailed
      */
-    private function attempt(Query $query, callable $attempt): void
-    {
+    private function attempt(
+        Query|Query\Builder $query,
+        Query $normalized,
+        callable $attempt,
+    ): void {
         try {
             if ($attempt()) {
                 return;
@@ -256,6 +281,7 @@ final class PDO implements Implementation
 
         throw new QueryFailed(
             $query,
+            $normalized,
             $errorInfo[0],
             $errorInfo[1],
             $errorInfo[2],

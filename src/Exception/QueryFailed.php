@@ -7,13 +7,14 @@ use Formal\AccessLayer\Query;
 
 final class QueryFailed extends RuntimeException
 {
-    private Query $query;
+    private Query|Query\Builder $query;
     private string $sqlstate;
     private ?int $driverSpecificCode;
     private ?string $driverSpecificMessage;
 
     public function __construct(
-        Query $query,
+        Query|Query\Builder $query,
+        Query $normalized,
         string $sqlstate,
         ?int $code,
         ?string $message,
@@ -25,14 +26,14 @@ final class QueryFailed extends RuntimeException
         $this->driverSpecificMessage = $message;
         parent::__construct(\sprintf(
             "Query '%s' failed with: [%s] [%s] %s",
-            $query->sql(),
+            $normalized->sql(),
             $sqlstate,
             (string) $code,
             (string) $message,
         ), 0, $previous);
     }
 
-    public function query(): Query
+    public function query(): Query|Query\Builder
     {
         return $this->query;
     }
