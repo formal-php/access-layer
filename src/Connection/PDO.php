@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Connection,
     Query,
     Query\Parameter,
     Query\Parameter\Type,
@@ -20,7 +19,10 @@ use Innmind\Url\{
 };
 use Innmind\Immutable\Sequence;
 
-final class PDO implements Connection
+/**
+ * @internal
+ */
+final class PDO implements Implementation
 {
     private \PDO $pdo;
     private Driver $driver;

@@ -5,6 +5,7 @@
 ### Changed
 
 - Requires PHP `8.4`
+- `Formal\AccessLayer\Connection` is now a final class, all previous implementations are now flagged as internal
 
 ### Removed
 

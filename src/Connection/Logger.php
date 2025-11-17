@@ -11,12 +11,15 @@ use Formal\AccessLayer\{
 use Innmind\Immutable\Sequence;
 use Psr\Log\LoggerInterface;
 
-final class Logger implements Connection
+/**
+ * @internal
+ */
+final class Logger implements Implementation
 {
-    private Connection $connection;
+    private Implementation $connection;
     private LoggerInterface $logger;
 
-    private function __construct(Connection $connection, LoggerInterface $logger)
+    private function __construct(Implementation $connection, LoggerInterface $logger)
     {
         $this->connection = $connection;
         $this->logger = $logger;
@@ -62,7 +65,7 @@ final class Logger implements Connection
         }
     }
 
-    public static function psr(Connection $connection, LoggerInterface $logger): self
+    public static function psr(Implementation $connection, LoggerInterface $logger): self
     {
         return new self($connection, $logger);
     }

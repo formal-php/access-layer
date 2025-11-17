@@ -9,7 +9,10 @@ use Formal\AccessLayer\{
 };
 use Innmind\Immutable\Sequence;
 
-final class Lazy implements Connection
+/**
+ * @internal
+ */
+final class Lazy implements Implementation
 {
     /** @var callable(): Connection */
     private $load;
