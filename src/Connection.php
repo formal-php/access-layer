@@ -26,8 +26,12 @@ final class Connection
      *
      * @return Sequence<Row>
      */
-    public function __invoke(Query $query): Sequence
+    public function __invoke(Query|Query\Builder $query): Sequence
     {
+        if ($query instanceof Query\Builder) {
+            $query = $query->normalize();
+        }
+
         return ($this->implementation)($query);
     }
 

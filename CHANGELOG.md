@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `Formal\AccessLayer\Query\Builder`
+
 ### Changed
 
 - Requires PHP `8.4`
