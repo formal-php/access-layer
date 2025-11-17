@@ -6,6 +6,10 @@
 
 - Requires PHP `8.4`
 
+### Removed
+
+- `Formal\AccessLayer\Connection\PDO::persistent()`
+
 ## 4.2.0 - 2025-04-09
 
 ### Added

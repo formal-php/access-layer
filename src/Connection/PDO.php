@@ -25,7 +25,7 @@ final class PDO implements Connection
     private \PDO $pdo;
     private Driver $driver;
 
-    private function __construct(Url $dsn, array $options = [])
+    private function __construct(Url $dsn)
     {
         $dsnUser = $dsn->authority()->userInformation()->user();
         $dsnPassword = $dsn->authority()->userInformation()->password();
@@ -67,7 +67,7 @@ final class PDO implements Connection
             $charset,
         );
 
-        $this->pdo = new \PDO($pdoDsn, $user, $password, $options);
+        $this->pdo = new \PDO($pdoDsn, $user, $password);
     }
 
     #[\Override]
@@ -93,11 +93,6 @@ final class PDO implements Connection
     public static function of(Url $dsn): self
     {
         return new self($dsn);
-    }
-
-    public static function persistent(Url $dsn): self
-    {
-        return new self($dsn, [\PDO::ATTR_PERSISTENT => true]);
     }
 
     /**
