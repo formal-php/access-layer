@@ -75,10 +75,6 @@ final class PDO implements Implementation
     #[\Override]
     public function __invoke(Query|Query\Builder $query): Sequence
     {
-        if ($query instanceof Query\Builder) {
-            $query = $query->normalize($this->driver);
-        }
-
         return match (\get_class($query)) {
             Query\StartTransaction::class => $this->transaction(
                 $query,
@@ -117,8 +113,12 @@ final class PDO implements Implementation
     /**
      * @return Sequence<Row>
      */
-    private function execute(Query $query): Sequence
+    private function execute(Query|Query\Builder $query): Sequence
     {
+        if ($query instanceof Query\Builder) {
+            $query = $query->normalize($this->driver);
+        }
+
         return match ($query->lazy()) {
             true => $this->lazy($query),
             false => $this->defer($query),
