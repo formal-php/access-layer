@@ -43,10 +43,21 @@ final class SQL implements Query
 
     /**
      * @psalm-pure
+     * @deprecated Use ::lazily() instead
      *
      * @param non-empty-string $sql
      */
     public static function onDemand(string $sql): self
+    {
+        return self::lazily($sql);
+    }
+
+    /**
+     * @psalm-pure
+     *
+     * @param non-empty-string $sql
+     */
+    public static function lazily(string $sql): self
     {
         return new self($sql, true, Sequence::of());
     }

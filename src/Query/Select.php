@@ -70,8 +70,17 @@ final class Select implements Query
 
     /**
      * @psalm-pure
+     * @deprecated Use ::lazily() instead
      */
     public static function onDemand(Name|Name\Aliased $table): self
+    {
+        return self::lazily($table);
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function lazily(Name|Name\Aliased $table): self
     {
         /** @var Maybe<non-empty-string> */
         $count = Maybe::nothing();
