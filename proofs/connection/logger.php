@@ -14,7 +14,7 @@ return static function() {
         new NullLogger,
     );
     Properties::seed($connection);
-    $connections = Set\Call::of(static function() use ($connection) {
+    $connections = Set::call(static function() use ($connection) {
         Properties::seed($connection);
 
         return $connection;

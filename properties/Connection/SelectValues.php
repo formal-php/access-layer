@@ -38,18 +38,22 @@ final class SelectValues implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-            Set\Integers::any(),
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(0, 255),
+            Set::integers(),
             FName::any(),
-            Set\Either::any(
-                Set\Integers::any(),
-                Set\Strings::madeOf(Set\Chars::alphanumerical()),
-                Set\Elements::of(null, true, false),
+            Set::either(
+                Set::integers(),
+                Set::strings()->madeOf(
+                    Set::strings()->chars()->alphanumerical(),
+                ),
+                Set::of(null, true, false),
             ),
-        );
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool

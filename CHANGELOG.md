@@ -12,6 +12,7 @@
 - Requires PHP `8.4`
 - `Formal\AccessLayer\Connection` is now a final class, all previous implementations are now flagged as internal
 - `Formal\AccessLayer\Query` is now a final class
+- Requires `innmind/black-box:~6.5`
 
 ### Deprecated
 

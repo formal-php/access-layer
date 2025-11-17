@@ -40,12 +40,12 @@ final class CreateTableWithForeignKey implements Property
     {
         // max length of 30 for column names as combined can't be higher than 64
         // as it's the limit of the created constraint name
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             Name::pair(),
             Column::any(Column\Type::constraint(), 30),
             Column::any(null, 30),
-        );
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool

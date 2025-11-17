@@ -44,13 +44,17 @@ final class SelectWhereStartsWith implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(10, 125), // 10 to avoid collisions with possible other values
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 125),
-            Set\Integers::any(),
-        );
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(10, 125), // 10 to avoid collisions with possible other values
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(0, 125),
+            Set::integers(),
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool

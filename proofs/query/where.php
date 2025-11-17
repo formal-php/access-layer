@@ -34,7 +34,7 @@ return static function() {
         'Where equal comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $specification = Property::of(
@@ -61,7 +61,7 @@ return static function() {
         'Where less than comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $specification = Property::of(
@@ -88,7 +88,7 @@ return static function() {
         'Where less than or equal comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $lessThan = Property::of(
@@ -121,7 +121,7 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column1, $column2, $value) {
             $lessThan = Property::of(
@@ -157,7 +157,7 @@ return static function() {
         'Where more than comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $specification = Property::of(
@@ -184,7 +184,7 @@ return static function() {
         'Where more than or equal comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $moreThan = Property::of(
@@ -217,7 +217,7 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column1, $column2, $value) {
             $moreThan = Property::of(
@@ -293,12 +293,12 @@ return static function() {
         'Where in comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
-            Set\Sequence::of(
-                Set\Strings::any(),
-                Set\Integers::between(1, 5),
+            Set::strings(),
+            Set::strings(),
+            Set::strings(),
+            Set::sequence(
+                Set::strings(),
+                Set::integers()->between(1, 5),
             ),
         ),
         static function($assert, $column, $value1, $value2, $value3, $values) {
@@ -348,8 +348,8 @@ return static function() {
         'Where not',
         given(
             Column::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
+            Set::strings(),
+            Set::strings(),
         ),
         static function($assert, $column, $leftValue, $rightValue){
             $specification = Property::of(
@@ -405,8 +405,8 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
+            Set::strings(),
+            Set::strings(),
         ),
         static function($assert, $column1, $column2, $value1, $value2) {
             $left = Property::of(
@@ -472,8 +472,8 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
+            Set::strings(),
+            Set::strings(),
         ),
         static function($assert, $column1, $column2, $value1, $value2) {
             $left = Property::of(
@@ -539,8 +539,8 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
-            Set\Elements::of(
+            Set::strings(),
+            Set::of(
                 Type::bool,
                 Type::null,
                 Type::int,
@@ -578,7 +578,7 @@ return static function() {
         given(
             Name::any(),
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $table, $column, $value) {
             $specification = Property::of(

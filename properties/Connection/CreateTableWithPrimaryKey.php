@@ -38,12 +38,12 @@ final class CreateTableWithPrimaryKey implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             Name::any(),
             Column::any(Column\Type::constraint()),
             Column::list(),
-        );
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool

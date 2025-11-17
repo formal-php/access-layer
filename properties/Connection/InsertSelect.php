@@ -35,13 +35,17 @@ final class InsertSelect implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::alphanumerical())->between(0, 100),
-            Set\Integers::any(),
-            Set\Strings::madeOf(Set\Chars::alphanumerical())->between(10, 100), // to avoid collisions
-        );
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->alphanumerical())
+                ->between(0, 100),
+            Set::integers(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->alphanumerical())
+                ->between(10, 100), // to avoid collisions
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool

@@ -33,7 +33,7 @@ use Innmind\BlackBox\Set;
 $proofs = static function(Url $dsn, Driver $driver) {
     $connection = Connection::new($dsn);
     Properties::seed($connection);
-    $connections = Set\Call::of(static function() use ($connection) {
+    $connections = Set::call(static function() use ($connection) {
         Properties::seed($connection);
 
         return $connection;
@@ -467,7 +467,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
 
     yield proof(
         "Unique constraint({$driver->name})",
-        given(Set\Integers::between(0, 1_000_000)),
+        given(Set::integers()->between(0, 1_000_000)),
         static function($assert, $int) use ($connection) {
             $table = Table\Name::of('test_unique');
             $connection(CreateTable::ifNotExists(

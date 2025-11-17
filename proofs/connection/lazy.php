@@ -12,7 +12,7 @@ return static function() {
         static fn() => Connection::new(Url::of("mysql://root:root@127.0.0.1:$port/example")),
     );
     Properties::seed($connection);
-    $connections = Set\Call::of(static function() use ($connection) {
+    $connections = Set::call(static function() use ($connection) {
         Properties::seed($connection);
 
         return $connection;

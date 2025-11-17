@@ -30,7 +30,7 @@ final class Insert implements Property
 
     public static function any(): Set
     {
-        return Set\Uuid::any()->map(static fn($uuid) => new self($uuid));
+        return Set::uuid()->map(static fn($uuid) => new self($uuid));
     }
 
     public function applicableTo(object $connection): bool

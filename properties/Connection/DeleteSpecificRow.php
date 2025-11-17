@@ -38,11 +38,11 @@ final class DeleteSpecificRow implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Uuid::any(),
-        );
+            Set::uuid(),
+            Set::uuid(),
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
