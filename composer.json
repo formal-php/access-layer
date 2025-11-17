@@ -15,7 +15,7 @@
         "issues": "http://github.com/formal-php/access-layer/issues"
     },
     "require": {
-        "php": "~8.2",
+        "php": "~8.4",
         "innmind/immutable": "~4.0|~5.0",
         "innmind/url": "~4.0",
         "innmind/specification": "~4.1",
