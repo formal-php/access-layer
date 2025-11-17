@@ -5,6 +5,7 @@
 ### Added
 
 - `Formal\AccessLayer\Query\Builder`
+- `Formal\AccessLayer\Query\SQL` named constructors allow to pass all the parameters at once via the second argument
 
 ### Changed
 

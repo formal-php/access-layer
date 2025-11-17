@@ -35,10 +35,11 @@ final class SQL implements Query
      * @psalm-pure
      *
      * @param non-empty-string $sql
+     * @param Sequence<Parameter> $parameters
      */
-    public static function of(string $sql): self
+    public static function of(string $sql, ?Sequence $parameters = null): self
     {
-        return new self($sql, false, Sequence::of());
+        return new self($sql, false, $parameters ?? Sequence::of());
     }
 
     /**
@@ -46,8 +47,9 @@ final class SQL implements Query
      * @deprecated Use ::lazily() instead
      *
      * @param non-empty-string $sql
+     * @param Sequence<Parameter> $parameters
      */
-    public static function onDemand(string $sql): self
+    public static function onDemand(string $sql, ?Sequence $parameters = null): self
     {
         return self::lazily($sql);
     }
@@ -56,10 +58,11 @@ final class SQL implements Query
      * @psalm-pure
      *
      * @param non-empty-string $sql
+     * @param Sequence<Parameter> $parameters
      */
-    public static function lazily(string $sql): self
+    public static function lazily(string $sql, ?Sequence $parameters = null): self
     {
-        return new self($sql, true, Sequence::of());
+        return new self($sql, true, $parameters ?? Sequence::of());
     }
 
     public function with(Parameter $parameter): self
