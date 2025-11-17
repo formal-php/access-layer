@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Connection;
 
-use Formal\AccessLayer\{
-    Connection,
-    Query,
-};
+use Formal\AccessLayer\Query;
 use Innmind\Immutable\Sequence;
 
 /**
@@ -14,12 +11,12 @@ use Innmind\Immutable\Sequence;
  */
 final class Lazy implements Implementation
 {
-    /** @var callable(): Connection */
+    /** @var callable(): Implementation */
     private $load;
-    private ?Connection $connection = null;
+    private ?Implementation $connection = null;
 
     /**
-     * @param callable(): Connection $load
+     * @param callable(): Implementation $load
      */
     private function __construct(callable $load)
     {
@@ -33,14 +30,14 @@ final class Lazy implements Implementation
     }
 
     /**
-     * @param callable(): Connection $load
+     * @param callable(): Implementation $load
      */
     public static function of(callable $load): self
     {
         return new self($load);
     }
 
-    private function connection(): Connection
+    private function connection(): Implementation
     {
         return $this->connection ?? $this->connection = ($this->load)();
     }

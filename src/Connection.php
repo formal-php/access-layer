@@ -41,7 +41,9 @@ final class Connection
      */
     public static function lazy(callable $load): self
     {
-        return new self(Lazy::of($load));
+        return new self(Lazy::of(
+            static fn() => $load()->implementation,
+        ));
     }
 
     public static function logger(self $connection, LoggerInterface $logger): self
