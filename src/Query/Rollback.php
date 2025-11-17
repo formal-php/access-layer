@@ -16,6 +16,6 @@ final class Rollback implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
-        return SQL::of('ROLLBACK');
+        return Query::of('ROLLBACK');
     }
 }

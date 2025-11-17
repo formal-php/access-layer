@@ -68,7 +68,7 @@ final class Delete implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
-        return SQL::of(
+        return Query::of(
             match ($driver) {
                 Driver::mysql => $this->mysqlSql($driver),
                 Driver::postgres => $this->postgresSql($driver),

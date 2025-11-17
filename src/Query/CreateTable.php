@@ -104,7 +104,7 @@ final class CreateTable implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
-        return SQL::of(\sprintf(
+        return Query::of(\sprintf(
             'CREATE TABLE %s %s (%s%s)',
             $this->ifNotExists ? 'IF NOT EXISTS' : '',
             $this->name->sql($driver),

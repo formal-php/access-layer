@@ -11,11 +11,12 @@
 
 - Requires PHP `8.4`
 - `Formal\AccessLayer\Connection` is now a final class, all previous implementations are now flagged as internal
+- `Formal\AccessLayer\Query` is now a final class
 
 ### Deprecated
 
 - `Formal\AccessLayer\Query\Select::onDemand()`, use `::lazily()` instead
-- `Formal\AccessLayer\Query\SQL::onDemand()`, use `::lazily()` instead
+- `Formal\AccessLayer\Query\SQL`, use `Formal\AccessLayer\Query` instead
 
 ### Removed
 

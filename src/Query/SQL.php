@@ -3,92 +3,35 @@ declare(strict_types = 1);
 
 namespace Formal\AccessLayer\Query;
 
-use Formal\AccessLayer\{
-    Query,
-    Driver,
-};
+use Formal\AccessLayer\Query;
 use Innmind\Immutable\Sequence;
 
 /**
- * @psalm-immutable
+ * @deprecated Use Query instead
  */
-final class SQL implements Query
+final class SQL
 {
-    /** @var non-empty-string */
-    private string $sql;
-    private bool $lazy;
-    /** @var Sequence<Parameter> */
-    private Sequence $parameters;
-
-    /**
-     * @param non-empty-string $sql
-     * @param Sequence<Parameter> $parameters
-     */
-    private function __construct(string $sql, bool $lazy, Sequence $parameters)
-    {
-        $this->sql = $sql;
-        $this->lazy = $lazy;
-        $this->parameters = $parameters;
-    }
-
     /**
      * @psalm-pure
+     * @deprecated Use Query::of() instead
      *
      * @param non-empty-string $sql
      * @param Sequence<Parameter> $parameters
      */
-    public static function of(string $sql, ?Sequence $parameters = null): self
+    public static function of(string $sql, ?Sequence $parameters = null): Query
     {
-        return new self($sql, false, $parameters ?? Sequence::of());
+        return Query::of($sql, $parameters);
     }
 
     /**
      * @psalm-pure
-     * @deprecated Use ::lazily() instead
+     * @deprecated Use Query::lazily() instead
      *
      * @param non-empty-string $sql
      * @param Sequence<Parameter> $parameters
      */
-    public static function onDemand(string $sql, ?Sequence $parameters = null): self
+    public static function onDemand(string $sql, ?Sequence $parameters = null): Query
     {
-        return self::lazily($sql);
-    }
-
-    /**
-     * @psalm-pure
-     *
-     * @param non-empty-string $sql
-     * @param Sequence<Parameter> $parameters
-     */
-    public static function lazily(string $sql, ?Sequence $parameters = null): self
-    {
-        return new self($sql, true, $parameters ?? Sequence::of());
-    }
-
-    public function with(Parameter $parameter): self
-    {
-        return new self(
-            $this->sql,
-            $this->lazy,
-            ($this->parameters)($parameter),
-        );
-    }
-
-    #[\Override]
-    public function parameters(): Sequence
-    {
-        return $this->parameters;
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        return $this->sql;
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return $this->lazy;
+        return Query::lazily($sql, $parameters);
     }
 }

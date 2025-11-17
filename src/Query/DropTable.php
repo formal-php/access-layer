@@ -42,7 +42,7 @@ final class DropTable implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
-        return SQL::of(\sprintf(
+        return Query::of(\sprintf(
             'DROP TABLE %s %s',
             $this->ifExists ? 'IF EXISTS' : '',
             $this->name->sql($driver),

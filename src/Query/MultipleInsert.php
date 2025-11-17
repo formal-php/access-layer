@@ -64,7 +64,7 @@ final class MultipleInsert implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
-        return SQL::of(
+        return Query::of(
             $this->buildInsert($driver),
             $this->rows->flatMap(static fn($row) => $row->values()->map(
                 static fn($value) => Parameter::of($value->value(), $value->type()),

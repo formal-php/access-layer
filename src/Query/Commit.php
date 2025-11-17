@@ -16,6 +16,6 @@ final class Commit implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
-        return SQL::of('COMMIT');
+        return Query::of('COMMIT');
     }
 }

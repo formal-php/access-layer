@@ -16,6 +16,6 @@ final class StartTransaction implements Builder
     #[\Override]
     public function normalize(Driver $driver): Query
     {
-        return SQL::of('START TRANSACTION');
+        return Query::of('START TRANSACTION');
     }
 }

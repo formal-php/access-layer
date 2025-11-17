@@ -253,8 +253,8 @@ final class Select implements Builder
             ->append($this->where->parameters());
 
         return match ($this->lazy) {
-            true => SQL::lazily($sql, $parameters),
-            false => SQL::of($sql, $parameters),
+            true => Query::lazily($sql, $parameters),
+            false => Query::of($sql, $parameters),
         };
     }
 

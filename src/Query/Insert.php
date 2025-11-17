@@ -46,7 +46,7 @@ final class Insert implements Builder
 
             $keys = $columns->map(static fn($column) => $column->sql($driver));
 
-            return SQL::of(
+            return Query::of(
                 \sprintf(
                     'INSERT INTO %s (%s) %s',
                     $this->table->sql($driver),
@@ -62,7 +62,7 @@ final class Insert implements Builder
         /** @var Sequence<string> */
         $values = $this->row->values()->map(static fn() => '?');
 
-        return SQL::of(
+        return Query::of(
             \sprintf(
                 'INSERT INTO %s (%s) VALUES (%s)',
                 $this->table->sql($driver),

@@ -65,7 +65,7 @@ final class Update implements Builder
             ->map(static fn($value) => Parameter::of($value->value(), $value->type()))
             ->append($this->where->parameters());
 
-        return SQL::of(
+        return Query::of(
             \sprintf(
                 'UPDATE %s SET %s %s',
                 $this->table->sql($driver),
