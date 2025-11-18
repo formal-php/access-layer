@@ -6,7 +6,6 @@ namespace Formal\AccessLayer;
 use Formal\AccessLayer\{
     Connection\Implementation,
     Connection\PDO,
-    Connection\Lazy,
     Connection\Logger,
     Exception\QueryFailed,
 };
@@ -42,16 +41,6 @@ final class Connection
         return PDO::of($dsn)->map(
             static fn($implementation) => new self($implementation),
         );
-    }
-
-    /**
-     * @param callable(): Connection $load
-     */
-    public static function lazy(callable $load): self
-    {
-        return new self(Lazy::of(
-            static fn() => $load()->implementation,
-        ));
     }
 
     public static function logger(self $connection, LoggerInterface $logger): self
