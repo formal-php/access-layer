@@ -31,7 +31,7 @@ use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\Set;
 
 $proofs = static function(Url $dsn, Driver $driver) {
-    $connection = Connection::new($dsn);
+    $connection = Connection::new($dsn)->unwrap();
     Properties::seed($connection);
     $connections = Set::call(static function() use ($connection) {
         Properties::seed($connection);
@@ -113,7 +113,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
 
                 $select = Select::from($table);
 
-                $ascii = Connection::new($dsn->withQuery(Query::of('charset=ascii')));
+                $ascii = Connection::new($dsn->withQuery(Query::of('charset=ascii')))->unwrap();
                 $assert
                     ->expected('gelé')
                     ->not()
@@ -127,7 +127,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
                             ),
                     );
 
-                $utf8 = Connection::new($dsn->withQuery(Query::of('charset=utf8mb4')));
+                $utf8 = Connection::new($dsn->withQuery(Query::of('charset=utf8mb4')))->unwrap();
                 $assert->same(
                     'gelé',
                     $utf8($select)

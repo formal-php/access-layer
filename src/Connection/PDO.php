@@ -17,7 +17,10 @@ use Innmind\Url\{
     Authority\UserInformation\User,
     Authority\UserInformation\Password,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Attempt,
+};
 
 /**
  * @internal
@@ -92,9 +95,12 @@ final class PDO implements Implementation
         };
     }
 
-    public static function of(Url $dsn): self
+    /**
+     * @return Attempt<self>
+     */
+    public static function of(Url $dsn): Attempt
     {
-        return new self($dsn);
+        return Attempt::of(static fn() => new self($dsn));
     }
 
     /**

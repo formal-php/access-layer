@@ -11,7 +11,10 @@ use Formal\AccessLayer\{
     Exception\QueryFailed,
 };
 use Innmind\Url\Url;
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Attempt,
+};
 use Psr\Log\LoggerInterface;
 
 final class Connection
@@ -31,9 +34,14 @@ final class Connection
         return ($this->implementation)($query);
     }
 
-    public static function new(Url $dsn): self
+    /**
+     * @return Attempt<self>
+     */
+    public static function new(Url $dsn): Attempt
     {
-        return new self(PDO::of($dsn));
+        return PDO::of($dsn)->map(
+            static fn($implementation) => new self($implementation),
+        );
     }
 
     /**

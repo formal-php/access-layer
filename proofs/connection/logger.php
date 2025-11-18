@@ -10,7 +10,7 @@ use Psr\Log\NullLogger;
 return static function() {
     $port = \getenv('DB_PORT') ?: '3306';
     $connection = Connection::logger(
-        Connection::new(Url::of("mysql://root:root@127.0.0.1:$port/example")),
+        Connection::new(Url::of("mysql://root:root@127.0.0.1:$port/example"))->unwrap(),
         new NullLogger,
     );
     Properties::seed($connection);
