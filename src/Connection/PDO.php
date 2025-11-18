@@ -105,6 +105,11 @@ final class PDO implements Implementation
         );
     }
 
+    public function driver(): Driver
+    {
+        return $this->driver;
+    }
+
     /**
      * @param callable(): bool $action
      *

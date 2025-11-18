@@ -28,12 +28,8 @@ final class Logger implements Implementation
     #[\Override]
     public function __invoke(Query|Query\Builder $query): Sequence
     {
-        // For the sake of simplicity the queries SQL is logged with the MySQL
-        // format. As otherwise it would require this decorator to retrieve the
-        // driver from the underlying connection.
-
         if ($query instanceof Query\Builder) {
-            $normalized = $query->normalize(Driver::mysql);
+            $normalized = $query->normalize($this->driver());
         } else {
             $normalized = $query;
         }
@@ -74,5 +70,10 @@ final class Logger implements Implementation
     public static function psr(Implementation $connection, LoggerInterface $logger): self
     {
         return new self($connection, $logger);
+    }
+
+    public function driver(): Driver
+    {
+        return $this->connection->driver();
     }
 }

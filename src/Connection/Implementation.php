@@ -6,6 +6,7 @@ namespace Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query,
     Row,
+    Driver,
 };
 use Innmind\Immutable\Sequence;
 
@@ -18,4 +19,5 @@ interface Implementation
      * @return Sequence<Row>
      */
     public function __invoke(Query|Query\Builder $query): Sequence;
+    public function driver(): Driver;
 }
