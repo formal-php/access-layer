@@ -105,6 +105,7 @@ final class PDO implements Implementation
         );
     }
 
+    #[\Override]
     public function driver(): Driver
     {
         return $this->driver;

@@ -71,6 +71,7 @@ final class Logger implements Implementation
         return new self($connection, $logger);
     }
 
+    #[\Override]
     public function driver(): Driver
     {
         return $this->connection->driver();
