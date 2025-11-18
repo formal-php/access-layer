@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Connection,
     Query,
     Driver,
 };
