@@ -100,7 +100,9 @@ final class PDO implements Implementation
      */
     public static function of(Url $dsn): Attempt
     {
-        return Attempt::of(static fn() => new self($dsn));
+        return Attempt::defer(
+            static fn() => Attempt::of(static fn() => new self($dsn)),
+        );
     }
 
     /**
