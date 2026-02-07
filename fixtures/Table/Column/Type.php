@@ -13,7 +13,7 @@ final class Type
      */
     public static function any(): Set
     {
-        return Set\Either::any(
+        return Set::either(
             self::bigint(),
             self::binary(),
             self::bit(),
@@ -28,7 +28,7 @@ final class Type
             self::nullable(),
             self::comment(),
             self::nullable(self::comment()),
-            Set\Elements::of(Model::uuid(), Model::bool()),
+            Set::of(Model::uuid(), Model::bool()),
         );
     }
 
@@ -37,7 +37,7 @@ final class Type
      */
     public static function constraint(): Set
     {
-        return Set\Either::any(
+        return Set::either(
             self::bigint(),
             self::binary(),
             self::bit(),
@@ -48,7 +48,7 @@ final class Type
             self::smallint(),
             self::tinyint(),
             self::varchar(),
-            Set\Elements::of(Model::uuid(), Model::bool()),
+            Set::of(Model::uuid(), Model::bool()),
         );
     }
 
@@ -57,7 +57,9 @@ final class Type
      */
     private static function bigint(): Set
     {
-        return Set\Integers::between(1, 255)->map(Model::bigint(...));
+        return Set::integers()
+            ->between(1, 255)
+            ->map(Model::bigint(...));
     }
 
     /**
@@ -65,7 +67,9 @@ final class Type
      */
     private static function binary(): Set
     {
-        return Set\Integers::between(1, 255)->map(Model::binary(...));
+        return Set::integers()
+            ->between(1, 255)
+            ->map(Model::binary(...));
     }
 
     /**
@@ -73,7 +77,9 @@ final class Type
      */
     private static function bit(): Set
     {
-        return Set\Integers::between(1, 64)->map(Model::bit(...));
+        return Set::integers()
+            ->between(1, 64)
+            ->map(Model::bit(...));
     }
 
     /**
@@ -81,7 +87,9 @@ final class Type
      */
     private static function char(): Set
     {
-        return Set\Integers::between(1, 255)->map(Model::char(...));
+        return Set::integers()
+            ->between(1, 255)
+            ->map(Model::char(...));
     }
 
     /**
@@ -89,12 +97,14 @@ final class Type
      */
     private static function decimal(): Set
     {
-        return Set\Either::any(
-            Set\Integers::between(1, 65)->map(Model::decimal(...)),
-            Set\Composite::immutable(
+        return Set::either(
+            Set::integers()
+                ->between(1, 65)
+                ->map(Model::decimal(...)),
+            Set::compose(
                 static fn($precision, $scale) => [$precision, $scale],
-                Set\Integers::between(1, 65),
-                Set\Integers::between(0, 30),
+                Set::integers()->between(1, 65),
+                Set::integers()->between(0, 30),
             )
                 ->filter(static fn($precision) => $precision[1] <= $precision[0]) // scale can't be higher than the precision
                 ->map(static fn($precision) => Model::decimal(...$precision)),
@@ -106,7 +116,9 @@ final class Type
      */
     private static function int(): Set
     {
-        return Set\Integers::between(1, 255)->map(Model::int(...));
+        return Set::integers()
+            ->between(1, 255)
+            ->map(Model::int(...));
     }
 
     /**
@@ -114,7 +126,9 @@ final class Type
      */
     private static function mediumint(): Set
     {
-        return Set\Integers::between(1, 255)->map(Model::mediumint(...));
+        return Set::integers()
+            ->between(1, 255)
+            ->map(Model::mediumint(...));
     }
 
     /**
@@ -122,7 +136,9 @@ final class Type
      */
     private static function smallint(): Set
     {
-        return Set\Integers::between(1, 255)->map(Model::smallint(...));
+        return Set::integers()
+            ->between(1, 255)
+            ->map(Model::smallint(...));
     }
 
     /**
@@ -130,7 +146,9 @@ final class Type
      */
     private static function tinyint(): Set
     {
-        return Set\Integers::between(1, 255)->map(Model::tinyint(...));
+        return Set::integers()
+            ->between(1, 255)
+            ->map(Model::tinyint(...));
     }
 
     /**
@@ -138,7 +156,9 @@ final class Type
      */
     private static function varchar(): Set
     {
-        return Set\Integers::between(1, 255)->map(Model::varchar(...));
+        return Set::integers()
+            ->between(1, 255)
+            ->map(Model::varchar(...));
     }
 
     /**
@@ -146,30 +166,27 @@ final class Type
      */
     private static function of(): Set
     {
-        return Set\Decorate::immutable(
-            static fn(string $name): Model => Model::$name(),
-            Set\Elements::of(
-                'bigint',
-                'binary',
-                'bit',
-                'blob',
-                'char',
-                'date',
-                'datetime',
-                'decimal',
-                'double',
-                'float',
-                'int',
-                'json',
-                'longtext',
-                'mediumint',
-                'mediumtext',
-                'smallint',
-                'text',
-                'tinyint',
-                'varchar',
-            ),
-        );
+        return Set::of(
+            'bigint',
+            'binary',
+            'bit',
+            'blob',
+            'char',
+            'date',
+            'datetime',
+            'decimal',
+            'double',
+            'float',
+            'int',
+            'json',
+            'longtext',
+            'mediumint',
+            'mediumtext',
+            'smallint',
+            'text',
+            'tinyint',
+            'varchar',
+        )->map(static fn(string $name): Model => Model::$name());
     }
 
     /**
@@ -177,9 +194,8 @@ final class Type
      */
     private static function nullable(?Set $set = null): Set
     {
-        return Set\Decorate::immutable(
+        return ($set ?? self::of())->map(
             static fn(Model $type): Model => $type->nullable(),
-            $set ?? self::of(),
         );
     }
 
@@ -188,10 +204,12 @@ final class Type
      */
     private static function comment(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(Model $type, string $comment): Model => $type->comment($comment),
             self::of(),
-            Set\Strings::madeOf(Set\Chars::alphanumerical())->atLeast(1),
-        );
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->alphanumerical())
+                ->atLeast(1),
+        )->toSet();
     }
 }

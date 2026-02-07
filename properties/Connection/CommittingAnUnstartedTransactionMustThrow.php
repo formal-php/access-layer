@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\Commit,
+    Query\Transaction,
     Exception\QueryFailed,
     Connection,
 };
@@ -21,7 +21,7 @@ final class CommittingAnUnstartedTransactionMustThrow implements Property
 {
     public static function any(): Set
     {
-        return Set\Elements::of(new self);
+        return Set::of(new self);
     }
 
     public function applicableTo(object $connection): bool
@@ -32,7 +32,7 @@ final class CommittingAnUnstartedTransactionMustThrow implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
-            $query = new Commit;
+            $query = Transaction::commit;
             $connection($query);
             $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {

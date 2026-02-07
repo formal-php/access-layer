@@ -74,7 +74,7 @@ final class Unique
             ->columns
             ->map(static fn($column) => ', '.$column->sql($driver))
             ->map(Str::of(...))
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->toString();
 
         return $this->name->match(

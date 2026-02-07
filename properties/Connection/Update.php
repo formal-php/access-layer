@@ -30,7 +30,7 @@ final class Update implements Property
 
     public static function any(): Set
     {
-        return Set\Uuid::any()->map(static fn($uuid) => new self($uuid));
+        return Set::uuid()->map(static fn($uuid) => new self($uuid));
     }
 
     public function applicableTo(object $connection): bool
@@ -55,14 +55,14 @@ final class Update implements Property
             Row::of(['registerNumber' => 24]),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
         $assert
             ->number($rows->size())
             ->greaterThanOrEqual(1);
-        $rows->foreach(static fn($row) => $assert->same(24, $row->column('registerNumber')->match(
+        $_ = $rows->foreach(static fn($row) => $assert->same(24, $row->column('registerNumber')->match(
             static fn($registerNumber) => $registerNumber,
             static fn() => null,
         )));

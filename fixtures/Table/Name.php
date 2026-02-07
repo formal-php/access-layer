@@ -13,17 +13,19 @@ final class Name
      */
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(string $firstChar, string $name): Model => Model::of($firstChar.$name),
-            Set\Either::any( // table name can't start with a number
-                Set\Chars::lowercaseLetter(),
-                Set\Chars::uppercaseLetter(),
+            Set::either( // table name can't start with a number
+                Set::strings()->chars()->lowercaseLetter(),
+                Set::strings()->chars()->uppercaseLetter(),
             ),
-            Set\Strings::madeOf(
-                Set\Chars::alphanumerical(),
-                Set\Elements::of('é', 'è', 'ê', 'ë', '_'),
-            )->between(0, 63),
-        );
+            Set::strings()
+                ->madeOf(
+                    Set::strings()->chars()->alphanumerical(),
+                    Set::of('é', 'è', 'ê', 'ë', '_'),
+                )
+                ->between(0, 63),
+        )->toSet();
     }
 
     /**
@@ -31,7 +33,7 @@ final class Name
      */
     public static function pair(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn($a, $b) => [$a, $b],
             self::any(),
             self::any(),

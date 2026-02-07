@@ -13,13 +13,11 @@ final class Column
      */
     public static function any(?Set $type = null, ?int $max = null): Set
     {
-        return Set\Randomize::of( // randomize to prevent same name used twice
-            Set\Composite::immutable(
-                Model::of(...),
-                Column\Name::any($max),
-                $type ?? Column\Type::any(),
-            ),
-        );
+        return Set::compose(
+            Model::of(...),
+            Column\Name::any($max),
+            $type ?? Column\Type::any(),
+        )->randomize();
     }
 
     /**
@@ -27,7 +25,7 @@ final class Column
      */
     public static function list(): Set
     {
-        return Set\Sequence::of(self::any())
+        return Set::sequence(self::any())
             ->between(1, 20)
             ->map(static function($columns) {
                 $filtered = [];

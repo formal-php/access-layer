@@ -40,12 +40,12 @@ final class CreateTableWithForeignKey implements Property
     {
         // max length of 30 for column names as combined can't be higher than 64
         // as it's the limit of the created constraint name
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             Name::pair(),
             Column::any(Column\Type::constraint(), 30),
             Column::any(null, 30),
-        );
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -60,7 +60,7 @@ final class CreateTableWithForeignKey implements Property
             $create = $create->primaryKey($this->primaryKey->name());
             $rows = $connection($create);
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
 
             $create = Query\CreateTable::named($this->name2, ConcreteColumn::of(
                 $this->foreignKey->name(),
@@ -73,7 +73,7 @@ final class CreateTableWithForeignKey implements Property
             );
             $rows = $connection($create);
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
         } finally {
             $connection(Query\DropTable::ifExists($this->name2));
             $connection(Query\DropTable::ifExists($this->name1));

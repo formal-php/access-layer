@@ -31,7 +31,7 @@ return static function() {
 
     yield proof(
         'Type::for() int',
-        given(Set\Integers::any()),
+        given(Set::integers()),
         static function($assert, $int) {
             $assert->same(
                 Type::int,
@@ -42,7 +42,7 @@ return static function() {
 
     yield proof(
         'Type::for() string',
-        given(Set\Unicode::strings()),
+        given(Set::strings()->unicode()),
         static function($assert, $string) {
             $assert->same(
                 Type::string,
@@ -54,7 +54,7 @@ return static function() {
     yield proof(
         'Type::for() unsupported data',
         given(
-            Set\Elements::of(
+            Set::of(
                 new \stdClass,
                 new class {},
                 static fn() => null,

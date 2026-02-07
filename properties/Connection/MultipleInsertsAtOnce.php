@@ -48,15 +48,19 @@ final class MultipleInsertsAtOnce implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-            Set\Integers::any(),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-            Set\Integers::any(),
-        );
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(0, 255),
+            Set::integers(),
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(0, 255),
+            Set::integers(),
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -69,7 +73,7 @@ final class MultipleInsertsAtOnce implements Property
         $select = SQL::of("SELECT * FROM test WHERE id IN ('{$this->uuid1}', '{$this->uuid2}')");
         $rows = $connection($select);
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         $insert = Query\MultipleInsert::into(
             Table\Name::of('test'),
@@ -90,11 +94,11 @@ final class MultipleInsertsAtOnce implements Property
             ]),
         )));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
-        $assert->count(2, $rows);
+        $assert->same(2, $rows->size());
         $assert
             ->expected(
                 $rows

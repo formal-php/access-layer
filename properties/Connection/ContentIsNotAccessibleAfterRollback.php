@@ -6,8 +6,7 @@ namespace Properties\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query\SQL,
     Query\Insert,
-    Query\StartTransaction,
-    Query\Rollback,
+    Query\Transaction,
     Table\Name,
     Row,
     Connection,
@@ -36,12 +35,14 @@ final class ContentIsNotAccessibleAfterRollback implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-            Set\Integers::any(),
-        );
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(0, 255),
+            Set::integers(),
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -51,7 +52,7 @@ final class ContentIsNotAccessibleAfterRollback implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(new StartTransaction);
+        $connection(Transaction::start);
 
         $connection(Insert::into(
             Name::of('test'),
@@ -62,11 +63,11 @@ final class ContentIsNotAccessibleAfterRollback implements Property
             ]),
         ));
 
-        $connection(new Rollback);
+        $connection(Transaction::rollback);
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         return $connection;
     }

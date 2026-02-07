@@ -38,12 +38,12 @@ final class CreateTableWithPrimaryKey implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             Name::any(),
             Column::any(Column\Type::constraint()),
             Column::list(),
-        );
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -58,7 +58,7 @@ final class CreateTableWithPrimaryKey implements Property
             $create = $create->primaryKey($this->primaryKey->name());
             $rows = $connection($create);
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
         } finally {
             $connection(Query\DropTable::ifExists($this->name));
         }

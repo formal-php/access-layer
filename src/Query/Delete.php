@@ -19,7 +19,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class Delete implements Query
+final class Delete implements Builder
 {
     private Name|Name\Aliased $table;
     /** @var Sequence<Join> */
@@ -66,30 +66,23 @@ final class Delete implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
+    public function normalize(Driver $driver): Query
     {
-        return $this->where->parameters();
-    }
+        [$where, $parameters] = $this->where->normalize($driver);
 
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        return match ($driver) {
-            Driver::mysql => $this->mysqlSql($driver),
-            Driver::postgres => $this->postgresSql($driver),
-        };
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
+        return Query::of(
+            match ($driver) {
+                Driver::mysql => $this->mysqlSql($driver, $where),
+                Driver::postgres => $this->postgresSql($driver, $where),
+            },
+            $parameters,
+        );
     }
 
     /**
      * @return non-empty-string
      */
-    private function mysqlSql(Driver $driver): string
+    private function mysqlSql(Driver $driver, string $where): string
     {
         /** @var non-empty-string */
         return \sprintf(
@@ -103,19 +96,18 @@ final class Delete implements Query
                 ->joins
                 ->map(static fn($join) => $join->sql($driver))
                 ->map(Str::of(...))
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
-            $this->where->sql($driver),
+            $where,
         );
     }
 
     /**
      * @return non-empty-string
      */
-    private function postgresSql(Driver $driver): string
+    private function postgresSql(Driver $driver, string $where): string
     {
         $joins = '';
-        $where = $this->where->sql($driver);
 
         if (!$this->joins->empty()) {
             $joins = Str::of(', ')
@@ -138,7 +130,7 @@ final class Delete implements Query
                         );
                     })
                     ->map(Str::of(...))
-                    ->fold(new Concat)
+                    ->fold(Concat::monoid)
                     ->dropEnd(4)
                     ->prepend('WHERE ')
                     ->toString(),
@@ -155,7 +147,7 @@ final class Delete implements Query
                         );
                     })
                     ->map(Str::of(...))
-                    ->fold(new Concat)
+                    ->fold(Concat::monoid)
                     ->drop(4)
                     ->prepend(' AND (')
                     ->append(')')
