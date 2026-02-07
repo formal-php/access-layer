@@ -33,11 +33,11 @@ final class CreateTable implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             Name::any(),
             Column::list(),
-        );
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -50,9 +50,9 @@ final class CreateTable implements Property
         try {
             $rows = $connection(Query\CreateTable::named($this->name, ...$this->columns));
 
-            $assert->count(0, $rows);
+            $assert->same(0, $rows->size());
         } finally {
-            $connection(Query\DropTable::ifExists($this->name));
+            $_ = $connection(Query\DropTable::ifExists($this->name));
         }
 
         return $connection;

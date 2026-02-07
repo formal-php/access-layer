@@ -30,7 +30,7 @@ final class DeleteWithAlias implements Property
 
     public static function any(): Set
     {
-        return Set\Uuid::any()->map(static fn($uuid) => new self($uuid));
+        return Set::uuid()->map(static fn($uuid) => new self($uuid));
     }
 
     public function applicableTo(object $connection): bool
@@ -41,7 +41,7 @@ final class DeleteWithAlias implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         $select = SQL::of('SELECT * FROM test');
-        $connection(Query\Insert::into(
+        $_ = $connection(Query\Insert::into(
             Table\Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
@@ -54,11 +54,11 @@ final class DeleteWithAlias implements Property
             Table\Name::of('test')->as('alias'),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         return $connection;
     }

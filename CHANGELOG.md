@@ -1,5 +1,35 @@
 # Changelog
 
+## 5.0.0 - 2026-02-07
+
+### Added
+
+- `Formal\AccessLayer\Query\Builder`
+- `Formal\AccessLayer\Query\SQL` named constructors allow to pass all the parameters at once via the second argument
+- `Formal\AccessLayer\Query\Transaction`
+
+### Changed
+
+- Requires PHP `8.4`
+- `Formal\AccessLayer\Connection` is now a final class, all previous implementations are now flagged as internal
+- `Formal\AccessLayer\Query` is now a final class
+- Requires `innmind/black-box:~6.5`
+- Requires `innmind/immutable:~6.0`
+- Requires `innmind/url:~5.0`
+
+### Deprecated
+
+- `Formal\AccessLayer\Query\Select::onDemand()`, use `::lazily()` instead
+- `Formal\AccessLayer\Query\SQL`, use `Formal\AccessLayer\Query` instead
+
+### Removed
+
+- `Formal\AccessLayer\Connection\PDO::persistent()`
+- `Formal\AccessLayer\Query\Where::sql()` and `::parameters()`, use `::normalize()` instead
+- `Formal\AccessLayer\Query\Commit`, use `Transaction::commit` instead
+- `Formal\AccessLayer\Query\StartTransaction`, use `Transaction::start` instead
+- `Formal\AccessLayer\Query\Rollback`, use `Transaction::rollback` instead
+
 ## 4.2.0 - 2025-04-09
 
 ### Added

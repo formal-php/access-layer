@@ -24,7 +24,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class Select implements Query
+final class Select implements Builder
 {
     /**
      * @param Sequence<Join> $joins
@@ -70,8 +70,17 @@ final class Select implements Query
 
     /**
      * @psalm-pure
+     * @deprecated Use ::lazily() instead
      */
     public static function onDemand(Name|Name\Aliased $table): self
+    {
+        return self::lazily($table);
+    }
+
+    /**
+     * @psalm-pure
+     */
+    public static function lazily(Name|Name\Aliased $table): self
     {
         /** @var Maybe<non-empty-string> */
         $count = Maybe::nothing();
@@ -197,23 +206,11 @@ final class Select implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
+    public function normalize(Driver $driver): Query
     {
-        return $this
-            ->columns
-            ->keep(Instance::of(Row\Value::class))
-            ->map(static fn($value) => Parameter::of(
-                $value->value(),
-                $value->type(),
-            ))
-            ->append($this->where->parameters());
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
+        [$where, $parameters] = $this->where->normalize($driver);
         /** @var non-empty-string */
-        return \sprintf(
+        $sql = \sprintf(
             'SELECT %s FROM %s%s %s%s%s%s',
             $this
                 ->count
@@ -227,9 +224,9 @@ final class Select implements Query
                 ->joins
                 ->map(static fn($join) => $join->sql($driver))
                 ->map(Str::of(...))
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
-            $this->where->sql($driver),
+            $where,
             match ($this->orderBy) {
                 null => '',
                 default => \sprintf(
@@ -247,12 +244,19 @@ final class Select implements Query
                 default => ' OFFSET '.$this->offset,
             },
         );
-    }
+        $parameters = $this
+            ->columns
+            ->keep(Instance::of(Row\Value::class))
+            ->map(static fn($value) => Parameter::of(
+                $value->value(),
+                $value->type(),
+            ))
+            ->append($parameters);
 
-    #[\Override]
-    public function lazy(): bool
-    {
-        return $this->lazy;
+        return match ($this->lazy) {
+            true => Query::lazily($sql, $parameters),
+            false => Query::of($sql, $parameters),
+        };
     }
 
     /**

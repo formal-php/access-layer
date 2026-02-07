@@ -21,7 +21,7 @@ final class AnInvalidQueryMustThrow implements Property
 {
     public static function any(): Set
     {
-        return Set\Elements::of(new self);
+        return Set::of(new self);
     }
 
     public function applicableTo(object $connection): bool
@@ -33,7 +33,7 @@ final class AnInvalidQueryMustThrow implements Property
     {
         try {
             $query = SQL::of('INSERT');
-            $connection($query);
+            $_ = $connection($query);
             $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
             $assert->same($query, $e->query());

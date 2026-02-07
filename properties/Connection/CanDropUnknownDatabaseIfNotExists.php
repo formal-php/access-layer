@@ -40,7 +40,7 @@ final class CanDropUnknownDatabaseIfNotExists implements Property
     {
         $rows = $connection(Query\DropTable::ifExists($this->name));
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         return $connection;
     }

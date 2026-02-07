@@ -34,11 +34,11 @@ final class CreatingSameTableTwiceMustThrow implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
             Name::any(),
             Column::list(),
-        );
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -50,13 +50,13 @@ final class CreatingSameTableTwiceMustThrow implements Property
     {
         try {
             $expected = Query\CreateTable::named($this->name, ...$this->columns);
-            $connection(Query\CreateTable::named($this->name, ...$this->columns));
-            $connection($expected);
+            $_ = $connection(Query\CreateTable::named($this->name, ...$this->columns));
+            $_ = $connection($expected);
             $assert->fail('it should throw');
         } catch (QueryFailed $e) {
             $assert->same($expected, $e->query());
         } finally {
-            $connection(Query\DropTable::ifExists($this->name));
+            $_ = $connection(Query\DropTable::ifExists($this->name));
         }
 
         return $connection;

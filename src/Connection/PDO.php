@@ -4,7 +4,6 @@ declare(strict_types = 1);
 namespace Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Connection,
     Query,
     Query\Parameter,
     Query\Parameter\Type,
@@ -18,14 +17,20 @@ use Innmind\Url\{
     Authority\UserInformation\User,
     Authority\UserInformation\Password,
 };
-use Innmind\Immutable\Sequence;
+use Innmind\Immutable\{
+    Sequence,
+    Attempt,
+};
 
-final class PDO implements Connection
+/**
+ * @internal
+ */
+final class PDO implements Implementation
 {
     private \PDO $pdo;
     private Driver $driver;
 
-    private function __construct(Url $dsn, array $options = [])
+    private function __construct(Url $dsn)
     {
         $dsnUser = $dsn->authority()->userInformation()->user();
         $dsnPassword = $dsn->authority()->userInformation()->password();
@@ -67,22 +72,22 @@ final class PDO implements Connection
             $charset,
         );
 
-        $this->pdo = new \PDO($pdoDsn, $user, $password, $options);
+        $this->pdo = new \PDO($pdoDsn, $user, $password);
     }
 
     #[\Override]
-    public function __invoke(Query $query): Sequence
+    public function __invoke(Query|Query\Builder $query): Sequence
     {
-        return match (\get_class($query)) {
-            Query\StartTransaction::class => $this->transaction(
+        return match ($query) {
+            Query\Transaction::start => $this->transaction(
                 $query,
                 fn(): bool => $this->pdo->beginTransaction(),
             ),
-            Query\Commit::class => $this->transaction(
+            Query\Transaction::commit => $this->transaction(
                 $query,
                 fn(): bool => $this->pdo->commit(),
             ),
-            Query\Rollback::class => $this->transaction(
+            Query\Transaction::rollback => $this->transaction(
                 $query,
                 fn(): bool => $this->pdo->rollBack(),
             ),
@@ -90,14 +95,20 @@ final class PDO implements Connection
         };
     }
 
-    public static function of(Url $dsn): self
+    /**
+     * @return Attempt<self>
+     */
+    public static function of(Url $dsn): Attempt
     {
-        return new self($dsn);
+        return Attempt::defer(
+            static fn() => Attempt::of(static fn() => new self($dsn)),
+        );
     }
 
-    public static function persistent(Url $dsn): self
+    #[\Override]
+    public function driver(): Driver
     {
-        return new self($dsn, [\PDO::ATTR_PERSISTENT => true]);
+        return $this->driver;
     }
 
     /**
@@ -105,9 +116,13 @@ final class PDO implements Connection
      *
      * @return Sequence<Row>
      */
-    private function transaction(Query $query, callable $action): Sequence
+    private function transaction(Query\Transaction $query, callable $action): Sequence
     {
-        $this->attempt($query, $action);
+        $this->attempt(
+            $query,
+            $query->normalize($this->driver),
+            $action,
+        );
 
         /** @var Sequence<Row> */
         return Sequence::of();
@@ -116,22 +131,30 @@ final class PDO implements Connection
     /**
      * @return Sequence<Row>
      */
-    private function execute(Query $query): Sequence
+    private function execute(Query|Query\Builder $query): Sequence
     {
-        return match ($query->lazy()) {
-            true => $this->lazy($query),
-            false => $this->defer($query),
+        if ($query instanceof Query\Builder) {
+            $normalized = $query->normalize($this->driver);
+        } else {
+            $normalized = $query;
+        }
+
+        return match ($normalized->lazy()) {
+            true => $this->lazy($query, $normalized),
+            false => $this->defer($query, $normalized),
         };
     }
 
     /**
      * @return Sequence<Row>
      */
-    private function lazy(Query $query): Sequence
-    {
+    private function lazy(
+        Query|Query\Builder $query,
+        Query $normalized,
+    ): Sequence {
         /** @var Sequence<Row> */
-        return Sequence::lazy(function() use ($query): \Generator {
-            $statement = $this->prepare($query);
+        return Sequence::lazy(function() use ($query, $normalized): \Generator {
+            $statement = $this->prepare($query, $normalized);
 
             /** @psalm-suppress MixedAssignment */
             while ($row = $statement->fetch(\PDO::FETCH_ASSOC)) {
@@ -146,9 +169,11 @@ final class PDO implements Connection
     /**
      * @return Sequence<Row>
      */
-    private function defer(Query $query): Sequence
-    {
-        $statement = $this->prepare($query);
+    private function defer(
+        Query|Query\Builder $query,
+        Query $normalized,
+    ): Sequence {
+        $statement = $this->prepare($query, $normalized);
 
         /** @var Sequence<Row> */
         return Sequence::defer(
@@ -167,19 +192,23 @@ final class PDO implements Connection
     /**
      * @throws QueryFailed
      */
-    private function prepare(Query $query): \PDOStatement
-    {
+    private function prepare(
+        Query|Query\Builder $query,
+        Query $normalized,
+    ): \PDOStatement {
         $statement = $this->guard(
             $query,
-            fn() => $this->pdo->prepare($query->sql($this->driver)),
+            $normalized,
+            fn() => $this->pdo->prepare($normalized->sql()),
         );
 
-        $_ = $query->parameters()->reduce(
+        $_ = $normalized->parameters()->reduce(
             0,
-            function(int $index, Parameter $parameter) use ($query, $statement): int {
+            function(int $index, Parameter $parameter) use ($query, $normalized, $statement): int {
                 ++$index;
                 $this->attempt(
                     $query,
+                    $normalized,
                     fn(): bool => $statement->bindValue(
                         $parameter->name()->match(
                             static fn($name) => $name,
@@ -194,7 +223,11 @@ final class PDO implements Connection
             },
         );
 
-        $this->attempt($query, static fn(): bool => $statement->execute());
+        $this->attempt(
+            $query,
+            $normalized,
+            static fn(): bool => $statement->execute(),
+        );
 
         return $statement;
     }
@@ -204,8 +237,11 @@ final class PDO implements Connection
      *
      * @throws QueryFailed
      */
-    private function guard(Query $query, callable $try): \PDOStatement
-    {
+    private function guard(
+        Query|Query\Builder $query,
+        Query $normalized,
+        callable $try,
+    ): \PDOStatement {
         try {
             $statement = $try();
 
@@ -225,8 +261,8 @@ final class PDO implements Connection
         }
 
         throw new QueryFailed(
-            $this->driver,
             $query,
+            $normalized,
             $errorInfo[0],
             $errorInfo[1],
             $errorInfo[2],
@@ -239,8 +275,11 @@ final class PDO implements Connection
      *
      * @throws QueryFailed
      */
-    private function attempt(Query $query, callable $attempt): void
-    {
+    private function attempt(
+        Query|Query\Builder $query,
+        Query $normalized,
+        callable $attempt,
+    ): void {
         try {
             if ($attempt()) {
                 return;
@@ -255,8 +294,8 @@ final class PDO implements Connection
         }
 
         throw new QueryFailed(
-            $this->driver,
             $query,
+            $normalized,
             $errorInfo[0],
             $errorInfo[1],
             $errorInfo[2],

@@ -1,22 +1,16 @@
 <?php
 declare(strict_types = 1);
 
-use Formal\AccessLayer\{
-    Connection,
-    Connection\PDO,
-    Connection\Lazy,
-};
+use Formal\AccessLayer\Connection;
 use Properties\Formal\AccessLayer\Connection as Properties;
 use Innmind\Url\Url;
 use Innmind\BlackBox\Set;
 
 return static function() {
     $port = \getenv('DB_PORT') ?: '3306';
-    $connection = Lazy::of(
-        static fn() => PDO::of(Url::of("mysql://root:root@127.0.0.1:$port/example")),
-    );
+    $connection = Connection::new(Url::of("mysql://root:root@127.0.0.1:$port/example"))->unwrap();
     Properties::seed($connection);
-    $connections = Set\Call::of(static function() use ($connection) {
+    $connections = Set::call(static function() use ($connection) {
         Properties::seed($connection);
 
         return $connection;
@@ -32,8 +26,7 @@ return static function() {
     yield test(
         'Lazy connection must not be established at instanciation',
         static fn($assert) => $assert
-            ->object(Lazy::of(static fn() => PDO::of(Url::of('mysql://unknown:unknown@127.0.0.1:3306/unknown'))))
-            ->instance(Connection::class),
+            ->object(Connection::new(Url::of('mysql://unknown:unknown@127.0.0.1:3306/unknown'))),
     );
 
     yield properties(

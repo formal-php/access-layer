@@ -38,11 +38,11 @@ final class UpdateSpecificRow implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Uuid::any(),
-        );
+            Set::uuid(),
+            Set::uuid(),
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -58,7 +58,7 @@ final class UpdateSpecificRow implements Property
             Column\Name::of('username'),
             Column\Name::of('registerNumber'),
         );
-        $connection($insert(Sequence::of(
+        $_ = $connection($insert(Sequence::of(
             Row::of([
                 'id' => $this->uuid1,
                 'username' => 'foo',
@@ -82,11 +82,11 @@ final class UpdateSpecificRow implements Property
         ));
         $sequence = $connection($update);
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid1}'"));
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             24,
             $rows
@@ -100,7 +100,7 @@ final class UpdateSpecificRow implements Property
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid2}'"));
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             42,
             $rows

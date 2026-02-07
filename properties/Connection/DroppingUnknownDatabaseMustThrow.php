@@ -41,7 +41,7 @@ final class DroppingUnknownDatabaseMustThrow implements Property
     {
         try {
             $query = Query\DropTable::named($this->name);
-            $connection($query);
+            $_ = $connection($query);
             $assert->fail('it should throw');
         } catch (QueryFailed $e) {
             $assert->same($query, $e->query());

@@ -18,7 +18,7 @@ use Innmind\Immutable\{
 /**
  * @psalm-immutable
  */
-final class MultipleInsert implements Query
+final class MultipleInsert implements Builder
 {
     private Name $table;
     /** @var Sequence<Column\Name> */
@@ -62,23 +62,14 @@ final class MultipleInsert implements Query
     }
 
     #[\Override]
-    public function parameters(): Sequence
+    public function normalize(Driver $driver): Query
     {
-        return $this->rows->flatMap(static fn($row) => $row->values()->map(
-            static fn($value) => Parameter::of($value->value(), $value->type()),
-        ));
-    }
-
-    #[\Override]
-    public function sql(Driver $driver): string
-    {
-        return $this->buildInsert($driver);
-    }
-
-    #[\Override]
-    public function lazy(): bool
-    {
-        return false;
+        return Query::of(
+            $this->buildInsert($driver),
+            $this->rows->flatMap(static fn($row) => $row->values()->map(
+                static fn($value) => Parameter::of($value->value(), $value->type()),
+            )),
+        );
     }
 
     /**

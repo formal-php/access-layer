@@ -23,9 +23,10 @@ return static function() {
         static function($assert) {
             $where = Where::of(null);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->object($where)->instance(Where::class);
-            $assert->same('', $where->sql(Driver::mysql));
-            $assert->count(0, $where->parameters());
+            $assert->same('', $sql);
+            $assert->same(0, $parameters->size());
         },
     );
 
@@ -33,7 +34,7 @@ return static function() {
         'Where equal comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $specification = Property::of(
@@ -43,12 +44,13 @@ return static function() {
             );
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} = ?",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(1, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(1, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -59,7 +61,7 @@ return static function() {
         'Where less than comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $specification = Property::of(
@@ -69,12 +71,13 @@ return static function() {
             );
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} < ?",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(1, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(1, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -85,7 +88,7 @@ return static function() {
         'Where less than or equal comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $lessThan = Property::of(
@@ -100,12 +103,13 @@ return static function() {
             );
             $where = Where::of($lessThan->or($equal));
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} <= ?",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(1, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(1, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -117,7 +121,7 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column1, $column2, $value) {
             $lessThan = Property::of(
@@ -131,17 +135,18 @@ return static function() {
                 $value,
             );
             $where = Where::of($lessThan->or($equal));
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
 
             $assert->same(
                 "WHERE ({$column1->name()->sql(Driver::mysql)} < ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(2, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(2, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($value, $where->parameters()->last()->match(
+            $assert->same($value, $parameters->last()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -152,7 +157,7 @@ return static function() {
         'Where more than comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $specification = Property::of(
@@ -162,12 +167,13 @@ return static function() {
             );
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} > ?",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(1, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(1, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -178,7 +184,7 @@ return static function() {
         'Where more than or equal comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column, $value) {
             $moreThan = Property::of(
@@ -193,12 +199,13 @@ return static function() {
             );
             $where = Where::of($moreThan->or($equal));
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} >= ?",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(1, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(1, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -210,7 +217,7 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $column1, $column2, $value) {
             $moreThan = Property::of(
@@ -225,16 +232,17 @@ return static function() {
             );
             $where = Where::of($moreThan->or($equal));
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE ({$column1->name()->sql(Driver::mysql)} > ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(2, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(2, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($value, $where->parameters()->last()->match(
+            $assert->same($value, $parameters->last()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -252,11 +260,12 @@ return static function() {
             );
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} IS NULL",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(0, $where->parameters());
+            $assert->same(0, $parameters->size());
         },
     );
 
@@ -271,11 +280,12 @@ return static function() {
             );
             $where = Where::of($specification->not());
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} IS NOT NULL",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(0, $where->parameters());
+            $assert->same(0, $parameters->size());
         },
     );
 
@@ -283,12 +293,12 @@ return static function() {
         'Where in comparator',
         given(
             Column::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
-            Set\Sequence::of(
-                Set\Strings::any(),
-                Set\Integers::between(1, 5),
+            Set::strings(),
+            Set::strings(),
+            Set::strings(),
+            Set::sequence(
+                Set::strings(),
+                Set::integers()->between(1, 5),
             ),
         ),
         static function($assert, $column, $value1, $value2, $value3, $values) {
@@ -299,20 +309,21 @@ return static function() {
             );
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} IN (?, ?, ?)",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(3, $where->parameters());
-            $assert->same($value1, $where->parameters()->get(0)->match(
+            $assert->same(3, $parameters->size());
+            $assert->same($value1, $parameters->get(0)->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($value2, $where->parameters()->get(1)->match(
+            $assert->same($value2, $parameters->get(1)->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($value3, $where->parameters()->get(2)->match(
+            $assert->same($value3, $parameters->get(2)->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -324,11 +335,12 @@ return static function() {
             );
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 \count($values),
-                \count_chars($where->sql(Driver::mysql))[63], // looking for '?' placeholders
+                \count_chars($sql)[63], // looking for '?' placeholders
             );
-            $assert->count(\count($values), $where->parameters());
+            $assert->same(\count($values), $parameters->size());
         },
     );
 
@@ -336,8 +348,8 @@ return static function() {
         'Where not',
         given(
             Column::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
+            Set::strings(),
+            Set::strings(),
         ),
         static function($assert, $column, $leftValue, $rightValue){
             $specification = Property::of(
@@ -347,12 +359,13 @@ return static function() {
             );
             $where = Where::of($specification->not());
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} <> ?",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(1, $where->parameters());
-            $assert->same($leftValue, $where->parameters()->first()->match(
+            $assert->same(1, $parameters->size());
+            $assert->same($leftValue, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -370,16 +383,17 @@ return static function() {
             $specification = $left->or($right);
             $where = Where::of($specification->not());
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE NOT(({$column->name()->sql(Driver::mysql)} = ? OR {$column->name()->sql(Driver::mysql)} = ?))",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(2, $where->parameters());
-            $assert->same($leftValue, $where->parameters()->get(0)->match(
+            $assert->same(2, $parameters->size());
+            $assert->same($leftValue, $parameters->get(0)->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($rightValue, $where->parameters()->get(1)->match(
+            $assert->same($rightValue, $parameters->get(1)->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -391,8 +405,8 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
+            Set::strings(),
+            Set::strings(),
         ),
         static function($assert, $column1, $column2, $value1, $value2) {
             $left = Property::of(
@@ -408,16 +422,17 @@ return static function() {
             $specification = $left->and($right->not());
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE ({$column1->name()->sql(Driver::mysql)} = ? AND {$column2->name()->sql(Driver::mysql)} <> ?)",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(2, $where->parameters());
-            $assert->same($value1, $where->parameters()->first()->match(
+            $assert->same(2, $parameters->size());
+            $assert->same($value1, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($value2, $where->parameters()->last()->match(
+            $assert->same($value2, $parameters->last()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -435,16 +450,17 @@ return static function() {
             $specification = $left->not()->and($right);
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE ({$column1->name()->sql(Driver::mysql)} <> ? AND {$column2->name()->sql(Driver::mysql)} = ?)",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(2, $where->parameters());
-            $assert->same($value1, $where->parameters()->first()->match(
+            $assert->same(2, $parameters->size());
+            $assert->same($value1, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($value2, $where->parameters()->last()->match(
+            $assert->same($value2, $parameters->last()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -456,8 +472,8 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
-            Set\Strings::any(),
+            Set::strings(),
+            Set::strings(),
         ),
         static function($assert, $column1, $column2, $value1, $value2) {
             $left = Property::of(
@@ -473,16 +489,17 @@ return static function() {
             $specification = $left->or($right->not());
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE ({$column1->name()->sql(Driver::mysql)} = ? OR {$column2->name()->sql(Driver::mysql)} <> ?)",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(2, $where->parameters());
-            $assert->same($value1, $where->parameters()->first()->match(
+            $assert->same(2, $parameters->size());
+            $assert->same($value1, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($value2, $where->parameters()->last()->match(
+            $assert->same($value2, $parameters->last()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -500,16 +517,17 @@ return static function() {
             $specification = $left->not()->or($right);
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE ({$column1->name()->sql(Driver::mysql)} <> ? OR {$column2->name()->sql(Driver::mysql)} = ?)",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(2, $where->parameters());
-            $assert->same($value1, $where->parameters()->first()->match(
+            $assert->same(2, $parameters->size());
+            $assert->same($value1, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($value2, $where->parameters()->last()->match(
+            $assert->same($value2, $parameters->last()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
@@ -521,8 +539,8 @@ return static function() {
         given(
             Column::any(),
             Column::any(),
-            Set\Strings::any(),
-            Set\Elements::of(
+            Set::strings(),
+            Set::of(
                 Type::bool,
                 Type::null,
                 Type::int,
@@ -538,16 +556,17 @@ return static function() {
             );
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$column->name()->sql(Driver::mysql)} = ?",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(1, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(1, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-            $assert->same($type, $where->parameters()->first()->match(
+            $assert->same($type, $parameters->first()->match(
                 static fn($parameter) => $parameter->type(),
                 static fn() => null,
             ));
@@ -559,7 +578,7 @@ return static function() {
         given(
             Name::any(),
             Column::any(),
-            Set\Strings::any(),
+            Set::strings(),
         ),
         static function($assert, $table, $column, $value) {
             $specification = Property::of(
@@ -569,12 +588,13 @@ return static function() {
             );
             $where = Where::of($specification);
 
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
             $assert->same(
                 "WHERE {$table->sql(Driver::mysql)}.{$column->name()->sql(Driver::mysql)} = ?",
-                $where->sql(Driver::mysql),
+                $sql,
             );
-            $assert->count(1, $where->parameters());
-            $assert->same($value, $where->parameters()->first()->match(
+            $assert->same(1, $parameters->size());
+            $assert->same($value, $parameters->first()->match(
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));

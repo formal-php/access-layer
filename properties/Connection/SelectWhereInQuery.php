@@ -49,17 +49,23 @@ final class SelectWhereInQuery implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-            Set\Integers::any(),
+            Set::uuid(),
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(0, 255),
+            Set::integers(),
             Set\MutuallyExclusive::of(
-                Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-                Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
+                Set::strings()
+                    ->madeOf(Set::strings()->chars()->ascii())
+                    ->between(0, 255),
+                Set::strings()
+                    ->madeOf(Set::strings()->chars()->ascii())
+                    ->between(0, 255),
             ),
-        );
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -76,13 +82,13 @@ final class SelectWhereInQuery implements Property
             ->with(Parameter::of($this->uuid2))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
-        $connection($insert);
+        $_ = $connection($insert);
         $insert = SQL::of('INSERT INTO test_values VALUES (?, ?), (?, ?);')
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->value1))
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->value2));
-        $connection($insert);
+        $_ = $connection($insert);
 
         $select = Select::from(Name::of('test'));
         $select = $select->where(Comparator\Property::of(
@@ -100,7 +106,7 @@ final class SelectWhereInQuery implements Property
         ));
         $rows = $connection($select);
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             $this->uuid1,
             $rows

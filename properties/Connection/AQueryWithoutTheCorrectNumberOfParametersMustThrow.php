@@ -21,7 +21,7 @@ final class AQueryWithoutTheCorrectNumberOfParametersMustThrow implements Proper
 {
     public static function any(): Set
     {
-        return Set\Elements::of(new self);
+        return Set::of(new self);
     }
 
     public function applicableTo(object $connection): bool
@@ -33,7 +33,7 @@ final class AQueryWithoutTheCorrectNumberOfParametersMustThrow implements Proper
     {
         try {
             $query = SQL::of('INSERT INTO test VALUES (:uuid, :username, :registerNumber);');
-            $connection($query);
+            $_ = $connection($query);
             $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
             $assert->same($query, $e->query());

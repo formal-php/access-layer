@@ -33,12 +33,14 @@ final class MustThrowWhenValueDoesntFitTheSchema implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-            Set\Integers::any(),
-        );
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(0, 255),
+            Set::integers(),
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -54,7 +56,7 @@ final class MustThrowWhenValueDoesntFitTheSchema implements Property
                 ->with(Parameter::named('uuid', $this->uuid.$this->uuid)) // too long
                 ->with(Parameter::named('username', $this->username))
                 ->with(Parameter::named('registerNumber', $this->number));
-            $connection($query);
+            $_ = $connection($query);
             $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
             $assert->same($query, $e->query());

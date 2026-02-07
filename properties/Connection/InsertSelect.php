@@ -35,13 +35,17 @@ final class InsertSelect implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::alphanumerical())->between(0, 100),
-            Set\Integers::any(),
-            Set\Strings::madeOf(Set\Chars::alphanumerical())->between(10, 100), // to avoid collisions
-        );
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->alphanumerical())
+                ->between(0, 100),
+            Set::integers(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->alphanumerical())
+                ->between(10, 100), // to avoid collisions
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -54,7 +58,7 @@ final class InsertSelect implements Property
         $select = SQL::of("SELECT * FROM test_values WHERE id = '{$this->uuid}'");
         $rows = $connection($select);
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         $sequence = $connection(Query\Insert::into(
             Table\Name::of('test'),
@@ -65,7 +69,7 @@ final class InsertSelect implements Property
             ]),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $sequence = $connection(Query\Insert::into(
             Table\Name::of('test_values'),
@@ -84,11 +88,11 @@ final class InsertSelect implements Property
                 )),
         ));
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection($select);
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             $this->uuid,
             $rows

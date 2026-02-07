@@ -38,12 +38,14 @@ final class SelectWhere implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Strings::madeOf(Set\Chars::ascii())->between(0, 255),
-            Set\Integers::any(),
-        );
+            Set::uuid(),
+            Set::strings()
+                ->madeOf(Set::strings()->chars()->ascii())
+                ->between(0, 255),
+            Set::integers(),
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -53,7 +55,7 @@ final class SelectWhere implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(Insert::into(
+        $_ = $connection(Insert::into(
             Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
@@ -70,7 +72,7 @@ final class SelectWhere implements Property
         ));
         $rows = $connection($select);
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
         $assert->same(
             $this->uuid,
             $rows

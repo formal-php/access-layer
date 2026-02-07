@@ -38,11 +38,11 @@ final class DeleteSpecificRow implements Property
 
     public static function any(): Set
     {
-        return Set\Composite::immutable(
+        return Set::compose(
             static fn(...$args) => new self(...$args),
-            Set\Uuid::any(),
-            Set\Uuid::any(),
-        );
+            Set::uuid(),
+            Set::uuid(),
+        )->toSet();
     }
 
     public function applicableTo(object $connection): bool
@@ -58,7 +58,7 @@ final class DeleteSpecificRow implements Property
             Column\Name::of('username'),
             Column\Name::of('registerNumber'),
         );
-        $connection($insert(Sequence::of(
+        $_ = $connection($insert(Sequence::of(
             Row::of([
                 'id' => $this->uuid1,
                 'username' => 'foo',
@@ -80,15 +80,15 @@ final class DeleteSpecificRow implements Property
         );
         $sequence = $connection($delete);
 
-        $assert->count(0, $sequence);
+        $assert->same(0, $sequence->size());
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid1}'"));
 
-        $assert->count(0, $rows);
+        $assert->same(0, $rows->size());
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid2}'"));
 
-        $assert->count(1, $rows);
+        $assert->same(1, $rows->size());
 
         return $connection;
     }
