@@ -1,0 +1,48 @@
+name: Extensive CI
+
+on: [push, pull_request]
+
+jobs:
+  blackbox:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        php-version: ['8.5']
+        dependency-versions: ['highest']
+    name: 'BlackBox'
+    services:
+      mariadb:
+        image: mariadb:10
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: example
+        ports:
+            - 3306
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: root
+          POSTGRES_PASSWORD: root
+          POSTGRES_DB: example
+        ports:
+            - 5432
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring, intl
+          coverage: none
+      - name: Composer
+        uses: "ramsey/composer-install@v2"
+        with:
+          dependency-versions: ${{ matrix.dependencies }}
+      - name: BlackBox
+        run: php blackbox.php
+        env:
+          BLACKBOX_SET_SIZE: 1000
+          DB_PORT: ${{ job.services.mariadb.ports[3306] }}
+          POSTGRES_DB_PORT: ${{ job.services.postgres.ports[5432] }}
