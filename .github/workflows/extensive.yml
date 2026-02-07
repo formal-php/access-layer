@@ -1,6 +1,11 @@
 name: Extensive CI
 
-on: [push, pull_request]
+on:
+  push:
+    tags:
+      - '*'
+    paths:
+      - '.github/workflows/extensive.yml'
 
 jobs:
   blackbox:
