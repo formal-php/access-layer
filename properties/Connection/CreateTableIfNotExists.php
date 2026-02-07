@@ -48,12 +48,12 @@ final class CreateTableIfNotExists implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
-            $connection(Query\CreateTable::named($this->name, ...$this->columns));
+            $_ = $connection(Query\CreateTable::named($this->name, ...$this->columns));
             $rows = $connection(Query\CreateTable::ifNotExists($this->name, ...$this->columns));
 
             $assert->same(0, $rows->size());
         } finally {
-            $connection(Query\DropTable::ifExists($this->name));
+            $_ = $connection(Query\DropTable::ifExists($this->name));
         }
 
         return $connection;

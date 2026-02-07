@@ -70,7 +70,7 @@ final class SelectWhereContains implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(Insert::into(
+        $_ = $connection(Insert::into(
             Name::of('test'),
             Row::of([
                 'id' => $this->uuid,

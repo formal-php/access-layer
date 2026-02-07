@@ -52,9 +52,9 @@ final class ContentInsertedAfterStartOfTransactionIsAccessible implements Proper
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(Transaction::start);
+        $_ = $connection(Transaction::start);
 
-        $connection(Insert::into(
+        $_ = $connection(Insert::into(
             Name::of('test'),
             Row::of([
                 'id' => $this->uuid,
@@ -97,7 +97,7 @@ final class ContentInsertedAfterStartOfTransactionIsAccessible implements Proper
                 ),
         );
 
-        $connection(Transaction::commit);
+        $_ = $connection(Transaction::commit);
 
         return $connection;
     }

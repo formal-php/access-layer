@@ -56,7 +56,7 @@ final class MustThrowWhenValueDoesntFitTheSchema implements Property
                 ->with(Parameter::named('uuid', $this->uuid.$this->uuid)) // too long
                 ->with(Parameter::named('username', $this->username))
                 ->with(Parameter::named('registerNumber', $this->number));
-            $connection($query);
+            $_ = $connection($query);
             $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
             $assert->same($query, $e->query());

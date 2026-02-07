@@ -82,13 +82,13 @@ final class SelectWhereInQuery implements Property
             ->with(Parameter::of($this->uuid2))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
-        $connection($insert);
+        $_ = $connection($insert);
         $insert = SQL::of('INSERT INTO test_values VALUES (?, ?), (?, ?);')
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->value1))
             ->with(Parameter::of($this->uuid1))
             ->with(Parameter::of($this->value2));
-        $connection($insert);
+        $_ = $connection($insert);
 
         $select = Select::from(Name::of('test'));
         $select = $select->where(Comparator\Property::of(

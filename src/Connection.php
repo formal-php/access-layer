@@ -28,6 +28,7 @@ final class Connection
      *
      * @return Sequence<Row>
      */
+    #[\NoDiscard]
     public function __invoke(Query|Query\Builder $query): Sequence
     {
         return ($this->implementation)($query);
