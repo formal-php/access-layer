@@ -6,8 +6,7 @@ namespace Properties\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query\SQL,
     Query\Insert,
-    Query\StartTransaction,
-    Query\Rollback,
+    Query\Transaction,
     Table\Name,
     Row,
     Connection,
@@ -53,7 +52,7 @@ final class ContentIsNotAccessibleAfterRollback implements Property
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(new StartTransaction);
+        $connection(Transaction::start);
 
         $connection(Insert::into(
             Name::of('test'),
@@ -64,7 +63,7 @@ final class ContentIsNotAccessibleAfterRollback implements Property
             ]),
         ));
 
-        $connection(new Rollback);
+        $connection(Transaction::rollback);
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 

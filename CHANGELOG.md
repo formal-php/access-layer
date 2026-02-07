@@ -6,6 +6,7 @@
 
 - `Formal\AccessLayer\Query\Builder`
 - `Formal\AccessLayer\Query\SQL` named constructors allow to pass all the parameters at once via the second argument
+- `Formal\AccessLayer\Query\Transaction`
 
 ### Changed
 
@@ -25,6 +26,9 @@
 
 - `Formal\AccessLayer\Connection\PDO::persistent()`
 - `Formal\AccessLayer\Query\Where::sql()` and `::parameters()`, use `::normalize()` instead
+- `Formal\AccessLayer\Query\Commit`, use `Transaction::commit` instead
+- `Formal\AccessLayer\Query\StartTransaction`, use `Transaction::start` instead
+- `Formal\AccessLayer\Query\Rollback`, use `Transaction::rollback` instead
 
 ## 4.2.0 - 2025-04-09
 

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Properties\Formal\AccessLayer\Connection;
 
 use Formal\AccessLayer\{
-    Query\Rollback,
+    Query\Transaction,
     Exception\QueryFailed,
     Connection,
 };
@@ -32,7 +32,7 @@ final class RollbackingAnUnstartedTransactionMustThrow implements Property
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
         try {
-            $query = new Rollback;
+            $query = Transaction::rollback;
             $connection($query);
             $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {

@@ -78,16 +78,16 @@ final class PDO implements Implementation
     #[\Override]
     public function __invoke(Query|Query\Builder $query): Sequence
     {
-        return match (\get_class($query)) {
-            Query\StartTransaction::class => $this->transaction(
+        return match ($query) {
+            Query\Transaction::start => $this->transaction(
                 $query,
                 fn(): bool => $this->pdo->beginTransaction(),
             ),
-            Query\Commit::class => $this->transaction(
+            Query\Transaction::commit => $this->transaction(
                 $query,
                 fn(): bool => $this->pdo->commit(),
             ),
-            Query\Rollback::class => $this->transaction(
+            Query\Transaction::rollback => $this->transaction(
                 $query,
                 fn(): bool => $this->pdo->rollBack(),
             ),
@@ -116,7 +116,7 @@ final class PDO implements Implementation
      *
      * @return Sequence<Row>
      */
-    private function transaction(Query\Builder $query, callable $action): Sequence
+    private function transaction(Query\Transaction $query, callable $action): Sequence
     {
         $this->attempt(
             $query,

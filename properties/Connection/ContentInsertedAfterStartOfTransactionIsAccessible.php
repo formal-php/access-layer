@@ -6,8 +6,7 @@ namespace Properties\Formal\AccessLayer\Connection;
 use Formal\AccessLayer\{
     Query\SQL,
     Query\Insert,
-    Query\StartTransaction,
-    Query\Commit,
+    Query\Transaction,
     Table\Name,
     Row,
     Connection,
@@ -53,7 +52,7 @@ final class ContentInsertedAfterStartOfTransactionIsAccessible implements Proper
 
     public function ensureHeldBy(Assert $assert, object $connection): object
     {
-        $connection(new StartTransaction);
+        $connection(Transaction::start);
 
         $connection(Insert::into(
             Name::of('test'),
@@ -98,7 +97,7 @@ final class ContentInsertedAfterStartOfTransactionIsAccessible implements Proper
                 ),
         );
 
-        $connection(new Commit);
+        $connection(Transaction::commit);
 
         return $connection;
     }
