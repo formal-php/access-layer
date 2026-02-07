@@ -54,7 +54,7 @@ final class ParameterTypesCanBeSpecified implements Property
             ->with(Parameter::of($this->uuid, Type::string))
             ->with(Parameter::of($this->username, Type::string))
             ->with(Parameter::of($this->number, Type::int));
-        $connection($insert);
+        $_ = $connection($insert);
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 

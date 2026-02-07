@@ -60,7 +60,7 @@ final class CreateTableWithPrimaryKey implements Property
 
             $assert->same(0, $rows->size());
         } finally {
-            $connection(Query\DropTable::ifExists($this->name));
+            $_ = $connection(Query\DropTable::ifExists($this->name));
         }
 
         return $connection;

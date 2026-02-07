@@ -53,7 +53,7 @@ final class ParametersCanBeBoundByName implements Property
             ->with(Parameter::named('uuid', $this->uuid))
             ->with(Parameter::named('username', $this->username))
             ->with(Parameter::named('registerNumber', $this->number));
-        $connection($insert);
+        $_ = $connection($insert);
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 

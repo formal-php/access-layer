@@ -75,8 +75,8 @@ final class CreateTableWithForeignKey implements Property
 
             $assert->same(0, $rows->size());
         } finally {
-            $connection(Query\DropTable::ifExists($this->name2));
-            $connection(Query\DropTable::ifExists($this->name1));
+            $_ = $connection(Query\DropTable::ifExists($this->name2));
+            $_ = $connection(Query\DropTable::ifExists($this->name1));
         }
 
         return $connection;

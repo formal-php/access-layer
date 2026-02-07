@@ -58,7 +58,7 @@ final class UpdateSpecificRow implements Property
             Column\Name::of('username'),
             Column\Name::of('registerNumber'),
         );
-        $connection($insert(Sequence::of(
+        $_ = $connection($insert(Sequence::of(
             Row::of([
                 'id' => $this->uuid1,
                 'username' => 'foo',

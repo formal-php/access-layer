@@ -53,7 +53,7 @@ final class ParametersCanBeBoundByIndex implements Property
             ->with(Parameter::of($this->uuid))
             ->with(Parameter::of($this->username))
             ->with(Parameter::of($this->number));
-        $connection($insert);
+        $_ = $connection($insert);
 
         $rows = $connection(SQL::of("SELECT * FROM test WHERE id = '{$this->uuid}'"));
 

@@ -33,7 +33,7 @@ final class AnInvalidQueryMustThrow implements Property
     {
         try {
             $query = SQL::of('INSERT');
-            $connection($query);
+            $_ = $connection($query);
             $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
             $assert->same($query, $e->query());
