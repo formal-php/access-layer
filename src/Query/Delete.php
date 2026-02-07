@@ -96,7 +96,7 @@ final class Delete implements Builder
                 ->joins
                 ->map(static fn($join) => $join->sql($driver))
                 ->map(Str::of(...))
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
             $where,
         );
@@ -130,7 +130,7 @@ final class Delete implements Builder
                         );
                     })
                     ->map(Str::of(...))
-                    ->fold(new Concat)
+                    ->fold(Concat::monoid)
                     ->dropEnd(4)
                     ->prepend('WHERE ')
                     ->toString(),
@@ -147,7 +147,7 @@ final class Delete implements Builder
                         );
                     })
                     ->map(Str::of(...))
-                    ->fold(new Concat)
+                    ->fold(Concat::monoid)
                     ->drop(4)
                     ->prepend(' AND (')
                     ->append(')')

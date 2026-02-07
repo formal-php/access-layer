@@ -13,6 +13,8 @@
 - `Formal\AccessLayer\Connection` is now a final class, all previous implementations are now flagged as internal
 - `Formal\AccessLayer\Query` is now a final class
 - Requires `innmind/black-box:~6.5`
+- Requires `innmind/immutable:~6.0`
+- Requires `innmind/url:~5.0`
 
 ### Deprecated
 

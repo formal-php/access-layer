@@ -37,7 +37,7 @@ final class AnInvalidLazySelectMustThrow implements Property
 
         try {
             // throw only now because the force the execution of the sequence
-            $result->toList();
+            $_ = $result->toList();
             $assert->fail('it should throw an exception');
         } catch (QueryFailed $e) {
             $assert->same($query, $e->query());

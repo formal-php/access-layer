@@ -224,7 +224,7 @@ final class Select implements Builder
                 ->joins
                 ->map(static fn($join) => $join->sql($driver))
                 ->map(Str::of(...))
-                ->fold(new Concat)
+                ->fold(Concat::monoid)
                 ->toString(),
             $where,
             match ($this->orderBy) {

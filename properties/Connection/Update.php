@@ -62,7 +62,7 @@ final class Update implements Property
         $assert
             ->number($rows->size())
             ->greaterThanOrEqual(1);
-        $rows->foreach(static fn($row) => $assert->same(24, $row->column('registerNumber')->match(
+        $_ = $rows->foreach(static fn($row) => $assert->same(24, $row->column('registerNumber')->match(
             static fn($registerNumber) => $registerNumber,
             static fn() => null,
         )));
