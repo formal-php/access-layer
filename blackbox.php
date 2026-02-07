@@ -10,10 +10,6 @@ use Innmind\BlackBox\{
 };
 
 Application::new($argv)
-    ->when(
-        \getenv('BLACKBOX_SET_SIZE') !== false,
-        static fn(Application $app) => $app->scenariiPerProof((int) \getenv('BLACKBOX_SET_SIZE')),
-    )
     ->disableMemoryLimit()
     ->codeCoverage(
         CodeCoverage::of(
@@ -28,5 +24,9 @@ Application::new($argv)
         false => 100,
         default => 1,
     })
+    ->when(
+        \getenv('BLACKBOX_SET_SIZE') !== false,
+        static fn(Application $app) => $app->scenariiPerProof((int) \getenv('BLACKBOX_SET_SIZE')),
+    )
     ->tryToProve(Load::everythingIn(__DIR__.'/proofs/'))
     ->exit();
