@@ -7,6 +7,7 @@ use Formal\AccessLayer\{
     Connection\Implementation,
     Connection\PDO,
     Connection\Logger,
+    Connection\Intercept,
     Exception\QueryFailed,
 };
 use Innmind\Url\Url;
@@ -49,6 +50,21 @@ final class Connection
         return new self(Logger::psr(
             $connection->implementation,
             $logger,
+        ));
+    }
+
+    /**
+     * @internal
+     *
+     * @param callable(callable(Query|Query\Builder): Sequence<Row>, Driver, Query|Query\Builder): Sequence<Row> $intercept
+     */
+    public static function intercept(
+        self $connection,
+        callable $intercept,
+    ): self {
+        return new self(Intercept::of(
+            $connection->implementation,
+            \Closure::fromCallable($intercept),
         ));
     }
 }

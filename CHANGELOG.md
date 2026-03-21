@@ -1,5 +1,11 @@
 # Changelog
 
+## 5.1.0 - 2026-03-21
+
+### Added
+
+- Internal `Formal\AccessLayer\Connection::intercept()`
+
 ## 5.0.0 - 2026-02-07
 
 ### Added
