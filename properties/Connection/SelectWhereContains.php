@@ -60,7 +60,7 @@ final class SelectWhereContains implements Property
                 ->madeOf(Set::strings()->chars()->ascii())
                 ->between(10, 55), // 10 to avoid collisions with possible other values
             Set::integers(),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

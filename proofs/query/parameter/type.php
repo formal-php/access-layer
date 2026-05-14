@@ -4,8 +4,8 @@ declare(strict_types = 1);
 use Formal\AccessLayer\Query\Parameter\Type;
 use Innmind\BlackBox\Set;
 
-return static function() {
-    yield test(
+return static function($prove) {
+    yield $prove->test(
         'Type::for() bool',
         static function($assert) {
             $assert->same(
@@ -19,7 +19,7 @@ return static function() {
         },
     );
 
-    yield test(
+    yield $prove->test(
         'Type::for() null',
         static function($assert) {
             $assert->same(
@@ -29,43 +29,40 @@ return static function() {
         },
     );
 
-    yield proof(
-        'Type::for() int',
-        given(Set::integers()),
-        static function($assert, $int) {
+    yield $prove
+        ->proof('Type::for() int')
+        ->given(Set::integers())
+        ->test(static function($assert, $int) {
             $assert->same(
                 Type::int,
                 Type::for($int),
             );
-        },
-    );
+        });
 
-    yield proof(
-        'Type::for() string',
-        given(Set::strings()->unicode()),
-        static function($assert, $string) {
+    yield $prove
+        ->proof('Type::for() string')
+        ->given(Set::strings()->unicode())
+        ->test(static function($assert, $string) {
             $assert->same(
                 Type::string,
                 Type::for($string),
             );
-        },
-    );
+        });
 
-    yield proof(
-        'Type::for() unsupported data',
-        given(
+    yield $prove
+        ->proof('Type::for() unsupported data')
+        ->given(
             Set::of(
                 new \stdClass,
                 new class {},
                 static fn() => null,
                 \tmpfile(),
             ),
-        ),
-        static function($assert, $value) {
+        )
+        ->test(static function($assert, $value) {
             $assert->same(
                 Type::unspecified,
                 Type::for($value),
             );
-        },
-    );
+        });
 };

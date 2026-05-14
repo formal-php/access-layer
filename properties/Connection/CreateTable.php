@@ -37,7 +37,7 @@ final class CreateTable implements Property
             static fn(...$args) => new self(...$args),
             Name::any(),
             Column::list(),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

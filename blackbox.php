@@ -11,19 +11,20 @@ use Innmind\BlackBox\{
 
 Application::new($argv)
     ->disableMemoryLimit()
-    ->codeCoverage(
-        CodeCoverage::of(
-            __DIR__.'/src/',
-            __DIR__.'/proofs/',
-            __DIR__.'/fixtures/',
-        )
-            ->dumpTo('coverage.clover')
-            ->enableWhen(\getenv('ENABLE_COVERAGE') !== false),
+    ->scenariiPerProof(10)
+    ->when(
+        \getenv('ENABLE_COVERAGE') !== false,
+        static fn($app) => $app
+            ->codeCoverage(
+                CodeCoverage::of(
+                    __DIR__.'/src/',
+                    __DIR__.'/proofs/',
+                    __DIR__.'/fixtures/',
+                )
+                    ->dumpTo('coverage.clover'),
+            )
+            ->scenariiPerProof(1),
     )
-    ->scenariiPerProof(match (\getenv('ENABLE_COVERAGE')) {
-        false => 100,
-        default => 1,
-    })
     ->when(
         \getenv('BLACKBOX_SET_SIZE') !== false,
         static fn(Application $app) => $app->scenariiPerProof((int) \getenv('BLACKBOX_SET_SIZE')),

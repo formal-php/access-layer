@@ -17,8 +17,8 @@ use Fixtures\Formal\AccessLayer\Table\{
     Name,
 };
 
-return static function() {
-    yield test(
+return static function($prove) {
+    yield $prove->test(
         'Where no specification',
         static function($assert) {
             $where = Where::of(null);
@@ -30,13 +30,13 @@ return static function() {
         },
     );
 
-    yield proof(
-        'Where equal comparator',
-        given(
+    yield $prove
+        ->proof('Where equal comparator')
+        ->given(
             Column::any(),
             Set::strings(),
-        ),
-        static function($assert, $column, $value) {
+        )
+        ->test(static function($assert, $column, $value) {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::equality,
@@ -54,16 +54,15 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where less than comparator',
-        given(
+    yield $prove
+        ->proof('Where less than comparator')
+        ->given(
             Column::any(),
             Set::strings(),
-        ),
-        static function($assert, $column, $value) {
+        )
+        ->test(static function($assert, $column, $value) {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::lessThan,
@@ -81,16 +80,15 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where less than or equal comparator',
-        given(
+    yield $prove
+        ->proof('Where less than or equal comparator')
+        ->given(
             Column::any(),
             Set::strings(),
-        ),
-        static function($assert, $column, $value) {
+        )
+        ->test(static function($assert, $column, $value) {
             $lessThan = Property::of(
                 $column->name()->toString(),
                 Sign::lessThan,
@@ -113,17 +111,16 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where less than or equal comparator on different columns',
-        given(
+    yield $prove
+        ->proof('Where less than or equal comparator on different columns')
+        ->given(
             Column::any(),
             Column::any(),
             Set::strings(),
-        ),
-        static function($assert, $column1, $column2, $value) {
+        )
+        ->test(static function($assert, $column1, $column2, $value) {
             $lessThan = Property::of(
                 $column1->name()->toString(),
                 Sign::lessThan,
@@ -150,16 +147,15 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where more than comparator',
-        given(
+    yield $prove
+        ->proof('Where more than comparator')
+        ->given(
             Column::any(),
             Set::strings(),
-        ),
-        static function($assert, $column, $value) {
+        )
+        ->test(static function($assert, $column, $value) {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::moreThan,
@@ -177,16 +173,15 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where more than or equal comparator',
-        given(
+    yield $prove
+        ->proof('Where more than or equal comparator')
+        ->given(
             Column::any(),
             Set::strings(),
-        ),
-        static function($assert, $column, $value) {
+        )
+        ->test(static function($assert, $column, $value) {
             $moreThan = Property::of(
                 $column->name()->toString(),
                 Sign::moreThan,
@@ -209,17 +204,16 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where more than or equal comparator on different columns',
-        given(
+    yield $prove
+        ->proof('Where more than or equal comparator on different columns')
+        ->given(
             Column::any(),
             Column::any(),
             Set::strings(),
-        ),
-        static function($assert, $column1, $column2, $value) {
+        )
+        ->test(static function($assert, $column1, $column2, $value) {
             $moreThan = Property::of(
                 $column1->name()->toString(),
                 Sign::moreThan,
@@ -246,13 +240,12 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where is null comparator',
-        given(Column::any()),
-        static function($assert, $column) {
+    yield $prove
+        ->proof('Where is null comparator')
+        ->given(Column::any())
+        ->test(static function($assert, $column) {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::equality,
@@ -266,13 +259,12 @@ return static function() {
                 $sql,
             );
             $assert->same(0, $parameters->size());
-        },
-    );
+        });
 
-    yield proof(
-        'Where is not null comparator',
-        given(Column::any()),
-        static function($assert, $column) {
+    yield $prove
+        ->proof('Where is not null comparator')
+        ->given(Column::any())
+        ->test(static function($assert, $column) {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::equality,
@@ -286,12 +278,11 @@ return static function() {
                 $sql,
             );
             $assert->same(0, $parameters->size());
-        },
-    );
+        });
 
-    yield proof(
-        'Where in comparator',
-        given(
+    yield $prove
+        ->proof('Where in comparator')
+        ->given(
             Column::any(),
             Set::strings(),
             Set::strings(),
@@ -300,8 +291,8 @@ return static function() {
                 Set::strings(),
                 Set::integers()->between(1, 5),
             ),
-        ),
-        static function($assert, $column, $value1, $value2, $value3, $values) {
+        )
+        ->test(static function($assert, $column, $value1, $value2, $value3, $values) {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::in,
@@ -341,17 +332,16 @@ return static function() {
                 \count_chars($sql)[63], // looking for '?' placeholders
             );
             $assert->same(\count($values), $parameters->size());
-        },
-    );
+        });
 
-    yield proof(
-        'Where not',
-        given(
+    yield $prove
+        ->proof('Where not')
+        ->given(
             Column::any(),
             Set::strings(),
             Set::strings(),
-        ),
-        static function($assert, $column, $leftValue, $rightValue){
+        )
+        ->test(static function($assert, $column, $leftValue, $rightValue){
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::equality,
@@ -397,18 +387,17 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where and',
-        given(
+    yield $prove
+        ->proof('Where and')
+        ->given(
             Column::any(),
             Column::any(),
             Set::strings(),
             Set::strings(),
-        ),
-        static function($assert, $column1, $column2, $value1, $value2) {
+        )
+        ->test(static function($assert, $column1, $column2, $value1, $value2) {
             $left = Property::of(
                 $column1->name()->toString(),
                 Sign::equality,
@@ -464,18 +453,17 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Where or',
-        given(
+    yield $prove
+        ->proof('Where or')
+        ->given(
             Column::any(),
             Column::any(),
             Set::strings(),
             Set::strings(),
-        ),
-        static function($assert, $column1, $column2, $value1, $value2) {
+        )
+        ->test(static function($assert, $column1, $column2, $value1, $value2) {
             $left = Property::of(
                 $column1->name()->toString(),
                 Sign::equality,
@@ -531,12 +519,11 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Comparator value can be a row type',
-        given(
+    yield $prove
+        ->proof('Comparator value can be a row type')
+        ->given(
             Column::any(),
             Column::any(),
             Set::strings(),
@@ -547,8 +534,8 @@ return static function() {
                 Type::string,
                 Type::unspecified,
             ),
-        ),
-        static function($assert, $column, $unused, $value, $type) {
+        )
+        ->test(static function($assert, $column, $unused, $value, $type) {
             $specification = Property::of(
                 $column->name()->toString(),
                 Sign::equality,
@@ -570,17 +557,16 @@ return static function() {
                 static fn($parameter) => $parameter->type(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 
-    yield proof(
-        'Table name can be used in property',
-        given(
+    yield $prove
+        ->proof('Table name can be used in property')
+        ->given(
             Name::any(),
             Column::any(),
             Set::strings(),
-        ),
-        static function($assert, $table, $column, $value) {
+        )
+        ->test(static function($assert, $table, $column, $value) {
             $specification = Property::of(
                 $table->toString().'.'.$column->name()->toString(),
                 Sign::equality,
@@ -598,6 +584,5 @@ return static function() {
                 static fn($parameter) => $parameter->value(),
                 static fn() => null,
             ));
-        },
-    );
+        });
 };

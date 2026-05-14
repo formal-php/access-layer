@@ -25,7 +25,7 @@ final class Name
                     Set::of('é', 'è', 'ê', 'ë', '_'),
                 )
                 ->between(0, 63),
-        )->toSet();
+        );
     }
 
     /**
