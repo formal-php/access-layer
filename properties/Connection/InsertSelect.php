@@ -45,7 +45,7 @@ final class InsertSelect implements Property
             Set::strings()
                 ->madeOf(Set::strings()->chars()->alphanumerical())
                 ->between(10, 100), // to avoid collisions
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

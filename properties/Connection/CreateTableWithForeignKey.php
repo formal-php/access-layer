@@ -45,7 +45,7 @@ final class CreateTableWithForeignKey implements Property
             Name::pair(),
             Column::any(Column\Type::constraint(), 30),
             Column::any(null, 30),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

@@ -19,14 +19,14 @@ use Innmind\BlackBox\{
 final class Connection
 {
     /**
-     * @return Set<Properties>|Set\Provider<Properties>
+     * @return Set<Properties>
      */
-    public static function any(): Set|Set\Provider
+    public static function any(): Set
     {
-        return Set\Properties::any(...\array_map(
+        return Set::properties(...\array_map(
             static fn($class) => [$class, 'any'](),
             self::list(),
-        ));
+        ))->toSet();
     }
 
     /**

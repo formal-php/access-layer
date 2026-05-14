@@ -53,7 +53,7 @@ final class SelectValues implements Property
                 ),
                 Set::of(null, true, false),
             ),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

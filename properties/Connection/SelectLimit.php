@@ -48,7 +48,7 @@ final class SelectLimit implements Property
                 ->between(0, 255),
             Set::integers(),
             Set::integers()->above(1),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

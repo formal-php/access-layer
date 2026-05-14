@@ -42,7 +42,7 @@ final class UpdateSpecificRow implements Property
             static fn(...$args) => new self(...$args),
             Set::uuid(),
             Set::uuid(),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

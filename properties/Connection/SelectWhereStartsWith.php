@@ -54,7 +54,7 @@ final class SelectWhereStartsWith implements Property
                 ->madeOf(Set::strings()->chars()->ascii())
                 ->between(0, 125),
             Set::integers(),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

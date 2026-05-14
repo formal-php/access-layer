@@ -30,23 +30,23 @@ use Innmind\Specification\{
 use Innmind\Immutable\Sequence;
 use Innmind\BlackBox\Set;
 
-$proofs = static function(Url $dsn, Driver $driver) {
+$proofs = static function($prove, Url $dsn, Driver $driver) {
     $connection = Connection::new($dsn)->unwrap();
     Properties::seed($connection);
-    $connections = Set::call(static function() use ($connection) {
+    $connections = Set::of(static function() use ($connection) {
         Properties::seed($connection);
 
         return $connection;
     });
 
-    yield test(
+    yield $prove->test(
         "PDO interface({$driver->name})",
         static fn($assert) => $assert
             ->object($connection)
             ->instance(Connection::class),
     );
 
-    yield test(
+    yield $prove->test(
         "PDO lazy select doesnt load everything in memory({$driver->name})",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_lazy_load');
@@ -91,7 +91,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
     );
 
     if ($driver === Driver::mysql) {
-        yield test(
+        yield $prove->test(
             "PDO charset({$driver->name})",
             static function($assert) use ($connection, $dsn) {
                 $table = Table\Name::of('test_charset');
@@ -144,7 +144,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
         );
     }
 
-    yield test(
+    yield $prove->test(
         "Select join({$driver->name})",
         static function($assert) use ($connection) {
             $table = Table\Name::of('test_left_join');
@@ -250,7 +250,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
-    yield test(
+    yield $prove->test(
         "Delete cascade({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_cascade_delete_parent');
@@ -309,7 +309,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
-    yield test(
+    yield $prove->test(
         "Delete set null({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_set_null_delete_parent');
@@ -375,7 +375,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
-    yield test(
+    yield $prove->test(
         "Foreign key name({$driver->name})",
         static function($assert) use ($driver) {
             $parent = Table\Name::of('parent_table');
@@ -392,7 +392,7 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
-    yield test(
+    yield $prove->test(
         "Delete join({$driver->name})",
         static function($assert) use ($connection) {
             $parent = Table\Name::of('test_join_delete_parent')->as('parent');
@@ -465,10 +465,10 @@ $proofs = static function(Url $dsn, Driver $driver) {
         },
     );
 
-    yield proof(
-        "Unique constraint({$driver->name})",
-        given(Set::integers()->between(0, 1_000_000)),
-        static function($assert, $int) use ($connection) {
+    yield $prove
+        ->proof("Unique constraint({$driver->name})")
+        ->given(Set::integers()->between(0, 1_000_000))
+        ->test(static function($assert, $int) use ($connection) {
             $table = Table\Name::of('test_unique');
             $_ = $connection(CreateTable::ifNotExists(
                 $table,
@@ -506,27 +506,29 @@ $proofs = static function(Url $dsn, Driver $driver) {
             )));
 
             $_ = $connection(DropTable::named($table));
-        },
-    );
+        });
 
-    yield properties(
+    yield $prove->properties(
         "PDO properties({$driver->name})",
         Properties::any(),
         $connections,
     );
 
     foreach (Properties::list() as $property) {
-        yield property(
-            $property,
-            $connections,
-        )->named("PDO({$driver->name})");
+        yield $prove
+            ->property(
+                $property,
+                $connections,
+            )
+            ->named("PDO({$driver->name})");
     }
 };
 
-return static function() use ($proofs) {
+return static function($prove) use ($proofs) {
     $port = \getenv('DB_PORT') ?: '3306';
 
     yield from $proofs(
+        $prove,
         Url::of("mysql://root:root@127.0.0.1:$port/example"),
         Driver::mysql,
     );
@@ -534,6 +536,7 @@ return static function() use ($proofs) {
     $port = \getenv('POSTGRES_DB_PORT') ?: '5432';
 
     yield from $proofs(
+        $prove,
         Url::of("pgsql://root:root@127.0.0.1:$port/example"),
         Driver::postgres,
     );
