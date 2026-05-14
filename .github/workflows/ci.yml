@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.4', '8.5']
+        php-version: ['8.5']
         dependency-versions: ['lowest', 'highest']
     name: 'BlackBox'
     services:
@@ -50,7 +50,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        php-version: ['8.4', '8.5']
+        php-version: ['8.5']
         dependency-versions: ['lowest', 'highest']
     name: 'Coverage'
     services:
@@ -92,6 +92,20 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
   psalm:
-    uses: innmind/github-workflows/.github/workflows/psalm-matrix.yml@main
+    uses: innmind/github-workflows/.github/workflows/psalm.yml@main
+    name: 'Psalm'
+    strategy:
+      matrix:
+        php-version: ['8.5']
+        run-php-version: ['8.5']
+    with:
+      php-version: ${{ matrix.php-version }}
+      run-php-version: ${{ matrix.run-php-version }}
   cs:
     uses: innmind/github-workflows/.github/workflows/cs.yml@main
+    name: 'CS'
+    strategy:
+      matrix:
+        php-version: ['8.5']
+    with:
+      php-version: ${{ matrix.php-version }}
