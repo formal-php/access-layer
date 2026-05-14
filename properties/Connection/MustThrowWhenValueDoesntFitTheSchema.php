@@ -40,7 +40,7 @@ final class MustThrowWhenValueDoesntFitTheSchema implements Property
                 ->madeOf(Set::strings()->chars()->ascii())
                 ->between(0, 255),
             Set::integers(),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

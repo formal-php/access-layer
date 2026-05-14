@@ -43,7 +43,7 @@ final class CreateTableWithPrimaryKey implements Property
             Name::any(),
             Column::any(Column\Type::constraint()),
             Column::list(),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

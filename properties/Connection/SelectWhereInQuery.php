@@ -57,7 +57,7 @@ final class SelectWhereInQuery implements Property
                 ->madeOf(Set::strings()->chars()->ascii())
                 ->between(0, 255),
             Set::integers(),
-            Set\MutuallyExclusive::of(
+            Set::strings()->mutuallyExclusive(
                 Set::strings()
                     ->madeOf(Set::strings()->chars()->ascii())
                     ->between(0, 255),
@@ -65,7 +65,7 @@ final class SelectWhereInQuery implements Property
                     ->madeOf(Set::strings()->chars()->ascii())
                     ->between(0, 255),
             ),
-        )->toSet();
+        );
     }
 
     public function applicableTo(object $connection): bool

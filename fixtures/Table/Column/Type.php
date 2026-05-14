@@ -210,6 +210,6 @@ final class Type
             Set::strings()
                 ->madeOf(Set::strings()->chars()->alphanumerical())
                 ->atLeast(1),
-        )->toSet();
+        );
     }
 }
