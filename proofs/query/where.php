@@ -585,4 +585,25 @@ return static function($prove) {
                 static fn() => null,
             ));
         });
+
+    yield $prove
+        ->proof('Where condition with no values for an "in" sign will match nothing')
+        ->given(
+            Column::any(),
+        )
+        ->test(static function($assert, $column) {
+            $specification = Property::of(
+                $column->name()->toString(),
+                Sign::in,
+                [],
+            );
+            $where = Where::of($specification);
+
+            [$sql, $parameters] = $where->normalize(Driver::mysql);
+            $assert->same(
+                "WHERE {$column->name()->sql(Driver::mysql)} IN (SELECT NULL WHERE false)",
+                $sql,
+            );
+            $assert->same(0, $parameters->size());
+        });
 };
