@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+## Added
+
+- It is now possible to use an empty array when using `Sign::in` in a specification
+
 ## 5.2.0 - 2026-05-14
 
 ### Changed

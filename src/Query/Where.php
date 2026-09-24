@@ -218,7 +218,10 @@ final class Where
         return \sprintf(
             '%s IN (%s)',
             $this->buildColumn($driver, $specification),
-            \implode(', ', $placeholders),
+            match ($placeholders) {
+                [] => 'SELECT NULL WHERE false',
+                default => \implode(', ', $placeholders),
+            },
         );
     }
 

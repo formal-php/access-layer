@@ -68,6 +68,7 @@ final class Connection
             Connection\SelectWhereEndsWith::class,
             Connection\SelectWhereContains::class,
             Connection\SelectWhereIn::class,
+            Connection\SelectWhereInNothing::class,
             Connection\SelectWhereInQuery::class,
             Connection\SelectOffset::class,
             Connection\SelectLimit::class,
